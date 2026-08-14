@@ -12,14 +12,18 @@
 -->
 
 <resources>
-    <string name="exteraAppName" translatable="false">OcoderX</string>
-    <string name="Preferences">X-Gram Preferences</string>
+    <string name="exteraAppName" translatable="false">Ox-gram</string>
+    <string name="Preferences">Ox-gram Preferences</string>
+    <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="RestartApp">Restart App</string>
 
     <!-- Main Menu -->
     <string name="Links">Links</string>
     <string name="AboutExteraDescription">Experimental Telegram client based on Official Sources!</string>
     <string name="Channel">Channel</string>
-    <string name="Crowdin">Translate</string>
+    <string name="ContactAdmin">Contact Admin</string>
+    <string name="SpamBot">Spam Bot</string>
     <string name="SourceCode">Source Code</string>
     <string name="Categories">Categories</string>
 
@@ -224,22 +228,13 @@
     <string name="formatterDay24HSec" translatable="false">HH:mm:ss</string>
     <string name="formatterDay12HSec" translatable="false">h:mm:ss a</string>
 
-    <string name="AppIconMonet" translatable="false">Monet</string>
-    <string name="AppIconGradient">Gradient</string>
-    <string name="AppIconAurora">Aurora</string>
-    <string name="AppIconNeo">Neo</string>
-    <string name="AppIconGoogle" translatable="false">Google</string>
-    <string name="AppIconAmethyst">Amethyst</string>
-    <string name="AppIcon480DSGN" translatable="false">480 DSGN</string>
-    <string name="AppIconSpace">Space</string>
-    <string name="AppIconOrbit">Orbit</string>
-    <string name="AppIconSus">Impostor</string>
-    <string name="AppIconWinter">Winter</string>
-    <string name="AppIconOcoderDark">OcoderX Dark</string>
-    <string name="AppIconOcoderCyber">OcoderX Cyber</string>
-    <string name="AppIconOcoderAmoled">OcoderX AMOLED</string>
-    <string name="AppIconOcoderGlass">OcoderX Glass</string>
     <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Light</string>
+    <string name="AppIconOxgramVivid">OXgram Vivid</string>
+    <string name="AppIconOxgramEmerald">OXgram Emerald</string>
+    <string name="AppIconOxgramBlue">OXgram Sapphire</string>
+    <string name="AppIconOxgramRed">OXgram Ruby</string>
 
     <string name="BottomNavigation">Bottom Navigation Bar</string>
     <string name="BottomNavigationInfo">Place chat folders and tabs at the bottom of the screen.</string>
@@ -249,4 +244,24 @@
     <string name="ThemeAmoledBlack">Pure AMOLED Black</string>
     <string name="ThemeCyberpunk">Cyberpunk</string>
     <string name="ThemeGlassmorphism">Glassmorphism</string>
+
+    <!-- Telegraph Features -->
+    <string name="AnimationType">Animation type</string>
+    <string name="AnimationTypeTelegram">Telegram</string>
+    <string name="AnimationTypeSlide">Slide</string>
+    <string name="AnimationTypeFade">Fade</string>
+    <string name="AnimationTypeZoom">Zoom</string>
+    <string name="AnimationTypeNone">None</string>
+
+    <string name="ShowStatusIndicator">Show status indicator</string>
+    <string name="ShowStatusIndicatorInfo">Display the status by placing a single circle beside the user\'s avatar.\nIf it is colored, it is online. If it is light gray, it was last seen recently. If it is black, it was last seen a long time ago. Otherwise, the color is gray.</string>
+
+    <string name="TouchUserPicture">Touch on User Picture</string>
+    <string name="TouchGroupPicture">Touch on Group/Channel Picture</string>
+    <string name="TouchPictureProfileMenu">Open Profile Menu</string>
+    <string name="TouchPictureProfile">Open Profile</string>
+    <string name="TouchPicturePhoto">Show Photo</string>
+    <string name="TouchPictureChat">Open Chat</string>
+    <string name="OpenChat">Open Chat</string>
+    <string name="ShowPhoto">Show Photo</string>
 </resources>

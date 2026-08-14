@@ -1082,13 +1082,13 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                     } else {
                         interpolated = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(animationProgress);
                     }
-                } else {
-                    interpolated = decelerateInterpolator.getInterpolation(animationProgress);
-                }
+} else {
+                        interpolated = decelerateInterpolator.getInterpolation(animationProgress);
+                    }
                 if (open) {
                     float clampedInterpolated = MathUtils.clamp(interpolated, 0, 1);
-                    containerView.setAlpha(clampedInterpolated);
                     if (preview) {
+                        containerView.setAlpha(clampedInterpolated);
                         containerView.setScaleX(0.7f + 0.3f * interpolated);
                         containerView.setScaleY(0.7f + 0.3f * interpolated);
                         if (previewMenu != null) {
@@ -1102,12 +1102,33 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                         containerView.invalidate();
                         invalidate();
                     } else {
-                        containerView.setTranslationX(AndroidUtilities.dp(48) * (1.0f - interpolated));
+                        switch (ExteraConfig.animationType) {
+                            case 1:
+                                containerView.setAlpha(1.0f);
+                                containerView.setTranslationX(containerView.getMeasuredWidth() * (1.0f - interpolated));
+                                containerViewBack.setTranslationX(-containerViewBack.getMeasuredWidth() * 0.3f * interpolated);
+                                break;
+                            case 2:
+                                containerView.setTranslationX(0);
+                                containerView.setAlpha(clampedInterpolated);
+                                break;
+                            case 3:
+                                containerView.setTranslationX(0);
+                                containerView.setAlpha(clampedInterpolated);
+                                containerView.setScaleX(0.85f + 0.15f * interpolated);
+                                containerView.setScaleY(0.85f + 0.15f * interpolated);
+                                break;
+                            case 0:
+                            default:
+                                containerView.setAlpha(clampedInterpolated);
+                                containerView.setTranslationX(AndroidUtilities.dp(48) * (1.0f - interpolated));
+                                break;
+                        }
                     }
                 } else {
                     float clampedReverseInterpolated = MathUtils.clamp(1f - interpolated, 0, 1);
-                    containerViewBack.setAlpha(clampedReverseInterpolated);
                     if (preview) {
+                        containerViewBack.setAlpha(clampedReverseInterpolated);
                         containerViewBack.setScaleX(0.9f + 0.1f * (1.0f - interpolated));
                         containerViewBack.setScaleY(0.9f + 0.1f * (1.0f - interpolated));
                         previewBackgroundDrawable.setAlpha((int) (0x2e * clampedReverseInterpolated));
@@ -1117,7 +1138,28 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                         containerView.invalidate();
                         invalidate();
                     } else {
-                        containerViewBack.setTranslationX(AndroidUtilities.dp(48) * interpolated);
+                        switch (ExteraConfig.animationType) {
+                            case 1:
+                                containerViewBack.setAlpha(1.0f);
+                                containerViewBack.setTranslationX(containerViewBack.getMeasuredWidth() * interpolated);
+                                containerView.setTranslationX(-containerView.getMeasuredWidth() * 0.3f * (1.0f - interpolated));
+                                break;
+                            case 2:
+                                containerViewBack.setTranslationX(0);
+                                containerViewBack.setAlpha(clampedReverseInterpolated);
+                                break;
+                            case 3:
+                                containerViewBack.setTranslationX(0);
+                                containerViewBack.setAlpha(clampedReverseInterpolated);
+                                containerViewBack.setScaleX(1.0f - 0.15f * interpolated);
+                                containerViewBack.setScaleY(1.0f - 0.15f * interpolated);
+                                break;
+                            case 0:
+                            default:
+                                containerViewBack.setAlpha(clampedReverseInterpolated);
+                                containerViewBack.setTranslationX(AndroidUtilities.dp(48) * interpolated);
+                                break;
+                        }
                     }
                 }
                 if (animationProgress < 1) {
@@ -1187,7 +1229,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         if (parentActivity.getCurrentFocus() != null && fragment.hideKeyboardOnShow() && !preview) {
             AndroidUtilities.hideKeyboard(parentActivity.getCurrentFocus());
         }
-        boolean needAnimation = preview || !forceWithoutAnimation && MessagesController.getGlobalMainSettings().getBoolean("view_animations", true);
+        boolean needAnimation = preview || (!forceWithoutAnimation && ExteraConfig.animationType != 4 && MessagesController.getGlobalMainSettings().getBoolean("view_animations", true));
 
         final BaseFragment currentFragment = !fragmentsStack.isEmpty() ? fragmentsStack.get(fragmentsStack.size() - 1) : null;
 
@@ -1645,7 +1687,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
             AndroidUtilities.hideKeyboard(parentActivity.getCurrentFocus());
         }
         setInnerTranslationX(0);
-        boolean needAnimation = !forceNoAnimation && (inPreviewMode || transitionAnimationPreviewMode || animated && MessagesController.getGlobalMainSettings().getBoolean("view_animations", true));
+        boolean needAnimation = !forceNoAnimation && (inPreviewMode || transitionAnimationPreviewMode || (animated && ExteraConfig.animationType != 4 && MessagesController.getGlobalMainSettings().getBoolean("view_animations", true)));
         final BaseFragment currentFragment = fragmentsStack.get(fragmentsStack.size() - 1);
         BaseFragment previousFragment = null;
         if (fragmentsStack.size() > 1) {

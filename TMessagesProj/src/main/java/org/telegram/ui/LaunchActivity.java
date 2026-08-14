@@ -98,6 +98,7 @@ import com.radolyn.ayugram.AyuConfig;
 import com.radolyn.ayugram.AyuConstants;
 import com.radolyn.ayugram.AyuCustomHandlers;
 import com.radolyn.ayugram.AyuUtils;
+import com.radolyn.ayugram.ui.preferences.AyuGramPreferencesActivity;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -634,7 +635,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     drawerLayoutContainer.closeDrawer(false);
                 }
 
-                // --- AyuGram hook
+                // --- OcoderX / AyuGram hook
                 if (id == AyuConstants.DRAWER_TOGGLE_GHOST && AyuConfig.showGhostToggleInDrawer) {
                     var msg = AyuConfig.isGhostModeActive()
                             ? LocaleController.getString("GhostModeDisabled", R.string.GhostModeDisabled)
@@ -647,10 +648,22 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
                     // update button text
                     NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.mainUserInfoChanged);
+                } else if (id == AyuConstants.DRAWER_OCODER_PREFS) {
+                    presentFragment(new MainPreferencesActivity());
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == AyuConstants.DRAWER_DELETED_MESSAGES) {
+                    presentFragment(new AyuGramPreferencesActivity());
+                    drawerLayoutContainer.closeDrawer(false);
                 } else if (id == AyuConstants.DRAWER_KILL_APP) {
                     AyuUtils.killApplication(this);
+                } else if (id == AyuConstants.DRAWER_CHANNEL) {
+                    MessagesController.getInstance(currentAccount).openByUserName("OcoderXs", getLastFragment(), 1);
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == AyuConstants.DRAWER_ADMIN) {
+                    MessagesController.getInstance(currentAccount).openByUserName("OcoderX", getLastFragment(), 1);
+                    drawerLayoutContainer.closeDrawer(false);
                 }
-                // --- AyuGram hook
+                // --- OcoderX / AyuGram hook
             }
         });
         final ItemTouchHelper sideMenuTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {

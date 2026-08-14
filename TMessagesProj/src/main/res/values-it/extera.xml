@@ -10,6 +10,9 @@
 
 -->
 <resources>
+        <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="RestartApp">Restart App</string>
     <string name="Preferences">Preferenze di X-Gram</string>
     <!-- Main Menu -->
     <string name="Links">Link</string>
@@ -184,12 +187,11 @@
     <string name="ChannelToSaveChanged">Le tracce saranno salvate nei **%1$s**.</string>
     <string name="ConfirmCall">Conferma chiamata</string>
     <string name="CallTo">Vuoi chiamare **%1$s**?</string>
-    <string name="AppIconGradient">Gradiente</string>
-    <string name="AppIconAurora">Aurora</string>
-    <string name="AppIconNeo">Neo</string>
-    <string name="AppIconAmethyst">Ametista</string>
-    <string name="AppIconSpace">Spazio</string>
-    <string name="AppIconOrbit">Orbita</string>
-    <string name="AppIconSus">Impostore</string>
-    <string name="AppIconWinter">Inverno</string>
+    <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Light</string>
+    <string name="AppIconOxgramVivid">OXgram Vivid</string>
+    <string name="AppIconOxgramEmerald">OXgram Emerald</string>
+    <string name="AppIconOxgramBlue">OXgram Sapphire</string>
+    <string name="AppIconOxgramRed">OXgram Ruby</string>
 </resources>

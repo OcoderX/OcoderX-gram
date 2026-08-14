@@ -12,13 +12,17 @@
 -->
 
 <resources>
-    <string name="Preferences">Настройки X-Gram</string>
+    <string name="Preferences">Настройки Ox-gram</string>
+    <string name="OcoderXPreferences">Настройки Ox-gram</string>
+    <string name="DeletedMessages">Удалённые сообщения</string>
+    <string name="RestartApp">Перезапустить приложение</string>
 
     <!-- Main Menu -->
     <string name="Links">Ссылки</string>
     <string name="AboutExteraDescription">Экспериментальный Telegram-клиент, основанный на официальном исходном коде!</string>
     <string name="Channel">Канал</string>
-    <string name="Crowdin">Перевод</string>
+    <string name="ContactAdmin">Связь с админом</string>
+    <string name="SpamBot">Бот для спам-блока</string>
     <string name="SourceCode">Исходный код</string>
     <string name="Categories">Категории</string>
 
@@ -220,19 +224,13 @@
     <string name="ConfirmCall">Подтверждение звонка</string>
     <string name="CallTo">Позвонить **%1$s**?</string>
 
-    <string name="AppIconGradient">Градиент</string>
-    <string name="AppIconAurora">Аврора</string>
-    <string name="AppIconNeo">Нео</string>
-    <string name="AppIconAmethyst">Аметист</string>
-    <string name="AppIconSpace">Космос</string>
-    <string name="AppIconOrbit">Орбита</string>
-    <string name="AppIconSus">Самозванец</string>
-    <string name="AppIconWinter">Зима</string>
-    <string name="AppIconOcoderDark">OcoderX Темная</string>
-    <string name="AppIconOcoderCyber">OcoderX Киберпанк</string>
-    <string name="AppIconOcoderAmoled">OcoderX AMOLED</string>
-    <string name="AppIconOcoderGlass">OcoderX Стеклянная</string>
     <string name="AppIconOcoderNeon">OcoderX Неон</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Светлая</string>
+    <string name="AppIconOxgramVivid">OXgram Яркая</string>
+    <string name="AppIconOxgramEmerald">OXgram Изумруд</string>
+    <string name="AppIconOxgramBlue">OXgram Сапфир</string>
+    <string name="AppIconOxgramRed">OXgram Рубин</string>
 
     <string name="BottomNavigation">Нижняя панель навигации</string>
     <string name="BottomNavigationInfo">Разместить папки и вкладки чатов внизу экрана.</string>
@@ -242,4 +240,24 @@
     <string name="ThemeAmoledBlack">Pure AMOLED Black</string>
     <string name="ThemeCyberpunk">Cyberpunk</string>
     <string name="ThemeGlassmorphism">Glassmorphism</string>
+
+    <!-- Telegraph Features -->
+    <string name="AnimationType">Тип анимации</string>
+    <string name="AnimationTypeTelegram">Telegram</string>
+    <string name="AnimationTypeSlide">Слайд</string>
+    <string name="AnimationTypeFade">Затухание</string>
+    <string name="AnimationTypeZoom">Масштабирование</string>
+    <string name="AnimationTypeNone">Без анимации</string>
+
+    <string name="ShowStatusIndicator">Показывать индикатор статуса</string>
+    <string name="ShowStatusIndicatorInfo">Отображать статус в виде кружка рядом с аватаром пользователя.\nЦветной — в сети, светло-серый — был недавно, черный — был очень давно, иначе — серый.</string>
+
+    <string name="TouchUserPicture">Нажатие на фото пользователя</string>
+    <string name="TouchGroupPicture">Нажатие на фото группы/канала</string>
+    <string name="TouchPictureProfileMenu">Открыть меню профиля</string>
+    <string name="TouchPictureProfile">Открыть профиль</string>
+    <string name="TouchPicturePhoto">Показать фото</string>
+    <string name="TouchPictureChat">Открыть чат</string>
+    <string name="OpenChat">Открыть чат</string>
+    <string name="ShowPhoto">Показать фото</string>
 </resources>

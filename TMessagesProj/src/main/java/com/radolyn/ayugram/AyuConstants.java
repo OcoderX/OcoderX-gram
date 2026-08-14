@@ -42,6 +42,10 @@ public class AyuConstants {
 
     public static final int DRAWER_TOGGLE_GHOST = 1000;
     public static final int DRAWER_KILL_APP = 1001;
+    public static final int DRAWER_OCODER_PREFS = 1002;
+    public static final int DRAWER_DELETED_MESSAGES = 1003;
+    public static final int DRAWER_CHANNEL = 1004;
+    public static final int DRAWER_ADMIN = 1005;
 
     public static final int MESSAGE_EDITED_NOTIFICATION = 6968;
     public static final int MESSAGES_DELETED_NOTIFICATION = 6969;
@@ -55,8 +59,8 @@ public class AyuConstants {
 
     public static String AYU_DATABASE = "ayu-data";
 
-    public static String APP_GITHUB = "AyuGram/AyuGram4A";
-    public static String APP_NAME = "OcoderX";
+    public static String APP_GITHUB = "OcoderX/OcoderX-gram";
+    public static String APP_NAME = "Ox-gram";
 
     public static String BUILD_STORE_PACKAGE = "com.android.vending";
     public static String BUILD_ORIGINAL_PACKAGE = "org.telegram.messenger";

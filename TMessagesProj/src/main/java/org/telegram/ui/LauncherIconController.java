@@ -3,22 +3,14 @@ package org.telegram.ui;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
-
-import com.exteragram.messenger.utils.AppUtils;
 
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.R;
 
 public class LauncherIconController {
     public static void tryFixLauncherIconIfNeeded() {
         for (LauncherIcon icon : LauncherIcon.values()) {
             if (isEnabled(icon)) {
-                if (icon == LauncherIcon.MONET) {
-                    setIcon(LauncherIcon.DEFAULT);
-                    setIcon(LauncherIcon.MONET);
-                }
                 return;
             }
         }
@@ -41,23 +33,14 @@ public class LauncherIconController {
     }
 
     public enum LauncherIcon {
-        DEFAULT("DefaultIcon", BuildVars.isBetaApp() ? R.mipmap.ic_background_beta : R.color.ic_background, BuildVars.isBetaApp() ? R.mipmap.ic_foreground_beta : R.drawable.ic_foreground, R.string.AppIconDefault),
-        MONET("MonetIcon", R.color.ic_background_monet, R.drawable.ic_foreground_monet, R.string.AppIconMonet, Build.VERSION.SDK_INT < 31 || Build.VERSION.SDK_INT > 32),
-        GRADIENT("GradientIcon", R.mipmap.ic_background_gradient, R.drawable.ic_foreground_white, R.string.AppIconGradient),
-        AURORA("AuroraIcon", R.mipmap.ic_background_aurora, R.drawable.ic_foreground_white, R.string.AppIconAurora),
-        NEO("NeoIcon", R.mipmap.ic_background_neo, R.mipmap.ic_foreground_neo, R.string.AppIconNeo),
-        GOOGLE("GoogleIcon", R.color.white, R.mipmap.ic_foreground_google, R.string.AppIconGoogle),
-        AMETHYST("AmethystIcon", R.mipmap.ic_background_amethyst, R.mipmap.ic_foreground_amethyst, R.string.AppIconAmethyst),
-        DSGN480("Dsgn480Icon", R.mipmap.ic_background_480dsgn, R.mipmap.ic_foreground_480dsgn, R.string.AppIcon480DSGN),
-        ORBIT("OrbitIcon", R.color.ic_background, R.mipmap.ic_foreground_orbit, R.string.AppIconOrbit),
-        SPACE("SpaceIcon", R.mipmap.ic_background_space, R.mipmap.ic_foreground_space, R.string.AppIconSpace),
-        WINTER("WinterIcon", R.mipmap.ic_background_winter, R.drawable.ic_foreground, R.string.AppIconWinter, !AppUtils.isWinter()),
-        SUS("SusIcon", R.color.ic_background_sus, R.mipmap.ic_foreground_sus, R.string.AppIconSus),
-        OCODER_DARK("OcoderDarkIcon", R.color.ic_background_ocoder_dark, R.drawable.ic_foreground_ocoder_dark, R.string.AppIconOcoderDark),
-        OCODER_CYBER("OcoderCyberIcon", R.color.ic_background_ocoder_cyber, R.drawable.ic_foreground_ocoder_cyber, R.string.AppIconOcoderCyber),
-        OCODER_AMOLED("OcoderAmoledIcon", R.color.ic_background_ocoder_amoled, R.drawable.ic_foreground_ocoder_amoled, R.string.AppIconOcoderAmoled),
-        OCODER_GLASS("OcoderGlassIcon", R.color.ic_background_ocoder_glass, R.drawable.ic_foreground_ocoder_glass, R.string.AppIconOcoderGlass),
-        OCODER_NEON("OcoderNeonIcon", R.color.ic_background_ocoder_neon, R.drawable.ic_foreground_ocoder_neon, R.string.AppIconOcoderNeon);
+        DEFAULT("DefaultIcon", R.color.ic_background_ocoder_default, R.mipmap.ic_foreground_ocoder_default, R.string.AppIconDefault),
+        OCODER_NEON("OcoderNeonIcon", R.color.ic_background_ocoder_neon, R.mipmap.ic_foreground_ocoder_neon, R.string.AppIconOcoderNeon),
+        OCODER_V2("OcoderV2Icon", R.color.ic_background_ocoder_v2, R.mipmap.ic_foreground_ocoder_v2, R.string.AppIconOcoderV2),
+        OCODER_WHITE("OcoderWhiteIcon", R.color.ic_background_ocoder_white, R.mipmap.ic_foreground_ocoder_white, R.string.AppIconOcoderWhite),
+        OXGRAM_VIVID("OxgramVividIcon", R.color.ic_background_oxgram_vivid, R.mipmap.ic_foreground_oxgram_vivid, R.string.AppIconOxgramVivid),
+        OXGRAM_EMERALD("OxgramEmeraldIcon", R.color.ic_background_oxgram_emerald, R.mipmap.ic_foreground_oxgram_emerald, R.string.AppIconOxgramEmerald),
+        OXGRAM_BLUE("OxgramBlueIcon", R.color.ic_background_oxgram_blue, R.mipmap.ic_foreground_oxgram_blue, R.string.AppIconOxgramBlue),
+        OXGRAM_RED("OxgramRedIcon", R.color.ic_background_oxgram_red, R.mipmap.ic_foreground_oxgram_red, R.string.AppIconOxgramRed);
 
         public final String key;
         public final int background;

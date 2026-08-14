@@ -178,9 +178,9 @@ import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.FloatingDebug.FloatingDebugController;
 import org.telegram.ui.Components.FloatingDebug.FloatingDebugProvider;
 import org.telegram.ui.Components.FolderBottomSheet;
+import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.Components.FragmentContextView;
-import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.JoinGroupAlert;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MediaActionDrawable;
@@ -3365,7 +3365,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             viewPage.listView.setLayoutManager(viewPage.layoutManager);
             viewPage.listView.setVerticalScrollbarPosition(LocaleController.isRTL ? RecyclerListView.SCROLLBAR_POSITION_LEFT : RecyclerListView.SCROLLBAR_POSITION_RIGHT);
             viewPage.addView(viewPage.listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-            viewPage.listView.setOnItemClickListener((view, position) -> {
+            viewPage.listView.setOnItemClickListener((RecyclerListView.OnItemClickListenerExtended) (view, position, x, y) -> {
                 if (initialDialogsType == DIALOGS_TYPE_BOT_REQUEST_PEER && view instanceof TextCell) {
                     viewPage.dialogsAdapter.onCreateGroupForThisClick();
                     return;
@@ -3414,6 +3414,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         if (filter != null) {
                             showDialog(new FolderBottomSheet(DialogsActivity.this, filter.id, updates));
                         }
+                        return;
+                    }
+                }
+                if (!onlySelect && !actionBar.isActionModeShowed() && view instanceof DialogCell && ((DialogCell) view).isPointInsideAvatar(x, y)) {
+                    if (processAvatarClick((DialogCell) view, position, viewPage.dialogsAdapter)) {
                         return;
                     }
                 }
@@ -3815,10 +3820,15 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         });
 
-        searchViewPager.searchListView.setOnItemClickListener((view, position) -> {
+        searchViewPager.searchListView.setOnItemClickListener((RecyclerListView.OnItemClickListenerExtended) (view, position, x, y) -> {
             if (initialDialogsType == DIALOGS_TYPE_WIDGET) {
                 onItemLongClick(searchViewPager.searchListView, view, position, 0, 0, -1, searchViewPager.dialogsSearchAdapter);
                 return;
+            }
+            if (!onlySelect && !actionBar.isActionModeShowed() && view instanceof DialogCell && ((DialogCell) view).isPointInsideAvatar(x, y)) {
+                if (processAvatarClick((DialogCell) view, position, searchViewPager.dialogsSearchAdapter)) {
+                    return;
+                }
             }
             onItemClick(view, position, searchViewPager.dialogsSearchAdapter);
         });
@@ -6799,6 +6809,98 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         });
         showDialog(builder.create());
+    }
+
+    public boolean processAvatarClick(DialogCell cell, int position, RecyclerListView.Adapter adapter) {
+        if (cell == null || cell.isDialogFolder()) {
+            return false;
+        }
+        long dialogId = cell.getDialogId();
+        if (dialogId == 0) {
+            return false;
+        }
+        if (DialogObject.isEncryptedDialog(dialogId)) {
+            int encId = DialogObject.getEncryptedChatId(dialogId);
+            TLRPC.EncryptedChat encChat = getMessagesController().getEncryptedChat(encId);
+            if (encChat != null) {
+                dialogId = encChat.user_id;
+            }
+        }
+        boolean isUser = DialogObject.isUserDialog(dialogId);
+        int action = isUser ? ExteraConfig.touchUserPicture : ExteraConfig.touchGroupPicture;
+        if (action == 3) {
+            return false;
+        }
+        if (action == 1) {
+            Bundle args = new Bundle();
+            if (isUser) {
+                args.putLong("user_id", dialogId);
+            } else {
+                args.putLong("chat_id", -dialogId);
+            }
+            presentFragment(new ProfileActivity(args));
+            return true;
+        }
+        if (action == 2) {
+            showChatPreview(cell);
+            return true;
+        }
+        if (action == 0) {
+            showProfileMenu(cell, dialogId, isUser);
+            return true;
+        }
+        return false;
+    }
+
+    private void showProfileMenu(DialogCell cell, long dialogId, boolean isUser) {
+        if (getParentActivity() == null) {
+            return;
+        }
+        ItemOptions options = ItemOptions.makeOptions(this, cell);
+
+        Bundle profileArgs = new Bundle();
+        if (isUser) {
+            profileArgs.putLong("user_id", dialogId);
+        } else {
+            profileArgs.putLong("chat_id", -dialogId);
+        }
+        options.add(isUser ? R.drawable.msg_user : R.drawable.msg_channel, LocaleController.getString("OpenProfile", R.string.OpenProfile), () -> {
+            presentFragment(new ProfileActivity(profileArgs));
+        });
+
+        Bundle chatArgs = new Bundle();
+        if (isUser) {
+            chatArgs.putLong("user_id", dialogId);
+        } else {
+            chatArgs.putLong("chat_id", -dialogId);
+        }
+        options.add(R.drawable.msg_message, LocaleController.getString("OpenChat", R.string.OpenChat), () -> {
+            presentFragment(new ChatActivity(chatArgs));
+        });
+
+        options.add(R.drawable.msg_photo, LocaleController.getString("ShowPhoto", R.string.ShowPhoto), () -> {
+            showChatPreview(cell);
+        });
+
+        boolean isMuted = getMessagesController().isDialogMuted(dialogId, 0);
+        options.add(isMuted ? R.drawable.msg_unmute : R.drawable.msg_mute, isMuted ? LocaleController.getString("UnmuteNotifications", R.string.UnmuteNotifications) : LocaleController.getString("MuteNotifications", R.string.MuteNotifications), () -> {
+            getNotificationsController().setDialogNotificationsSettings(dialogId, 0, isMuted ? NotificationsController.SETTING_MUTE_UNMUTE : NotificationsController.SETTING_MUTE_FOREVER);
+        });
+
+        TLRPC.Dialog dialog = getMessagesController().dialogs_dict.get(dialogId);
+        if (dialog != null) {
+            boolean hasUnread = dialog.unread_count > 0 || dialog.unread_mark;
+            options.add(hasUnread ? R.drawable.msg_markread : R.drawable.msg_markunread, hasUnread ? LocaleController.getString("MarkAsRead", R.string.MarkAsRead) : LocaleController.getString("MarkAsUnread", R.string.MarkAsUnread), () -> {
+                if (hasUnread) {
+                    getMessagesStorage().markDialogAsRead(dialogId, 0, 0, 0, false, 0, 0, true, 0);
+                } else {
+                    getMessagesStorage().markDialogAsUnread(dialogId, 0);
+                }
+            });
+        }
+
+        options.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
+        options.show();
     }
 
     public boolean showChatPreview(DialogCell cell) {

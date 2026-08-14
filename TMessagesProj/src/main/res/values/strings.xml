@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">OcoderX</string>
-    <string name="AppNameBeta">OcoderX Beta</string>
+    <string name="AppName">Ox-gram</string>
+    <string name="AppNameBeta">Ox-gram Beta</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>

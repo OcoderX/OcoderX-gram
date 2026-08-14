@@ -10,6 +10,9 @@
 
 -->
 <resources>
+        <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="RestartApp">Restart App</string>
     <string name="Preferences">X-Gram 设置</string>
     <!-- Main Menu -->
     <string name="Links">链接</string>
@@ -184,12 +187,11 @@
     <string name="ChannelToSaveChanged">曲目将被保存到 **%1$s**。</string>
     <string name="ConfirmCall">呼叫前确认</string>
     <string name="CallTo">是否呼叫**%1$s**？</string>
-    <string name="AppIconGradient">渐变</string>
-    <string name="AppIconAurora">极光</string>
-    <string name="AppIconNeo">新式</string>
-    <string name="AppIconAmethyst">紫水晶</string>
-    <string name="AppIconSpace">太空</string>
-    <string name="AppIconOrbit">星轨</string>
-    <string name="AppIconSus">内鬼</string>
-    <string name="AppIconWinter">冬日</string>
+    <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Light</string>
+    <string name="AppIconOxgramVivid">OXgram Vivid</string>
+    <string name="AppIconOxgramEmerald">OXgram Emerald</string>
+    <string name="AppIconOxgramBlue">OXgram Sapphire</string>
+    <string name="AppIconOxgramRed">OXgram Ruby</string>
 </resources>

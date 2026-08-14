@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">OcoderX Preferences</string>
+  <string name="AyuPreferences">Ox-gram Preferences</string>
   <string name="GhostEssentialsHeader">Ghost essentials</string>
   <string name="DontSendReadPackets">Don\'t read messages</string>
   <string name="DontSendOnlinePackets">Don\'t send online</string>
@@ -41,7 +41,7 @@
   <string name="ExportHistoryBtn">Export saved history to JSON</string>
   <string name="ExportHistoryDone">Exported to %1$s</string>
   <string name="QoLTogglesHeader">Useful features</string>
-  <string name="KeepAliveService">OcoderX Push Service</string>
+  <string name="KeepAliveService">Ox-gram Push Service</string>
   <string name="DisableAds">Disable ads</string>
   <string name="LocalPremium">Local Telegram Premium</string>
   <string name="CustomizationHeader">Customization</string>
@@ -92,7 +92,7 @@
   <string name="AyuSyncDownloadAgent">Download agent</string>
   <string name="WALMode">Enable WAL mode</string>
   <string name="ClearAyuDatabase">Clear Ayu Database</string>
-  <string name="ClearAyuDatabaseNotification">OcoderX database cleared</string>
+  <string name="ClearAyuDatabaseNotification">Ox-gram database cleared</string>
   <string name="EraseLocalDatabase">Erase Local Database</string>
   <string name="BetaFeatures">Beta features</string>
   <string name="StickerConfirmation">Confirmation when sending stickers</string>
@@ -149,7 +149,7 @@
   <string name="ExportAsTxt">Export as Text (.txt)</string>
   <string name="ExportAsJson">Export as JSON (.json)</string>
   <string name="ExportingChatHistory">Exporting chat history…</string>
-  <string name="SettingsWatermark">OcoderX</string>
+  <string name="SettingsWatermark">Ox-gram</string>
   <string name="SettingsDescription">Just an exteraGram based client with ToS breaking features in mind.</string>
   <string name="SecretMessageTecno">Tecno phones are the best.</string>
   <string name="SecretMessageXiaomiSuccess">You\'re using a good phone.</string>

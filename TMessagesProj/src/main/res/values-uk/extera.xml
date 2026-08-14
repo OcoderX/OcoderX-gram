@@ -9,6 +9,9 @@
 
      -->
 <resources>
+        <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="RestartApp">Restart App</string>
     <string name="Preferences">параметри X-Gram</string>
     <!--  Main Menu  -->
     <string name="Links">Посилання</string>
@@ -188,12 +191,11 @@ CameraX підтримується тільки на
     <string name="ChannelToSaveChanged">Треки будуть збережені в **%1$s**.</string>
     <string name="ConfirmCall">Підтвердити дзвінок</string>
     <string name="CallTo">Зателефонувати до **%1$s**?</string>
-    <string name="AppIconGradient">Градієнт</string>
-    <string name="AppIconAurora">Аврора</string>
-    <string name="AppIconNeo">Нео</string>
-    <string name="AppIconAmethyst">Аметист</string>
-    <string name="AppIconSpace">Космос</string>
-    <string name="AppIconOrbit">Орбіта</string>
-    <string name="AppIconSus">Самозванець</string>
-    <string name="AppIconWinter">Зима</string>
+    <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Light</string>
+    <string name="AppIconOxgramVivid">OXgram Vivid</string>
+    <string name="AppIconOxgramEmerald">OXgram Emerald</string>
+    <string name="AppIconOxgramBlue">OXgram Sapphire</string>
+    <string name="AppIconOxgramRed">OXgram Ruby</string>
 </resources>

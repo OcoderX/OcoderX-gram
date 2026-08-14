@@ -3861,7 +3861,31 @@ public class DialogCell extends BaseCell {
             }
             if (user != null && !MessagesController.isSupportUser(user) && !user.bot) {
                 boolean isOnline = isOnline();
-                if (isOnline || onlineProgress != 0) {
+                if (ExteraConfig.showStatusIndicator && !user.self) {
+                    int top = (int) (avatarImage.getImageY2() - AndroidUtilities.dp(8));
+                    int left;
+                    if (LocaleController.isRTL) {
+                        left = (int) (avatarImage.getImageX() + AndroidUtilities.dp(6));
+                    } else {
+                        left = (int) (avatarImage.getImageX2() - AndroidUtilities.dp(6));
+                    }
+
+                    int circleColor;
+                    if (isOnline) {
+                        circleColor = Theme.getColor(Theme.key_chats_onlineCircle, resourcesProvider);
+                    } else if (user.status instanceof TLRPC.TL_userStatusRecently || (user.status != null && user.status.expires == -100)) {
+                        circleColor = 0xffb0b0b0;
+                    } else if (user.status instanceof TLRPC.TL_userStatusLastMonth || (user.status != null && user.status.expires == -102) || user.status == null || user.status instanceof TLRPC.TL_userStatusEmpty || user.status.expires == 0) {
+                        circleColor = 0xff333333;
+                    } else {
+                        circleColor = 0xff707579;
+                    }
+
+                    Theme.dialogs_onlineCirclePaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider));
+                    canvas.drawCircle(left, top, AndroidUtilities.dp(8), Theme.dialogs_onlineCirclePaint);
+                    Theme.dialogs_onlineCirclePaint.setColor(circleColor);
+                    canvas.drawCircle(left, top, AndroidUtilities.dp(5), Theme.dialogs_onlineCirclePaint);
+                } else if (isOnline || onlineProgress != 0) {
                     int top = (int) (avatarImage.getImageY2() - AndroidUtilities.dp(8));
                     int left;
                     if (LocaleController.isRTL) {

@@ -60,10 +60,11 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
 
     private int infoHeaderRow;
     private int aboutExteraRow;
-    private int sourceCodeRow;
     private int channelRow;
     private int groupRow;
-    private int crowdinRow;
+    private int adminRow;
+    private int spamBotRow;
+    private int sourceCodeRow;
     private int infoDividerRow;
 
     @Override
@@ -204,7 +205,8 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
         infoHeaderRow = newRow();
         channelRow = newRow();
         groupRow = newRow();
-        crowdinRow = newRow();
+        adminRow = newRow();
+        spamBotRow = newRow();
         sourceCodeRow = newRow();
         infoDividerRow = newRow();
     }
@@ -214,14 +216,16 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
         if (position == aboutExteraRow) {
             if (!BuildVars.PM_BUILD)
                 (new UpdaterBottomSheet(getParentActivity(), this, false, null)).show();
-        } else if (position == sourceCodeRow) {
-            Browser.openUrl(getParentActivity(), "https://github.com/AyuGram/AyuGram4A");
         } else if (position == channelRow) {
-            MessagesController.getInstance(currentAccount).openByUserName(("ayugram1338"), this, 1);
+            MessagesController.getInstance(currentAccount).openByUserName("OcoderXs", this, 1);
         } else if (position == groupRow) {
-            MessagesController.getInstance(currentAccount).openByUserName(("ayugramchat"), this, 1);
-        } else if (position == crowdinRow) {
-            Browser.openUrl(getParentActivity(), "https://crowdin.com/project/ayugram");
+            MessagesController.getInstance(currentAccount).openByUserName("TATUdagi_chat", this, 1);
+        } else if (position == adminRow) {
+            MessagesController.getInstance(currentAccount).openByUserName("OcoderX", this, 1);
+        } else if (position == spamBotRow) {
+            MessagesController.getInstance(currentAccount).openByUserName("OcoderXbot", this, 1);
+        } else if (position == sourceCodeRow) {
+            Browser.openUrl(getParentActivity(), "https://github.com/OcoderX/OcoderX-gram");
         } else if (position == appearanceRow) {
             presentFragment(new AppearancePreferencesActivity());
         } else if (position == chatsRow) {
@@ -275,14 +279,16 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
                         textCell.setTextAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), R.drawable.msg_discussion, true);
                     } else if (position == otherRow) {
                         textCell.setTextAndIcon(LocaleController.getString("LocalOther", R.string.LocalOther), R.drawable.msg_fave, false);
-                    }else if (position == channelRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("Channel", R.string.Channel), "@ayugram1338", R.drawable.msg_channel, true);
+                    } else if (position == channelRow) {
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("Channel", R.string.Channel), "@OcoderXs", R.drawable.msg_channel, true);
                     } else if (position == groupRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), "@ayugramchat", R.drawable.msg_groups, true);
-                    } else if (position == crowdinRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("Crowdin", R.string.Crowdin), "Crowdin", R.drawable.msg_translate, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), "@TATUdagi_chat", R.drawable.msg_groups, true);
+                    } else if (position == adminRow) {
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("ContactAdmin", R.string.ContactAdmin), "@OcoderX", R.drawable.msg_admins, true);
+                    } else if (position == spamBotRow) {
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("SpamBot", R.string.SpamBot), "@OcoderXbot", R.drawable.msg_bot, true);
                     } else if (position == sourceCodeRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("SourceCode", R.string.SourceCode), "GitHub", R.drawable.msg_delete, false);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("SourceCode", R.string.SourceCode), "GitHub", R.drawable.msg_help, false);
                     }
                     break;
                 case 3:

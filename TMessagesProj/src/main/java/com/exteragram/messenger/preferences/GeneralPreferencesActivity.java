@@ -57,6 +57,17 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
             LocaleController.getString("Hide", R.string.Hide),
             "Telegram API",
             "Bot API"
+    }, animationTypes = new CharSequence[]{
+            LocaleController.getString("AnimationTypeTelegram", R.string.AnimationTypeTelegram),
+            LocaleController.getString("AnimationTypeSlide", R.string.AnimationTypeSlide),
+            LocaleController.getString("AnimationTypeFade", R.string.AnimationTypeFade),
+            LocaleController.getString("AnimationTypeZoom", R.string.AnimationTypeZoom),
+            LocaleController.getString("AnimationTypeNone", R.string.AnimationTypeNone)
+    }, touchPictureActions = new CharSequence[]{
+            LocaleController.getString("TouchPictureProfileMenu", R.string.TouchPictureProfileMenu),
+            LocaleController.getString("TouchPictureProfile", R.string.TouchPictureProfile),
+            LocaleController.getString("TouchPicturePhoto", R.string.TouchPicturePhoto),
+            LocaleController.getString("TouchPictureChat", R.string.TouchPictureChat)
     };
 
     private int cameraTypeHeaderRow;
@@ -71,9 +82,14 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
     private int speedBoostersDividerRow;
 
     private int generalHeaderRow;
+    private int animationTypeRow;
     private int formatTimeWithSecondsRow;
     private int disableNumberRoundingRow;
     private int tabletModeRow;
+    private int showStatusIndicatorRow;
+    private int showStatusIndicatorInfoRow;
+    private int touchUserPictureRow;
+    private int touchGroupPictureRow;
     private int generalDividerRow;
 
     private int profileHeaderRow;
@@ -107,9 +123,14 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
         }
 
         generalHeaderRow = newRow();
-        disableNumberRoundingRow = newRow();
+        animationTypeRow = newRow();
         formatTimeWithSecondsRow = newRow();
+        disableNumberRoundingRow = newRow();
         tabletModeRow = newRow();
+        showStatusIndicatorRow = newRow();
+        showStatusIndicatorInfoRow = newRow();
+        touchUserPictureRow = newRow();
+        touchGroupPictureRow = newRow();
         generalDividerRow = newRow();
 
         speedBoostersHeaderRow = newRow();
@@ -130,7 +151,15 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == disableNumberRoundingRow) {
+        if (position == animationTypeRow) {
+            if (getParentActivity() == null) {
+                return;
+            }
+            PopupUtils.showDialog(animationTypes, LocaleController.getString("AnimationType", R.string.AnimationType), ExteraConfig.animationType, getContext(), i -> {
+                ExteraConfig.editor.putInt("animationType", ExteraConfig.animationType = i).apply();
+                listAdapter.notifyItemChanged(animationTypeRow, payload);
+            });
+        } else if (position == disableNumberRoundingRow) {
             ExteraConfig.editor.putBoolean("disableNumberRounding", ExteraConfig.disableNumberRounding ^= true).apply();
             ((TextCheckCell) view).setChecked(ExteraConfig.disableNumberRounding);
             parentLayout.rebuildAllFragmentViews(false, false);
@@ -147,6 +176,26 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
                 ExteraConfig.editor.putInt("tabletMode", ExteraConfig.tabletMode = i).apply();
                 listAdapter.notifyItemChanged(tabletModeRow, payload);
                 showBulletin();
+            });
+        } else if (position == showStatusIndicatorRow) {
+            ExteraConfig.editor.putBoolean("showStatusIndicator", ExteraConfig.showStatusIndicator ^= true).apply();
+            ((TextCheckCell) view).setChecked(ExteraConfig.showStatusIndicator);
+            parentLayout.rebuildAllFragmentViews(false, false);
+        } else if (position == touchUserPictureRow) {
+            if (getParentActivity() == null) {
+                return;
+            }
+            PopupUtils.showDialog(touchPictureActions, LocaleController.getString("TouchUserPicture", R.string.TouchUserPicture), ExteraConfig.touchUserPicture, getContext(), i -> {
+                ExteraConfig.editor.putInt("touchUserPicture", ExteraConfig.touchUserPicture = i).apply();
+                listAdapter.notifyItemChanged(touchUserPictureRow, payload);
+            });
+        } else if (position == touchGroupPictureRow) {
+            if (getParentActivity() == null) {
+                return;
+            }
+            PopupUtils.showDialog(touchPictureActions, LocaleController.getString("TouchGroupPicture", R.string.TouchGroupPicture), ExteraConfig.touchGroupPicture, getContext(), i -> {
+                ExteraConfig.editor.putInt("touchGroupPicture", ExteraConfig.touchGroupPicture = i).apply();
+                listAdapter.notifyItemChanged(touchGroupPictureRow, payload);
             });
         } else if (position == archiveOnPullRow) {
             ExteraConfig.editor.putBoolean("archiveOnPull", ExteraConfig.archiveOnPull ^= true).apply();
@@ -263,7 +312,9 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
                     if (position == disableNumberRoundingRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("DisableNumberRounding", R.string.DisableNumberRounding), "1.23K -> 1,234", ExteraConfig.disableNumberRounding, true, true);
                     } else if (position == formatTimeWithSecondsRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds), "12:34 -> 12:34:56", ExteraConfig.formatTimeWithSeconds, true, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds), "11:22 -> 11:22:33", ExteraConfig.formatTimeWithSeconds, true, true);
+                    } else if (position == showStatusIndicatorRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString("ShowStatusIndicator", R.string.ShowStatusIndicator), ExteraConfig.showStatusIndicator, false);
                     } else if (position == disableUnarchiveSwipeRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("DisableUnarchiveSwipe", R.string.DisableUnarchiveSwipe), ExteraConfig.disableUnarchiveSwipe, false);
                     } else if (position == archiveOnPullRow) {
@@ -278,17 +329,25 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
                     break;
                 case 7:
                     TextSettingsCell textSettingsCell = (TextSettingsCell) holder.itemView;
-                    if (position == cameraXQualityRow) {
+                    if (position == animationTypeRow) {
+                        textSettingsCell.setTextAndValue(LocaleController.getString("AnimationType", R.string.AnimationType), animationTypes[ExteraConfig.animationType], payload, true);
+                    } else if (position == cameraXQualityRow) {
                         textSettingsCell.setTextAndValue(LocaleController.getString("CameraQuality", R.string.CameraQuality), ExteraConfig.cameraResolution + "p", payload, false);
                     } else if (position == tabletModeRow) {
-                        textSettingsCell.setTextAndValue(LocaleController.getString("TabletMode", R.string.TabletMode), tabletMode[ExteraConfig.tabletMode], payload, false);
+                        textSettingsCell.setTextAndValue(LocaleController.getString("TabletMode", R.string.TabletMode), tabletMode[ExteraConfig.tabletMode], payload, true);
+                    } else if (position == touchUserPictureRow) {
+                        textSettingsCell.setTextAndValue(LocaleController.getString("TouchUserPicture", R.string.TouchUserPicture), touchPictureActions[ExteraConfig.touchUserPicture], payload, true);
+                    } else if (position == touchGroupPictureRow) {
+                        textSettingsCell.setTextAndValue(LocaleController.getString("TouchGroupPicture", R.string.TouchGroupPicture), touchPictureActions[ExteraConfig.touchGroupPicture], payload, false);
                     } else if (position == showIdAndDcRow) {
                         textSettingsCell.setTextAndValue(LocaleController.getString("ShowIdAndDc", R.string.ShowIdAndDc), id[ExteraConfig.showIdAndDc], payload, false);
                     }
                     break;
                 case 8:
                     TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) holder.itemView;
-                    if (position == cameraTypeDividerRow) {
+                    if (position == showStatusIndicatorInfoRow) {
+                        textInfoPrivacyCell.setText(LocaleController.getString("ShowStatusIndicatorInfo", R.string.ShowStatusIndicatorInfo));
+                    } else if (position == cameraTypeDividerRow) {
                         String advise;
                         switch (ExteraConfig.cameraType) {
                             case 0:
@@ -335,9 +394,9 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
             } else if (position == generalHeaderRow || position == archiveHeaderRow || position == profileHeaderRow ||
                     position == speedBoostersHeaderRow || position == cameraTypeHeaderRow) {
                 return 3;
-            } else if (position == cameraXQualityRow || position == tabletModeRow || position == showIdAndDcRow) {
+            } else if (position == animationTypeRow || position == cameraXQualityRow || position == tabletModeRow || position == touchUserPictureRow || position == touchGroupPictureRow || position == showIdAndDcRow) {
                 return 7;
-            } else if (position == cameraTypeDividerRow || position == speedBoostersDividerRow || position == profileDividerRow  || position == archiveDividerRow) {
+            } else if (position == showStatusIndicatorInfoRow || position == cameraTypeDividerRow || position == speedBoostersDividerRow || position == profileDividerRow  || position == archiveDividerRow) {
                 return 8;
             } else if (position == downloadSpeedChooserRow) {
                 return 13;

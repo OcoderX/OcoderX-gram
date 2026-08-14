@@ -68,9 +68,13 @@ public class ExteraConfig {
     public static boolean useCameraXOptimizedMode;
     public static int cameraResolution;
 
+    public static int animationType;
     public static boolean disableNumberRounding;
     public static boolean formatTimeWithSeconds;
     public static int tabletMode;
+    public static boolean showStatusIndicator;
+    public static int touchUserPicture;
+    public static int touchGroupPicture;
 
     public static int downloadSpeedBoost;
     public static boolean uploadSpeedBoost;
@@ -166,9 +170,13 @@ public class ExteraConfig {
             useCameraXOptimizedMode = preferences.getBoolean("useCameraXOptimizedMode", SharedConfig.getDevicePerformanceClass() != SharedConfig.PERFORMANCE_CLASS_HIGH);
             cameraResolution = preferences.getInt("cameraResolution", CameraXUtils.getCameraResolution());
 
+            animationType = preferences.getInt("animationType", 0);
             disableNumberRounding = preferences.getBoolean("disableNumberRounding", false);
             formatTimeWithSeconds = preferences.getBoolean("formatTimeWithSeconds", false);
             tabletMode = preferences.getInt("tabletMode", 0);
+            showStatusIndicator = preferences.getBoolean("showStatusIndicator", false);
+            touchUserPicture = preferences.getInt("touchUserPicture", 0);
+            touchGroupPicture = preferences.getInt("touchGroupPicture", 0);
 
             downloadSpeedBoost = preferences.getInt("downloadSpeedBoost", 0);
             uploadSpeedBoost = preferences.getBoolean("uploadSpeedBoost", false);

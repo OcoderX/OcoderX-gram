@@ -1,33 +1,17 @@
-/*
-
- This is the source code of exteraGram for Android.
-
- We do not and cannot prevent the use of our code,
- but be respectful and credit the original author.
-
- Copyright @immat0x1, 2023
-
-*/
-
 package com.exteragram.messenger.preferences.components;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
+import android.graphics.Outline;
 import android.os.Build;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
-
-import com.exteragram.messenger.utils.MonetUtils;
-
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
@@ -40,30 +24,25 @@ public class HeaderSettingsCell extends FrameLayout {
     public HeaderSettingsCell(Context context) {
         super(context);
 
-        Drawable arrow = ContextCompat.getDrawable(context, R.drawable.ic_logo_foreground).mutate();
-        Theme.ThemeInfo theme = Theme.getActiveTheme();
-        int color = ContextCompat.getColor(context, R.color.ic_background);
-
-        if (theme.isMonet() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            color = MonetUtils.getColor(theme.isDark() ? "n1_800" : "a1_100");
-            arrow.setColorFilter(new PorterDuffColorFilter(MonetUtils.getColor(theme.isDark() ? "a1_100" : "n2_700"), PorterDuff.Mode.MULTIPLY));
-        } else {
-            // AyuGram: removed
-            // arrow.setAlpha((int) (70 * 2.55f));
-        }
-
         ImageView logo = new ImageView(context);
-        logo.setScaleType(ImageView.ScaleType.CENTER);
-        logo.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(108), color));
-        //TODO: logo.setBackground(new GradientArrowBackground(context, color));
-        logo.setImageDrawable(arrow);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        logo.setImageResource(R.mipmap.ic_launcher_ocoder_default);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            logo.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                }
+            });
+            logo.setClipToOutline(true);
+        }
         addView(logo, LayoutHelper.createFrame(108, 108, Gravity.CENTER | Gravity.TOP, 0, 20, 0, 0));
 
         titleTextView = new TextView(context);
         titleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         titleTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
-        titleTextView.setText(String.format("%s %s", LocaleController.getString(R.string.exteraAppName), BuildVars.BUILD_VERSION_STRING));
+        titleTextView.setText("Ox-gram 1.0.0");
         titleTextView.setLines(1);
         titleTextView.setMaxLines(1);
         titleTextView.setSingleLine(true);
@@ -83,7 +62,6 @@ public class HeaderSettingsCell extends FrameLayout {
         subtitleTextView.setSingleLine(false);
         subtitleTextView.setPadding(0, 0, 0, 0);
         addView(subtitleTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER | Gravity.TOP, 60, 180, 60, 27));
-
     }
 
     @Override

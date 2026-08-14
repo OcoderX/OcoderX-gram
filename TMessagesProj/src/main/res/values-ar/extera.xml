@@ -10,6 +10,9 @@
 
 -->
 <resources>
+        <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="RestartApp">Restart App</string>
     <string name="Preferences">تفضيلات X-Gram</string>
     <!-- Main Menu -->
     <string name="Links">الروابط</string>
@@ -184,12 +187,11 @@
     <string name="ChannelToSaveChanged">سيتم حفظ الأصوات في **%1$s**.</string>
     <string name="ConfirmCall">قبول المكالمة</string>
     <string name="CallTo">الاتصال ب **%1$s**؟</string>
-    <string name="AppIconGradient">متدرج</string>
-    <string name="AppIconAurora">أضواء قطبية</string>
-    <string name="AppIconNeo">Neo</string>
-    <string name="AppIconAmethyst">يَاقُوتٌ بَنَفْسَجِىّ‎</string>
-    <string name="AppIconSpace">فضاء</string>
-    <string name="AppIconOrbit">مدار</string>
-    <string name="AppIconSus">مستورد</string>
-    <string name="AppIconWinter">شتاء</string>
+    <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Light</string>
+    <string name="AppIconOxgramVivid">OXgram Vivid</string>
+    <string name="AppIconOxgramEmerald">OXgram Emerald</string>
+    <string name="AppIconOxgramBlue">OXgram Sapphire</string>
+    <string name="AppIconOxgramRed">OXgram Ruby</string>
 </resources>

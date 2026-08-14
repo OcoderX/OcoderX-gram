@@ -3891,7 +3891,10 @@ public class MessageObject {
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaInvoice) {
                     messageText = getMedia(messageOwner).description;
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaUnsupported) {
-                    messageText = LocaleController.getString("UnsupportedMedia", R.string.UnsupportedMedia).replace("https://telegram.org/update", "https://github.com/" + AyuConstants.APP_GITHUB + "/releases/latest").replace("Telegram", AyuConstants.APP_NAME);
+                    messageText = LocaleController.getString("UnsupportedMedia", R.string.UnsupportedMedia)
+                            .replace("https://telegram.org/update", "https://t.me/OcoderXs")
+                            .replace("http://telegram.org/update", "https://t.me/OcoderXs")
+                            .replace("Telegram", AyuConstants.APP_NAME);
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument) {
                     if (isSticker() || isAnimatedStickerDocument(getDocument(), true)) {
                         String sch = getStickerChar();

@@ -9,6 +9,9 @@
 
      -->
 <resources>
+        <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="RestartApp">Restart App</string>
     <string name="Preferences">X-Gram Einstellungen</string>
     <!--  Main Menu  -->
     <string name="Links">Links</string>
@@ -140,7 +143,11 @@ CameraX wird nur auf
     <string name="TrackSaved">Track wurde in **%1$s ** gespeichert.</string>
     <string name="ConfirmCall">Anruf bestätigen</string>
     <string name="CallTo">Anruf an **%1$s**?</string>
-    <string name="AppIconGradient">Farbverlauf</string>
-    <string name="AppIconSpace">Weltall</string>
-    <string name="AppIconWinter">Winter</string>
+    <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Light</string>
+    <string name="AppIconOxgramVivid">OXgram Vivid</string>
+    <string name="AppIconOxgramEmerald">OXgram Emerald</string>
+    <string name="AppIconOxgramBlue">OXgram Sapphire</string>
+    <string name="AppIconOxgramRed">OXgram Ruby</string>
 </resources>

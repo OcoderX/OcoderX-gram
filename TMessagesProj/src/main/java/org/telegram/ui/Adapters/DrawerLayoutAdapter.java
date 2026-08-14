@@ -310,19 +310,20 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             peopleNearbyIcon = R.drawable.msg_nearby;
         }
 
-        // --- AyuGram hook
+        // --- OcoderX / AyuGram hook
         if (AyuConfig.showGhostToggleInDrawer) {
             var msg = AyuConfig.isGhostModeActive()
                     ? LocaleController.getString("DisableGhostMode", R.string.DisableGhostMode)
                     : LocaleController.getString("EnableGhostMode", R.string.EnableGhostMode);
             items.add(new Item(AyuConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.ayu_ghost));
-            items.add(null);
         }
+        items.add(new Item(AyuConstants.DRAWER_OCODER_PREFS, LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences), R.drawable.msg_customize));
+        items.add(new Item(AyuConstants.DRAWER_DELETED_MESSAGES, LocaleController.getString("DeletedMessages", R.string.DeletedMessages), R.drawable.msg_delete));
         if (AyuConfig.showKillButtonInDrawer) {
-            items.add(new Item(AyuConstants.DRAWER_KILL_APP, LocaleController.getString("KillApp", R.string.KillApp), R.drawable.msg_disable));
-            items.add(null);
+            items.add(new Item(AyuConstants.DRAWER_KILL_APP, LocaleController.getString("RestartApp", R.string.RestartApp), R.drawable.msg_retry));
         }
-        // --- AyuGram hook
+        items.add(null);
+        // --- OcoderX / AyuGram hook
 
         UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
         if (me != null && me.isPremium() && ExteraConfig.changeStatus) {
@@ -349,6 +350,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             items.add(null);
             items.add(new Item(16, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), scanQrIcon));
         }
+        items.add(null);
+        items.add(new Item(AyuConstants.DRAWER_CHANNEL, LocaleController.getString("Channel", R.string.Channel) + " (@OcoderXs)", R.drawable.msg_channel));
+        items.add(new Item(AyuConstants.DRAWER_ADMIN, LocaleController.getString("ContactAdmin", R.string.ContactAdmin) + " (@OcoderX)", R.drawable.msg_admins));
 //      items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
 //      items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon));
     }

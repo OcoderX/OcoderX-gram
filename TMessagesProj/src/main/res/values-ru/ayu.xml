@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">Настройки OcoderX</string>
+  <string name="AyuPreferences">Настройки Ox-gram</string>
   <string name="GhostEssentialsHeader">Режим призрака</string>
   <string name="SendReadPackets">Отправлять «прочитано»</string>
   <string name="SendOnlinePackets">Отправлять «онлайн»</string>
@@ -70,8 +70,8 @@
   <string name="AyuSyncOpenPreferences">Открыть настройки</string>
   <string name="AyuSyncDownloadAgent">Скачать клиент</string>
   <string name="WALMode">Включить WAL режим</string>
-  <string name="ClearAyuDatabase">Очистить OcoderX БД</string>
-  <string name="ClearAyuDatabaseNotification">База сообщений OcoderX очищена</string>
+  <string name="ClearAyuDatabase">Очистить Ox-gram БД</string>
+  <string name="ClearAyuDatabaseNotification">База сообщений Ox-gram очищена</string>
   <string name="EraseLocalDatabase">Стереть кэш сообщений</string>
   <string name="BetaFeatures">Бета фичи</string>
   <string name="StickerConfirmation">Подтверждение при отправке стикеров</string>
@@ -128,7 +128,7 @@
   <string name="ExportAsTxt">Экспорт в виде TXT (.txt)</string>
   <string name="ExportAsJson">Экспорт в виде JSON (.json)</string>
   <string name="ExportingChatHistory">Экспорт истории чата…</string>
-  <string name="SettingsWatermark">OcoderX</string>
+  <string name="SettingsWatermark">Ox-gram</string>
   <string name="SettingsDescription">Просто клиент на базе exteraGram с запретным функционалом.</string>
   <string name="SecretMessageTecno">Телефоны от Tecno - лучшие.</string>
   <string name="SecretMessageXiaomiSuccess">У тебя хороший телефон.</string>
