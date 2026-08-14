@@ -53,7 +53,6 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
     private int hideTypingStatusRow;
     private int frozenLastSeenRow;
     private int ghostVoiceChatRow;
-    private int incognitoStoriesRow;
     private int ghostDividerRow;
 
     private int spyHeaderRow;
@@ -125,7 +124,6 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
         hideTypingStatusRow = newRow();
         frozenLastSeenRow = newRow();
         ghostVoiceChatRow = newRow();
-        incognitoStoriesRow = newRow();
         ghostScheduleToggleRow = newRow();
         ghostScheduleStartRow = newRow();
         ghostScheduleEndRow = newRow();
@@ -338,9 +336,6 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
         } else if (position == ghostVoiceChatRow) {
             AyuConfig.editor.putBoolean("ghostVoiceChat", AyuConfig.ghostVoiceChat ^= true).apply();
             ((TextCheckCell) view).setChecked(AyuConfig.ghostVoiceChat);
-        } else if (position == incognitoStoriesRow) {
-            AyuConfig.editor.putBoolean("incognitoStories", AyuConfig.incognitoStories ^= true).apply();
-            ((TextCheckCell) view).setChecked(AyuConfig.incognitoStories);
         } else if (position == ghostScheduleToggleRow) {
             AyuConfig.editor.putBoolean("ghostModeScheduleEnabled", AyuConfig.ghostModeScheduleEnabled ^= true).apply();
             ((TextCheckCell) view).setChecked(AyuConfig.ghostModeScheduleEnabled);
@@ -560,8 +555,6 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("FrozenLastSeen", R.string.FrozenLastSeen), LocaleController.getString("FrozenLastSeenDescription", R.string.FrozenLastSeenDescription), AyuConfig.frozenLastSeen, true, true);
                     } else if (position == ghostVoiceChatRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("GhostVoiceChat", R.string.GhostVoiceChat), LocaleController.getString("GhostVoiceChatDescription", R.string.GhostVoiceChatDescription), AyuConfig.ghostVoiceChat, true, true);
-                    } else if (position == incognitoStoriesRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("IncognitoStories", R.string.IncognitoStories), LocaleController.getString("IncognitoStoriesDescription", R.string.IncognitoStoriesDescription), AyuConfig.incognitoStories, true, true);
                     } else if (position == ghostScheduleToggleRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.GhostScheduleToggle), AyuConfig.ghostModeScheduleEnabled, true);
                     } else if (position == autoCleanupEnabledRow) {

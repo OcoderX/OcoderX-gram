@@ -1,6 +1,6 @@
-# AyuGram for Android
+# OcoderX for Android
 
-![AyuGram Logo](.github/AyuGram.png)
+![OcoderX Logo](.github/OcoderX.png)
 
 ## What's this fork even about?
 

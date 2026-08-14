@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.util.Log;
 import com.google.gson.GsonBuilder;
 import com.radolyn.ayugram.AyuConstants;
 import com.radolyn.ayugram.database.AyuData;
+import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
@@ -22,7 +23,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.R;
-import org.telegram.messenger.Utilities;
+import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ChatActivity;
@@ -77,6 +78,38 @@ public class AyuExporter {
         }
     }
 
+    /**
+     * Reads every locally cached message for a dialog directly from MessagesStorage's SQLite
+     * database, newest-first (matching ChatActivity.messages ordering). Must be called from
+     * MessagesStorage's own storage queue thread.
+     */
+    private static ArrayList<MessageObject> loadFullHistoryFromStorage(MessagesStorage storage, int account, long dialogId) {
+        ArrayList<MessageObject> result = new ArrayList<>();
+        SQLiteCursor cursor = null;
+        try {
+            long clientUserId = org.telegram.messenger.UserConfig.getInstance(account).getClientUserId();
+            cursor = storage.getDatabase().queryFinalized("SELECT data FROM messages_v2 WHERE uid = " + dialogId + " ORDER BY mid DESC");
+            while (cursor.next()) {
+                NativeByteBuffer data = cursor.byteBufferValue(0);
+                if (data != null) {
+                    TLRPC.Message message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false);
+                    if (message != null) {
+                        message.readAttachPath(data, clientUserId);
+                        result.add(new MessageObject(account, message, false, false));
+                    }
+                    data.reuse();
+                }
+            }
+        } catch (Exception e) {
+            FileLog.e("loadFullHistoryFromStorage", e);
+        } finally {
+            if (cursor != null) {
+                cursor.dispose();
+            }
+        }
+        return result;
+    }
+
     public static void exportChatHistory(ChatActivity fragment, long dialogId, boolean asJson) {
         if (fragment == null) {
             return;
@@ -87,25 +120,26 @@ public class AyuExporter {
                 LocaleController.getString("ExportingChatHistory", R.string.ExportingChatHistory)
         ).show();
 
-        Utilities.globalQueue.postRunnable(() -> {
+        int account = fragment.getCurrentAccount();
+        MessagesStorage storage = MessagesStorage.getInstance(account);
+
+        // Runs on the storage thread: it's the only thread allowed to touch
+        // MessagesStorage's SQLite connection directly.
+        storage.getStorageQueue().postRunnable(() -> {
             try {
                 if (!exportsPath.exists()) {
                     exportsPath.mkdirs();
                 }
 
-                int account = fragment.getCurrentAccount();
-                MessagesStorage storage = MessagesStorage.getInstance(account);
                 MessagesController controller = MessagesController.getInstance(account);
 
                 TLRPC.Chat chat = dialogId < 0 ? controller.getChat(-dialogId) : null;
                 TLRPC.User user = dialogId > 0 ? controller.getUser(dialogId) : null;
                 String chatTitle = chat != null ? chat.title : (user != null ? ContactsController.formatName(user.first_name, user.last_name) : String.valueOf(dialogId));
 
-                ArrayList<MessageObject> messageObjects = new ArrayList<>();
-                // Load messages from memory or storage
-                if (fragment.getMessages() != null) {
-                    messageObjects.addAll(fragment.getMessages());
-                }
+                // Full local history for this dialog (newest first, matching ChatActivity.messages ordering),
+                // not just the window currently loaded into the open chat screen.
+                ArrayList<MessageObject> messageObjects = loadFullHistoryFromStorage(storage, account, dialogId);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
                 String fileTimestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());

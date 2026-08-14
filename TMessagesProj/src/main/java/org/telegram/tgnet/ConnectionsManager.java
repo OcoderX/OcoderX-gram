@@ -323,14 +323,6 @@ public class ConnectionsManager extends BaseController {
                 obj.offline = true;
             }
 
-            // incognito stories
-            if (AyuConfig.incognitoStories && object != null) {
-                String reqName = object.getClass().getSimpleName();
-                if (reqName.contains("readStories") || reqName.contains("ReadStories")) {
-                    return;
-                }
-            }
-
             // don't send read status
             if (
                     !AyuConfig.sendReadPackets &&

@@ -30,7 +30,6 @@ public class AyuConfig {
     public static boolean hideTypingStatus;
     public static boolean frozenLastSeen;
     public static boolean ghostVoiceChat;
-    public static boolean incognitoStories;
     public static boolean useScheduledMessages;
     public static boolean saveDeletedMessages;
     public static boolean saveMessagesHistory;
@@ -99,7 +98,6 @@ public class AyuConfig {
             hideTypingStatus = preferences.getBoolean("hideTypingStatus", false);
             frozenLastSeen = preferences.getBoolean("frozenLastSeen", false);
             ghostVoiceChat = preferences.getBoolean("ghostVoiceChat", false);
-            incognitoStories = preferences.getBoolean("incognitoStories", true);
 
             markReadAfterSend = preferences.getBoolean("markReadAfterSend", true);
             useScheduledMessages = preferences.getBoolean("useScheduledMessages", false);

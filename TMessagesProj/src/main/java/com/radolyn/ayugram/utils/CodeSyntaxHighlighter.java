@@ -257,31 +257,31 @@ public class CodeSyntaxHighlighter {
     }
 
     private static void applyPython(Spannable text, int offset, String code, SyntaxTheme theme) {
+        applyPattern(text, offset, PY_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, PY_KEYWORDS, code, theme.keywordColor, false, true);
         applyPattern(text, offset, PY_BUILTINS, code, theme.typeColor, false, false);
         applyPattern(text, offset, PY_CONSTANTS, code, theme.constantColor, false, true);
         applyPattern(text, offset, PY_DECORATORS, code, theme.decoratorColor, false, false);
-        applyPattern(text, offset, PY_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, NUMBERS, code, theme.numberColor, false, false);
         applyPattern(text, offset, PY_STRINGS, code, theme.stringColor, false, false);
         applyPattern(text, offset, PY_COMMENTS, code, theme.commentColor, true, false);
     }
 
     private static void applyJavaScript(Spannable text, int offset, String code, SyntaxTheme theme) {
+        applyPattern(text, offset, JS_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, JS_KEYWORDS, code, theme.keywordColor, false, true);
         applyPattern(text, offset, JS_BUILTINS, code, theme.typeColor, false, false);
-        applyPattern(text, offset, JS_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, NUMBERS, code, theme.numberColor, false, false);
         applyPattern(text, offset, JS_STRINGS, code, theme.stringColor, false, false);
         applyPattern(text, offset, JS_COMMENTS, code, theme.commentColor, true, false);
     }
 
     private static void applyJava(Spannable text, int offset, String code, SyntaxTheme theme) {
+        applyPattern(text, offset, JAVA_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, JAVA_KEYWORDS, code, theme.keywordColor, false, true);
         applyPattern(text, offset, JAVA_TYPES, code, theme.typeColor, false, false);
         applyPattern(text, offset, JAVA_CONSTANTS, code, theme.constantColor, false, true);
         applyPattern(text, offset, JAVA_ANNOTATIONS, code, theme.decoratorColor, false, false);
-        applyPattern(text, offset, JAVA_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, NUMBERS, code, theme.numberColor, false, false);
         applyPattern(text, offset, JAVA_STRINGS, code, theme.stringColor, false, false);
         applyPattern(text, offset, JAVA_COMMENTS, code, theme.commentColor, true, false);
@@ -289,9 +289,9 @@ public class CodeSyntaxHighlighter {
 
     private static void applyCpp(Spannable text, int offset, String code, SyntaxTheme theme) {
         applyPattern(text, offset, C_PREPROCESSOR, code, theme.decoratorColor, false, false);
+        applyPattern(text, offset, C_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, C_KEYWORDS, code, theme.keywordColor, false, true);
         applyPattern(text, offset, C_TYPES, code, theme.typeColor, false, false);
-        applyPattern(text, offset, C_FUNCTIONS, code, theme.functionColor, false, false);
         applyPattern(text, offset, NUMBERS, code, theme.numberColor, false, false);
         applyPattern(text, offset, C_STRINGS, code, theme.stringColor, false, false);
         applyPattern(text, offset, C_COMMENTS, code, theme.commentColor, true, false);
@@ -336,8 +336,8 @@ public class CodeSyntaxHighlighter {
     }
 
     private static void applyUniversal(Spannable text, int offset, String code, SyntaxTheme theme) {
-        applyPattern(text, offset, UNIVERSAL_KEYWORDS, code, theme.keywordColor, false, true);
         applyPattern(text, offset, UNIVERSAL_FUNCTIONS, code, theme.functionColor, false, false);
+        applyPattern(text, offset, UNIVERSAL_KEYWORDS, code, theme.keywordColor, false, true);
         applyPattern(text, offset, NUMBERS, code, theme.numberColor, false, false);
         applyPattern(text, offset, UNIVERSAL_STRINGS, code, theme.stringColor, false, false);
         applyPattern(text, offset, UNIVERSAL_COMMENTS, code, theme.commentColor, true, false);

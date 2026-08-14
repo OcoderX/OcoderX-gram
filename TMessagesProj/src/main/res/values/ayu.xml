@@ -139,7 +139,7 @@
   <string name="FrozenLastSeen">Freeze last seen time</string>
   <string name="FrozenLastSeenDescription">Prevents updating your online presence to preserve your last seen timestamp.</string>
   <string name="GhostVoiceChat">Ghost Voice Chat (Silent listener)</string>
-  <string name="GhostVoiceChatDescription">Join voice chats and live streams without speaking status or notifying participants.</string>
+  <string name="GhostVoiceChatDescription">Join muted with your camera off and no local speaking indicator. Note: Telegram still lists you as a participant to everyone in the call.</string>
   <string name="IncognitoStories">Incognito Stories</string>
   <string name="IncognitoStoriesDescription">View stories without leaving a view mark in the author\'s view list.</string>
   <string name="DeleteAllFromUser">Delete all from this user</string>

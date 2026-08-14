@@ -5294,11 +5294,8 @@ public class MessageObject {
                 spannable.setSpan(new URLSpanUserMention("" + ((TLRPC.TL_inputMessageEntityMentionName) run.urlEntity).user_id.user_id, t, run), run.start, run.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if ((run.flags & TextStyleSpan.FLAG_STYLE_MONO) != 0) {
                 spannable.setSpan(new URLSpanMono(spannable, run.start, run.end, t, run), run.start, run.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                if (com.radolyn.ayugram.AyuConfig.codeSyntaxHighlighting) {
-                    String lang = null;
-                    if (run.urlEntity instanceof TLRPC.TL_messageEntityPre) {
-                        lang = ((TLRPC.TL_messageEntityPre) run.urlEntity).language;
-                    }
+                if (com.radolyn.ayugram.AyuConfig.codeSyntaxHighlighting && run.urlEntity instanceof TLRPC.TL_messageEntityPre) {
+                    String lang = ((TLRPC.TL_messageEntityPre) run.urlEntity).language;
                     com.radolyn.ayugram.utils.CodeSyntaxHighlighter.highlight(spannable, run.start, run.end, lang, org.telegram.ui.ActionBar.Theme.isCurrentThemeDark());
                 }
             } else {
