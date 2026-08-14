@@ -76,6 +76,7 @@
     <string name="DownloadSpeedBoost">Aumento de velocidad de descarga</string>
     <string name="UploadSpeedBoost">Aumento de velocidad de subida</string>
     <string name="Ultra">Ultra</string>
+    <string name="SpeedExtreme">Turbo ⚡️</string>
     <string name="SpeedBoostInfo">Ultra aceleración puede causar problemas con la descarga de archivos y la transmisión de videos en una conexión lenta a Internet.</string>
     <string name="Profile">Perfil</string>
     <string name="HidePhoneNumber">Ocultar número de teléfono</string>

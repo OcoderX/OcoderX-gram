@@ -16,6 +16,7 @@ import androidx.room.Transaction;
 import com.radolyn.ayugram.database.entities.DeletedMessage;
 import com.radolyn.ayugram.database.entities.DeletedMessageFull;
 import com.radolyn.ayugram.database.entities.DeletedMessageReaction;
+import com.radolyn.ayugram.database.entities.DialogCount;
 
 import java.util.List;
 
@@ -50,4 +51,22 @@ public interface DeletedMessageDao {
 
     @Query("SELECT * FROM deletedmessage WHERE userId = :userId AND entityCreateDate > :fromDate ORDER BY entityCreateDate LIMIT 50 OFFSET :offset")
     List<DeletedMessage> getForSync(long userId, long fromDate, int offset);
+
+    @Query("SELECT * FROM deletedmessage WHERE entityCreateDate < :cutoff")
+    List<DeletedMessage> getOlderThan(int cutoff);
+
+    @Query("DELETE FROM deletedmessage WHERE entityCreateDate < :cutoff")
+    void deleteOlderThan(int cutoff);
+
+    @Query("SELECT COUNT(*) FROM deletedmessage")
+    int getTotalCount();
+
+    @Query("SELECT MIN(entityCreateDate) FROM deletedmessage")
+    int getOldestEntryDate();
+
+    @Query("SELECT dialogId, COUNT(*) as cnt FROM deletedmessage GROUP BY dialogId ORDER BY cnt DESC LIMIT :limit")
+    List<DialogCount> getTopDialogs(int limit);
+
+    @Query("SELECT * FROM deletedmessage ORDER BY entityCreateDate")
+    List<DeletedMessage> getAll();
 }

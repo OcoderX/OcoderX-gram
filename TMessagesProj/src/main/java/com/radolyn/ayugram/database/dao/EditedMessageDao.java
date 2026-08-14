@@ -39,6 +39,18 @@ public interface EditedMessageDao {
     @Query("SELECT * FROM editedmessage WHERE userId = :userId AND entityCreateDate > :fromDate ORDER BY entityCreateDate LIMIT 50 OFFSET :offset")
     List<EditedMessage> getForSync(long userId, long fromDate, int offset);
 
+    @Query("SELECT * FROM editedmessage WHERE entityCreateDate < :cutoff")
+    List<EditedMessage> getOlderThan(int cutoff);
+
+    @Query("DELETE FROM editedmessage WHERE entityCreateDate < :cutoff")
+    void deleteOlderThan(int cutoff);
+
+    @Query("SELECT COUNT(*) FROM editedmessage")
+    int getTotalCount();
+
+    @Query("SELECT * FROM editedmessage ORDER BY entityCreateDate")
+    List<EditedMessage> getAll();
+
     @Insert
     void insert(EditedMessage revision);
 }

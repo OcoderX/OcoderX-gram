@@ -56,6 +56,30 @@ public class AyuFilter {
         return false;
     }
 
+    private static boolean isFilteredByMediaType(MessageObject msg) {
+        if (msg == null) {
+            return false;
+        }
+
+        if (AyuConfig.filterStickers && msg.isSticker()) {
+            return true;
+        }
+
+        if (AyuConfig.filterGifs && msg.isGif()) {
+            return true;
+        }
+
+        if (AyuConfig.filterVoiceMessages && msg.isVoice()) {
+            return true;
+        }
+
+        if (AyuConfig.filterRoundVideos && msg.isRoundVideo()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static boolean isFiltered(MessageObject msg, MessageObject.GroupedMessages group) {
         if (!AyuConfig.regexFiltersEnabled) {
             return false;
@@ -63,6 +87,10 @@ public class AyuFilter {
 
         if (msg == null) {
             return false;
+        }
+
+        if (isFilteredByMediaType(msg)) {
+            return true;
         }
 
         if (patterns == null) {

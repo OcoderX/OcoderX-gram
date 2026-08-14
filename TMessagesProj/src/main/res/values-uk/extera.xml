@@ -79,6 +79,7 @@ CameraX підтримується тільки на
     <string name="DownloadSpeedBoost">Прискорення швидкості завантаження</string>
     <string name="UploadSpeedBoost">Збільшення швидкості завантаження</string>
     <string name="Ultra">Ультра</string>
+    <string name="SpeedExtreme">Турбо ⚡️</string>
     <string name="SpeedBoostInfo">Ультраприскорювач може викликати проблеми при завантаженні файлів і потокових відео через повільне підключення до Інтернету.</string>
     <string name="Profile">Профіль</string>
     <string name="HidePhoneNumber">Приховати номер телефону</string>

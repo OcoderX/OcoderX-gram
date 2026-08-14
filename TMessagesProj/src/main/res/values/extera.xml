@@ -92,6 +92,7 @@
     <string name="DownloadSpeedBoost">Download Speed Boost</string>
     <string name="UploadSpeedBoost">Upload Speed Boost</string>
     <string name="Ultra">Ultra</string>
+    <string name="SpeedExtreme">Turbo ⚡️</string>
     <string name="SpeedBoostInfo">Ultra Boost can cause problems with downloading files and streaming videos on a slow internet connection.</string>
 
     <string name="Profile">Profile</string>
@@ -234,4 +235,17 @@
     <string name="AppIconOrbit">Orbit</string>
     <string name="AppIconSus">Impostor</string>
     <string name="AppIconWinter">Winter</string>
+    <string name="AppIconOcoderDark">OcoderX Dark</string>
+    <string name="AppIconOcoderCyber">OcoderX Cyber</string>
+    <string name="AppIconOcoderAmoled">OcoderX AMOLED</string>
+    <string name="AppIconOcoderGlass">OcoderX Glass</string>
+
+    <string name="BottomNavigation">Bottom Navigation Bar</string>
+    <string name="BottomNavigationInfo">Place chat folders and tabs at the bottom of the screen.</string>
+    <string name="CompactChatList">Compact Chat List</string>
+    <string name="CompactChatListInfo">Reduce chat row height and spacing to fit more chats on the screen.</string>
+
+    <string name="ThemeAmoledBlack">Pure AMOLED Black</string>
+    <string name="ThemeCyberpunk">Cyberpunk</string>
+    <string name="ThemeGlassmorphism">Glassmorphism</string>
 </resources>

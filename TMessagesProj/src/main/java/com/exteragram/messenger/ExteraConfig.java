@@ -56,6 +56,8 @@ public class ExteraConfig {
     public static boolean newSwitchStyle;
     public static boolean disableDividers;
     public static boolean useLNavigation;
+    public static boolean bottomNavigation;
+    public static boolean compactChatList;
 
     public static int eventType;
     public static boolean alternativeOpenAnimation;
@@ -196,6 +198,8 @@ public class ExteraConfig {
             newSwitchStyle = preferences.getBoolean("newSwitchStyle", true);
             disableDividers = preferences.getBoolean("disableDividers", false);
             useLNavigation = preferences.getBoolean("useLNavigation", false);
+            bottomNavigation = preferences.getBoolean("bottomNavigation", false);
+            compactChatList = preferences.getBoolean("compactChatList", false);
 
             eventType = preferences.getInt("eventType", 0);
             alternativeOpenAnimation = preferences.getBoolean("alternativeOpenAnimation", true);

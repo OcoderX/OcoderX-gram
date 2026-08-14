@@ -233,6 +233,13 @@ public class ApplicationLoader extends Application {
 
         // AyuGram: start sync
         AyuSyncController.create();
+
+        // AyuGram: run retention cleanup for saved deleted/edited messages
+        try {
+            com.radolyn.ayugram.messages.AyuMessagesController.getInstance().runAutoCleanup();
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
     }
 
     public ApplicationLoader() {
@@ -271,6 +278,12 @@ public class ApplicationLoader extends Application {
                 super.onActivityStarted(activity);
                 if (wasInBackground) {
                     ensureCurrentNetworkGet(true);
+                }
+
+                try {
+                    com.radolyn.ayugram.utils.AyuGhostScheduler.checkAndApply();
+                } catch (Exception e) {
+                    FileLog.e(e);
                 }
             }
         };

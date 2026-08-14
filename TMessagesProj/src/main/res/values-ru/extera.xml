@@ -85,6 +85,7 @@
     <string name="DownloadSpeedBoost">Увеличение скорости загрузки</string>
     <string name="UploadSpeedBoost">Увеличение скорости отправки</string>
     <string name="Ultra">Ультра</string>
+    <string name="SpeedExtreme">Турбо ⚡️</string>
     <string name="SpeedBoostInfo">Ультра ускорение может вызывать проблемы с загрузкой файлов и потоковым воспроизведением видеороликов при медленном интернет соединении.</string>
 
     <string name="DisableNumberRounding">Отключить округление чисел</string>
@@ -227,4 +228,17 @@
     <string name="AppIconOrbit">Орбита</string>
     <string name="AppIconSus">Самозванец</string>
     <string name="AppIconWinter">Зима</string>
+    <string name="AppIconOcoderDark">OcoderX Темная</string>
+    <string name="AppIconOcoderCyber">OcoderX Киберпанк</string>
+    <string name="AppIconOcoderAmoled">OcoderX AMOLED</string>
+    <string name="AppIconOcoderGlass">OcoderX Стеклянная</string>
+
+    <string name="BottomNavigation">Нижняя панель навигации</string>
+    <string name="BottomNavigationInfo">Разместить папки и вкладки чатов внизу экрана.</string>
+    <string name="CompactChatList">Компактный список чатов</string>
+    <string name="CompactChatListInfo">Уменьшить высоту строк и отступы, чтобы на экране помещалось больше чатов.</string>
+
+    <string name="ThemeAmoledBlack">Pure AMOLED Black</string>
+    <string name="ThemeCyberpunk">Cyberpunk</string>
+    <string name="ThemeGlassmorphism">Glassmorphism</string>
 </resources>

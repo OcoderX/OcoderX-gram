@@ -233,18 +233,30 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        if (ExteraConfig.downloadSpeedBoost == 2) {
+        if (ExteraConfig.downloadSpeedBoost == 3) {
+            downloadChunkSizeBig = 1024 * 1024;
+            maxDownloadRequests = 24;
+            maxDownloadRequestsBig = 24;
+            downloadChunkSize = 1024 * 128;
+            downloadChunkSizeAnimation = 1024 * 256;
+            maxDownloadRequestsAnimation = 8;
+        } else if (ExteraConfig.downloadSpeedBoost == 2) {
             downloadChunkSizeBig = 1024 * 1024;
             maxDownloadRequests = 16;
             maxDownloadRequestsBig = 16;
+            downloadChunkSize = 1024 * 64;
+            downloadChunkSizeAnimation = 1024 * 128;
+            maxDownloadRequestsAnimation = 4;
         } else if (ExteraConfig.downloadSpeedBoost == 1 || MessagesController.getInstance(currentAccount).getfileExperimentalParams) {
             downloadChunkSizeBig = 1024 * 512;
             maxDownloadRequests = 8;
             maxDownloadRequestsBig = 8;
+            downloadChunkSize = 1024 * 32;
         } else {
             downloadChunkSizeBig = 1024 * 128;
             maxDownloadRequests = 4;
             maxDownloadRequestsBig = 4;
+            downloadChunkSize = 1024 * 32;
         }
         maxCdnParts = (int) (FileLoader.DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
     }
@@ -2090,7 +2102,19 @@ public class FileLoadOperation {
             }
             boolean isLast = totalBytesCount <= 0 || a == count - 1 || totalBytesCount > 0 && downloadOffset + currentDownloadChunkSize >= totalBytesCount;
             final TLObject request;
-            int connectionType = requestsCount % 2 == 0 ? ConnectionsManager.ConnectionTypeDownload : ConnectionsManager.ConnectionTypeDownload2;
+            int connectionType;
+            if (ExteraConfig.downloadSpeedBoost >= 3) {
+                int mod = requestsCount % 3;
+                if (mod == 0) {
+                    connectionType = ConnectionsManager.ConnectionTypeDownload;
+                } else if (mod == 1) {
+                    connectionType = ConnectionsManager.ConnectionTypeDownload2;
+                } else {
+                    connectionType = ConnectionsManager.ConnectionTypeGeneric;
+                }
+            } else {
+                connectionType = requestsCount % 2 == 0 ? ConnectionsManager.ConnectionTypeDownload : ConnectionsManager.ConnectionTypeDownload2;
+            }
             int flags = (isForceRequest ? ConnectionsManager.RequestFlagForceDownload : 0);
             if (isCdn) {
                 TLRPC.TL_upload_getCdnFile req = new TLRPC.TL_upload_getCdnFile();

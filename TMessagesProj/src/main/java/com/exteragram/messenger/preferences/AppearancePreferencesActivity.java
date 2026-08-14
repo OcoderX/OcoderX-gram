@@ -87,6 +87,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
     private int tabCounterRow;
     private int tabTitleRow;
     private int tabStyleRow;
+    private int bottomNavigationRow;
     private int foldersDividerRow;
 
     private int chatListHeaderRow;
@@ -94,6 +95,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
     private int hideActionBarStatusRow;
     private int centerTitleRow;
     private int actionBarTitleRow;
+    private int compactChatListRow;
     private int chatListDividerRow;
 
     private int solarIconsHeaderRow;
@@ -142,6 +144,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
         actionBarTitleRow = newRow();
         hideActionBarStatusRow = getUserConfig().isPremium() ? newRow() : -1;
         centerTitleRow = newRow();
+        compactChatListRow = newRow();
         chatListDividerRow = newRow();
 
         foldersHeaderRow = newRow();
@@ -149,6 +152,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
         tabTitleRow = newRow();
         tabStyleRow = newRow();
         tabCounterRow = newRow();
+        bottomNavigationRow = newRow();
         hideAllChatsRow = newRow();
         foldersDividerRow = newRow();
 
@@ -223,6 +227,21 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
             ExteraConfig.editor.putBoolean("centerTitle", ExteraConfig.centerTitle ^= true).apply();
             chatListPreviewCell.updateCenteredTitle(true);
             ((TextCheckCell) view).setChecked(ExteraConfig.centerTitle);
+            showBulletin();
+        } else if (position == compactChatListRow) {
+            ExteraConfig.editor.putBoolean("compactChatList", ExteraConfig.compactChatList ^= true).apply();
+            ((TextCheckCell) view).setChecked(ExteraConfig.compactChatList);
+            if (getListView().getLayoutManager() != null)
+                recyclerViewState = getListView().getLayoutManager().onSaveInstanceState();
+            parentLayout.rebuildAllFragmentViews(true, true);
+            getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
+        } else if (position == bottomNavigationRow) {
+            ExteraConfig.editor.putBoolean("bottomNavigation", ExteraConfig.bottomNavigation ^= true).apply();
+            ((TextCheckCell) view).setChecked(ExteraConfig.bottomNavigation);
+            if (getListView().getLayoutManager() != null)
+                recyclerViewState = getListView().getLayoutManager().onSaveInstanceState();
+            parentLayout.rebuildAllFragmentViews(true, true);
+            getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
             showBulletin();
         } else if (position == hideAllChatsRow) {
             ExteraConfig.editor.putBoolean("hideAllChats", ExteraConfig.hideAllChats ^= true).apply();
@@ -437,6 +456,10 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                         textCheckCell.setTextAndCheck(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation), ExteraConfig.useLNavigation, false);
                     } else if (position == centerTitleRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("CenterTitle", R.string.CenterTitle), ExteraConfig.centerTitle, false);
+                    } else if (position == compactChatListRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("CompactChatList", R.string.CompactChatList), LocaleController.getString("CompactChatListInfo", R.string.CompactChatListInfo), ExteraConfig.compactChatList, true, true);
+                    } else if (position == bottomNavigationRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("BottomNavigation", R.string.BottomNavigation), LocaleController.getString("BottomNavigationInfo", R.string.BottomNavigationInfo), ExteraConfig.bottomNavigation, true, true);
                     } else if (position == hideAllChatsRow) {
                         textCheckCell.setTextAndCheck(LocaleController.formatString("HideAllChats", R.string.HideAllChats, LocaleController.getString("AllChats", R.string.FilterAllChats)), ExteraConfig.hideAllChats, false);
                     } else if (position == tabCounterRow) {

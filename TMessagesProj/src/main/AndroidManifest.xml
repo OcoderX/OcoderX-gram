@@ -351,6 +351,82 @@
                 android:resource="@xml/shortcuts" />
         </activity-alias>
 
+        <activity-alias
+            android:name="com.exteragram.messenger.OcoderDarkIcon"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ocoder_dark"
+            android:roundIcon="@mipmap/ic_launcher_ocoder_dark"
+            android:targetActivity="org.telegram.ui.LaunchActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+
+        <activity-alias
+            android:name="com.exteragram.messenger.OcoderCyberIcon"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ocoder_cyber"
+            android:roundIcon="@mipmap/ic_launcher_ocoder_cyber"
+            android:targetActivity="org.telegram.ui.LaunchActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+
+        <activity-alias
+            android:name="com.exteragram.messenger.OcoderAmoledIcon"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ocoder_amoled"
+            android:roundIcon="@mipmap/ic_launcher_ocoder_amoled"
+            android:targetActivity="org.telegram.ui.LaunchActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+
+        <activity-alias
+            android:name="com.exteragram.messenger.OcoderGlassIcon"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ocoder_glass"
+            android:roundIcon="@mipmap/ic_launcher_ocoder_glass"
+            android:targetActivity="org.telegram.ui.LaunchActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+
         <activity
             android:name="org.telegram.ui.LaunchActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"

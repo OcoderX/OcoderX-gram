@@ -307,7 +307,7 @@ public class ConnectionsManager extends BaseController {
         // --- AyuGram request hook
         {
             // don't send upload & typing status
-            if (!AyuConfig.sendUploadProgress &&
+            if ((!AyuConfig.sendUploadProgress || AyuConfig.hideTypingStatus) &&
                     (
                             object instanceof TLRPC.TL_messages_setTyping ||
                             object instanceof TLRPC.TL_messages_setEncryptedTyping
@@ -317,10 +317,18 @@ public class ConnectionsManager extends BaseController {
                 return;
             }
 
-            // don't send online status
-            if (!AyuConfig.sendOnlinePackets && object instanceof TLRPC.TL_account_updateStatus) {
+            // don't send online status / frozen last seen
+            if ((!AyuConfig.sendOnlinePackets || AyuConfig.frozenLastSeen) && object instanceof TLRPC.TL_account_updateStatus) {
                 var obj = ((TLRPC.TL_account_updateStatus) object);
                 obj.offline = true;
+            }
+
+            // incognito stories
+            if (AyuConfig.incognitoStories && object != null) {
+                String reqName = object.getClass().getSimpleName();
+                if (reqName.contains("readStories") || reqName.contains("ReadStories")) {
+                    return;
+                }
             }
 
             // don't send read status

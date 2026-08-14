@@ -322,7 +322,7 @@ public class GeneralPreferencesActivity extends BasePreferencesActivity {
                     if (position == downloadSpeedChooserRow) {
                         slide.setNeedDivider(true);
                         slide.setCallback(index -> ExteraConfig.editor.putInt("downloadSpeedBoost", ExteraConfig.downloadSpeedBoost = index).apply());
-                        slide.setOptions(ExteraConfig.downloadSpeedBoost, LocaleController.getString("BlurOff", R.string.BlurOff), LocaleController.getString("SpeedFast", R.string.SpeedFast), LocaleController.getString("Ultra", R.string.Ultra));
+                        slide.setOptions(ExteraConfig.downloadSpeedBoost, LocaleController.getString("BlurOff", R.string.BlurOff), LocaleController.getString("SpeedFast", R.string.SpeedFast), LocaleController.getString("Ultra", R.string.Ultra), LocaleController.getString("SpeedExtreme", R.string.SpeedExtreme));
                     }
                     break;
             }

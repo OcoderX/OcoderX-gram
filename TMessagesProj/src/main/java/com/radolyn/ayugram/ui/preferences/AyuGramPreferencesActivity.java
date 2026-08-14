@@ -12,23 +12,28 @@ package com.radolyn.ayugram.ui.preferences;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.exteragram.messenger.preferences.BasePreferencesActivity;
 import com.radolyn.ayugram.AyuConfig;
 import com.radolyn.ayugram.AyuConstants;
+import com.radolyn.ayugram.messages.AyuExporter;
 import com.radolyn.ayugram.messages.AyuMessagesController;
 import com.radolyn.ayugram.sync.AyuSyncState;
 import com.radolyn.ayugram.ui.preferences.utils.AyuUi;
+import com.radolyn.ayugram.utils.AyuGhostScheduler;
 import com.radolyn.ayugram.utils.AyuState;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.*;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.*;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.RecyclerListView;
 
 import java.util.Locale;
+import java.util.function.IntConsumer;
 
 public class AyuGramPreferencesActivity extends BasePreferencesActivity implements NotificationCenter.NotificationCenterDelegate {
 
@@ -42,6 +47,13 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
     private int sendOfflinePacketAfterOnlineRow;
     private int markReadAfterSendRow;
     private int useScheduledMessagesRow;
+    private int ghostScheduleToggleRow;
+    private int ghostScheduleStartRow;
+    private int ghostScheduleEndRow;
+    private int hideTypingStatusRow;
+    private int frozenLastSeenRow;
+    private int ghostVoiceChatRow;
+    private int incognitoStoriesRow;
     private int ghostDividerRow;
 
     private int spyHeaderRow;
@@ -49,13 +61,21 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
     private int saveMessagesHistoryRow;
     private int spyDivider1Row;
     private int messageSavingBtnRow;
+    private int statsBtnRow;
     private int spyDivider2Row;
+
+    private int storageHeaderRow;
+    private int autoCleanupEnabledRow;
+    private int autoCleanupDaysRow;
+    private int exportHistoryBtnRow;
+    private int storageDividerRow;
 
     private int qolHeaderRow;
     private int keepAliveServiceRow;
     private int disableAdsRow;
     private int localPremiumRow;
     private int filtersRow;
+    private int showUserHistoryRow;
     private int qolDividerRow;
 
     private int customizationHeaderRow;
@@ -64,6 +84,12 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
     private int showGhostToggleInDrawerRow;
     private int showKillButtonInDrawerRow;
     private int customizationDividerRow;
+
+    private int powerToolsHeaderRow;
+    private int codeSyntaxHighlightingRow;
+    private int showRawViewerInMenuRow;
+    private int showCopyIdInMenuRow;
+    private int powerToolsDividerRow;
 
     private int ayuSyncHeaderRow;
     private int ayuSyncStatusBtnRow;
@@ -96,6 +122,13 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
         }
         markReadAfterSendRow = newRow();
         useScheduledMessagesRow = newRow();
+        hideTypingStatusRow = newRow();
+        frozenLastSeenRow = newRow();
+        ghostVoiceChatRow = newRow();
+        incognitoStoriesRow = newRow();
+        ghostScheduleToggleRow = newRow();
+        ghostScheduleStartRow = newRow();
+        ghostScheduleEndRow = newRow();
         ghostDividerRow = newRow();
 
         spyHeaderRow = newRow();
@@ -103,13 +136,21 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
         saveMessagesHistoryRow = newRow();
         spyDivider1Row = newRow();
         messageSavingBtnRow = newRow();
+        statsBtnRow = newRow();
         spyDivider2Row = newRow();
+
+        storageHeaderRow = newRow();
+        autoCleanupEnabledRow = newRow();
+        autoCleanupDaysRow = newRow();
+        exportHistoryBtnRow = newRow();
+        storageDividerRow = newRow();
 
         qolHeaderRow = newRow();
         keepAliveServiceRow = newRow();
         disableAdsRow = newRow();
         localPremiumRow = newRow();
         filtersRow = newRow();
+        showUserHistoryRow = newRow();
         qolDividerRow = newRow();
 
         customizationHeaderRow = newRow();
@@ -118,6 +159,12 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
         showGhostToggleInDrawerRow = newRow();
         showKillButtonInDrawerRow = newRow();
         customizationDividerRow = newRow();
+
+        powerToolsHeaderRow = newRow();
+        codeSyntaxHighlightingRow = newRow();
+        showRawViewerInMenuRow = newRow();
+        showCopyIdInMenuRow = newRow();
+        powerToolsDividerRow = newRow();
 
         ayuSyncHeaderRow = newRow();
         ayuSyncStatusBtnRow = newRow();
@@ -189,6 +236,45 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
         getMediaDataController().loadReactions(false, true);
     }
 
+    private void spawnHourEditBox(TextCell view, String title, int currentValue, IntConsumer setter) {
+        spawnNumberEditBox(view, title, currentValue, 0, 23, setter);
+    }
+
+    private void spawnDaysEditBox(TextCell view, String title, int currentValue) {
+        spawnNumberEditBox(view, title, currentValue, 1, 3650, AyuConfig::setAutoCleanupDays);
+    }
+
+    private void spawnNumberEditBox(TextCell view, String title, int currentValue, int min, int max, IntConsumer setter) {
+        if (getParentActivity() == null) {
+            return;
+        }
+
+        var builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(title);
+        var layout = new LinearLayout(getParentActivity());
+        var input = new EditTextSettingsCell(getParentActivity());
+        input.setText(String.valueOf(currentValue), true);
+
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(input);
+        builder.setView(layout);
+        builder.setPositiveButton(LocaleController.getString("Save", R.string.Save), (dialog, which) -> {
+            int val;
+            try {
+                val = Integer.parseInt(input.getText().trim());
+            } catch (Exception e) {
+                val = currentValue;
+            }
+            val = Math.max(min, Math.min(max, val));
+
+            setter.accept(val);
+            view.setTextAndValue(title, String.valueOf(val), true);
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
         if (position == ghostModeToggleRow) {
@@ -243,6 +329,41 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
 
                 listAdapter.notifyItemChanged(markReadAfterSendRow, false);
             }
+        } else if (position == hideTypingStatusRow) {
+            AyuConfig.editor.putBoolean("hideTypingStatus", AyuConfig.hideTypingStatus ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.hideTypingStatus);
+        } else if (position == frozenLastSeenRow) {
+            AyuConfig.editor.putBoolean("frozenLastSeen", AyuConfig.frozenLastSeen ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.frozenLastSeen);
+        } else if (position == ghostVoiceChatRow) {
+            AyuConfig.editor.putBoolean("ghostVoiceChat", AyuConfig.ghostVoiceChat ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.ghostVoiceChat);
+        } else if (position == incognitoStoriesRow) {
+            AyuConfig.editor.putBoolean("incognitoStories", AyuConfig.incognitoStories ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.incognitoStories);
+        } else if (position == ghostScheduleToggleRow) {
+            AyuConfig.editor.putBoolean("ghostModeScheduleEnabled", AyuConfig.ghostModeScheduleEnabled ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.ghostModeScheduleEnabled);
+
+            AyuGhostScheduler.checkAndApply();
+        } else if (position == ghostScheduleStartRow) {
+            spawnHourEditBox((TextCell) view, LocaleController.getString(R.string.GhostScheduleStart), AyuConfig.ghostModeScheduleStartHour, AyuConfig::setGhostModeScheduleStartHour);
+        } else if (position == ghostScheduleEndRow) {
+            spawnHourEditBox((TextCell) view, LocaleController.getString(R.string.GhostScheduleEnd), AyuConfig.ghostModeScheduleEndHour, AyuConfig::setGhostModeScheduleEndHour);
+        } else if (position == statsBtnRow) {
+            presentFragment(new AyuStatsActivity());
+        } else if (position == autoCleanupEnabledRow) {
+            AyuConfig.editor.putBoolean("autoCleanupEnabled", AyuConfig.autoCleanupEnabled ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.autoCleanupEnabled);
+        } else if (position == autoCleanupDaysRow) {
+            spawnDaysEditBox((TextCell) view, LocaleController.getString(R.string.AutoCleanupDays), AyuConfig.autoCleanupDays);
+        } else if (position == exportHistoryBtnRow) {
+            var file = AyuExporter.exportToJson();
+            if (file != null) {
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.info, LocaleController.formatString("ExportHistoryDone", R.string.ExportHistoryDone, file.getAbsolutePath())).show();
+            } else {
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.error, LocaleController.getString(R.string.ErrorOccurred)).show();
+            }
         } else if (position == saveDeletedMessagesRow) {
             AyuConfig.editor.putBoolean("saveDeletedMessages", AyuConfig.saveDeletedMessages ^= true).apply();
             ((TextCheckCell) view).setChecked(AyuConfig.saveDeletedMessages);
@@ -267,6 +388,9 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
             } else {
                 presentFragment(new RegexFiltersPreferencesActivity());
             }
+        } else if (position == showUserHistoryRow) {
+            AyuConfig.editor.putBoolean("showUserHistoryButton", AyuConfig.showUserHistoryButton ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.showUserHistoryButton);
         } else if (position == showGhostToggleInDrawerRow) {
             AyuConfig.editor.putBoolean("showGhostToggleInDrawer", AyuConfig.showGhostToggleInDrawer ^= true).apply();
             ((TextCheckCell) view).setChecked(AyuConfig.showGhostToggleInDrawer);
@@ -277,6 +401,15 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
             ((TextCheckCell) view).setChecked(AyuConfig.showKillButtonInDrawer);
 
             NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.mainUserInfoChanged);
+        } else if (position == codeSyntaxHighlightingRow) {
+            AyuConfig.editor.putBoolean("codeSyntaxHighlighting", AyuConfig.codeSyntaxHighlighting ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.codeSyntaxHighlighting);
+        } else if (position == showRawViewerInMenuRow) {
+            AyuConfig.editor.putBoolean("showRawViewerInMenu", AyuConfig.showRawViewerInMenu ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.showRawViewerInMenu);
+        } else if (position == showCopyIdInMenuRow) {
+            AyuConfig.editor.putBoolean("showCopyIdInMenu", AyuConfig.showCopyIdInMenu ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.showCopyIdInMenu);
         } else if (position == deletedMarkTextRow) {
             AyuUi.spawnEditBox(
                     getParentActivity(),
@@ -364,7 +497,17 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
                     TextCell textCell = (TextCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == messageSavingBtnRow) {
-                        textCell.setText(LocaleController.getString(R.string.MessageSavingBtn), false);
+                        textCell.setText(LocaleController.getString(R.string.MessageSavingBtn), true);
+                    } else if (position == statsBtnRow) {
+                        textCell.setText(LocaleController.getString(R.string.AyuStatsTitle), false);
+                    } else if (position == ghostScheduleStartRow) {
+                        textCell.setTextAndValue(LocaleController.getString(R.string.GhostScheduleStart), String.valueOf(AyuConfig.ghostModeScheduleStartHour), true);
+                    } else if (position == ghostScheduleEndRow) {
+                        textCell.setTextAndValue(LocaleController.getString(R.string.GhostScheduleEnd), String.valueOf(AyuConfig.ghostModeScheduleEndHour), false);
+                    } else if (position == autoCleanupDaysRow) {
+                        textCell.setTextAndValue(LocaleController.getString(R.string.AutoCleanupDays), String.valueOf(AyuConfig.autoCleanupDays), true);
+                    } else if (position == exportHistoryBtnRow) {
+                        textCell.setText(LocaleController.getString(R.string.ExportHistoryBtn), false);
                     } else if (position == deletedMarkTextRow) {
                         textCell.setTextAndValue(LocaleController.getString(R.string.DeletedMarkText), AyuConfig.getDeletedMark(), true);
                     } else if (position == editedMarkTextRow) {
@@ -390,10 +533,14 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
                         headerCell.setText(LocaleController.getString(R.string.GhostEssentialsHeader));
                     } else if (position == spyHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.SpyEssentialsHeader));
+                    } else if (position == storageHeaderRow) {
+                        headerCell.setText(LocaleController.getString(R.string.StorageHeader));
                     } else if (position == qolHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.QoLTogglesHeader));
                     } else if (position == customizationHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.CustomizationHeader));
+                    } else if (position == powerToolsHeaderRow) {
+                        headerCell.setText(LocaleController.getString("PowerToolsHeader", R.string.PowerToolsHeader));
                     } else if (position == ayuSyncHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.AyuSyncHeader));
                     } else if (position == debugHeaderRow) {
@@ -406,7 +553,19 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
                     if (position == markReadAfterSendRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.MarkReadAfterSend), AyuConfig.markReadAfterSend, true);
                     } else if (position == useScheduledMessagesRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.UseScheduledMessages), AyuConfig.useScheduledMessages, false);
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.UseScheduledMessages), AyuConfig.useScheduledMessages, true);
+                    } else if (position == hideTypingStatusRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HideTypingStatus", R.string.HideTypingStatus), LocaleController.getString("HideTypingStatusDescription", R.string.HideTypingStatusDescription), AyuConfig.hideTypingStatus, true, true);
+                    } else if (position == frozenLastSeenRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("FrozenLastSeen", R.string.FrozenLastSeen), LocaleController.getString("FrozenLastSeenDescription", R.string.FrozenLastSeenDescription), AyuConfig.frozenLastSeen, true, true);
+                    } else if (position == ghostVoiceChatRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("GhostVoiceChat", R.string.GhostVoiceChat), LocaleController.getString("GhostVoiceChatDescription", R.string.GhostVoiceChatDescription), AyuConfig.ghostVoiceChat, true, true);
+                    } else if (position == incognitoStoriesRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("IncognitoStories", R.string.IncognitoStories), LocaleController.getString("IncognitoStoriesDescription", R.string.IncognitoStoriesDescription), AyuConfig.incognitoStories, true, true);
+                    } else if (position == ghostScheduleToggleRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.GhostScheduleToggle), AyuConfig.ghostModeScheduleEnabled, true);
+                    } else if (position == autoCleanupEnabledRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.AutoCleanupEnabled), AyuConfig.autoCleanupEnabled, true);
                     } else if (position == saveDeletedMessagesRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.SaveDeletedMessages), AyuConfig.saveDeletedMessages, true);
                     } else if (position == saveMessagesHistoryRow) {
@@ -421,8 +580,16 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.ShowGhostToggleInDrawer), AyuConfig.showGhostToggleInDrawer, true);
                     } else if (position == showKillButtonInDrawerRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.ShowKllButtonInDrawer), AyuConfig.showKillButtonInDrawer, false);
+                    } else if (position == codeSyntaxHighlightingRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("CodeSyntaxHighlighting", R.string.CodeSyntaxHighlighting), LocaleController.getString("CodeSyntaxHighlightingDescription", R.string.CodeSyntaxHighlightingDescription), AyuConfig.codeSyntaxHighlighting, true, true);
+                    } else if (position == showRawViewerInMenuRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("RawMessageViewer", R.string.RawMessageViewer), LocaleController.getString("RawMessageViewerDescription", R.string.RawMessageViewerDescription), AyuConfig.showRawViewerInMenu, true, true);
+                    } else if (position == showCopyIdInMenuRow) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("ContextCopyID", R.string.ContextCopyID), LocaleController.getString("ContextCopyIDDescription", R.string.ContextCopyIDDescription), AyuConfig.showCopyIdInMenu, true, false);
                     } else if (position == WALModeRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.WALMode), AyuConfig.WALMode, false);
+                    } else if (position == showUserHistoryRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.MessageHistory), AyuConfig.showUserHistoryButton, false);
                     }
                     break;
                 case 18:
@@ -479,14 +646,21 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
                     position == ghostDividerRow ||
                             position == spyDivider1Row ||
                             position == spyDivider2Row ||
+                            position == storageDividerRow ||
                             position == qolDividerRow ||
                             position == customizationDividerRow ||
+                            position == powerToolsDividerRow ||
                             position == ayuSyncDividerRow ||
                             position == buttonsDividerRow
             ) {
                 return 1;
             } else if (
                     position == messageSavingBtnRow ||
+                            position == statsBtnRow ||
+                            position == ghostScheduleStartRow ||
+                            position == ghostScheduleEndRow ||
+                            position == autoCleanupDaysRow ||
+                            position == exportHistoryBtnRow ||
                             position == deletedMarkTextRow ||
                             position == editedMarkTextRow ||
                             position == ayuSyncStatusBtnRow ||
@@ -497,8 +671,10 @@ public class AyuGramPreferencesActivity extends BasePreferencesActivity implemen
             } else if (
                     position == ghostEssentialsHeaderRow ||
                             position == spyHeaderRow ||
+                            position == storageHeaderRow ||
                             position == qolHeaderRow ||
                             position == customizationHeaderRow ||
+                            position == powerToolsHeaderRow ||
                             position == ayuSyncHeaderRow ||
                             position == debugHeaderRow
             ) {

@@ -33,6 +33,12 @@ public class AyuConstants {
     public static final int OPTION_HISTORY = 1338_01;
     public static final int OPTION_TTL = 1338_02;
     public static final int OPTION_READ_UNTIL = 1338_03;
+    public static final int OPTION_RAW_VIEWER = 1338_04;
+    public static final int OPTION_COPY_ID = 1338_05;
+    public static final int OPTION_USER_HISTORY = 1338_06;
+    public static final int OPTION_CONVERT_ROUND_VIDEO = 1338_07;
+    public static final int OPTION_DELETE_ALL_FROM_USER = 1338_08;
+    public static final int OPTION_EXPORT_CHAT = 1338_09;
 
     public static final int DRAWER_TOGGLE_GHOST = 1000;
     public static final int DRAWER_KILL_APP = 1001;

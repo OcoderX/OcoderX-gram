@@ -62,6 +62,7 @@ public class MessageDetailsPopupWrapper {
 
     private final int SET_OWNER = 0;
     private final int FILE_PATH = 1;
+    private final int RAW_JSON = 2;
 
     public MessageDetailsPopupWrapper(BaseFragment fragment, PopupSwipeBackLayout swipeBackLayout, MessageObject messageObject, Theme.ResourcesProvider resourcesProvider) {
         this.fragment = fragment;
@@ -87,6 +88,16 @@ public class MessageDetailsPopupWrapper {
             items.add(null);
         }
         items.add(new Item(R.drawable.msg_info, "ID", messageObject.messageOwner.id));
+        long peerId = messageObject.messageOwner.peer_id != null ? MessageObject.getPeerId(messageObject.messageOwner.peer_id) : messageObject.getDialogId();
+        if (peerId != 0) {
+            items.add(new Item(R.drawable.msg_channel, "Peer ID", String.valueOf(peerId)));
+        }
+        if (messageObject.messageOwner.from_id != null) {
+            long fromId = MessageObject.getPeerId(messageObject.messageOwner.from_id);
+            if (fromId != 0 && fromId != peerId) {
+                items.add(new Item(R.drawable.msg_openprofile, "From ID", String.valueOf(fromId)));
+            }
+        }
         if (messageObject.messageOwner.date > 0) {
             items.add(new Item(R.drawable.msg_calendar2, LocaleController.getString(R.string.Date), formatTime(messageObject.messageOwner.date, true)));
         }
@@ -183,6 +194,8 @@ public class MessageDetailsPopupWrapper {
         if (dc != 0) {
             items.add(new Item(R.drawable.msg_satellite, LocaleController.getString(R.string.Datacenter), String.format(Locale.ROOT, "DC%d, %s", dc, ChatUtils.getDCName(dc))));
         }
+        items.add(null);
+        items.add(new Item(RAW_JSON, R.drawable.msg_log, LocaleController.getString("RawMessageDetails", R.string.RawMessageDetails), LocaleController.getString("Open", R.string.Open)));
 
         if (items.get(items.size() - 1) == null) {
             items.remove(items.size() - 1);
@@ -231,6 +244,8 @@ public class MessageDetailsPopupWrapper {
                     } else {
                         copy(ChatUtils.getOwnerIds(stickerSetId));
                     }
+                } else if (i.id == RAW_JSON) {
+                    new com.radolyn.ayugram.ui.RawMessageViewerBottomSheet(context, fragment, messageObject).show();
                 } else {
                     copy(i.subtitle != null ? i.subtitle : i.title);
                 }

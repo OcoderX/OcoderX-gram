@@ -618,7 +618,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         public int getActionBarFullHeight() {
             float h = actionBar.getHeight();
             float filtersTabsHeight = 0;
-            if (filterTabsView != null && filterTabsView.getVisibility() != GONE) {
+            if (filterTabsView != null && filterTabsView.getVisibility() != GONE && !ExteraConfig.bottomNavigation) {
                 filtersTabsHeight = filterTabsView.getMeasuredHeight() - (1f - filterTabsProgress) * filterTabsView.getMeasuredHeight();
             }
             float searchTabsHeight = 0;
@@ -694,7 +694,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     }
                 } else if (searchAnimationProgress == 0) {
                     if (filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE) {
-                        filterTabsView.setTranslationY(actionBar.getTranslationY());
+                        filterTabsView.setTranslationY(ExteraConfig.bottomNavigation ? 0 : actionBar.getTranslationY());
                     }
                 }
                 AndroidUtilities.rectTmp2.set(0, top, getMeasuredWidth(), top + actionBarHeight);
@@ -714,7 +714,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         drawBlurRect(canvas, 0, AndroidUtilities.rectTmp2, actionBarSearchPaint, true);
                     }
                     if (filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE) {
-                        filterTabsView.setTranslationY(actionBarHeight - (actionBar.getHeight() + filterTabsView.getMeasuredHeight()));
+                        filterTabsView.setTranslationY(ExteraConfig.bottomNavigation ? 0 : actionBarHeight - (actionBar.getHeight() + filterTabsView.getMeasuredHeight()));
                     }
                     if (searchTabsView != null) {
                         float y = actionBarHeight - (actionBar.getHeight() + searchTabsView.getMeasuredHeight());
@@ -746,11 +746,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             tabsYOffset = 0;
             if ((filtersTabAnimator != null || rightSlidingDialogContainer.hasFragment()) && filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE) {
                 tabsYOffset = -(1f - filterTabsProgress) * filterTabsView.getMeasuredHeight();
-                filterTabsView.setTranslationY(actionBar.getTranslationY() + tabsYOffset);
+                filterTabsView.setTranslationY(ExteraConfig.bottomNavigation ? 0 : (actionBar.getTranslationY() + tabsYOffset));
                 filterTabsView.setAlpha(filterTabsProgress);
                 viewPages[0].setTranslationY(-(1f - filterTabsProgress) * filterTabsMoveFrom);
             } else if (filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE) {
-                filterTabsView.setTranslationY(actionBar.getTranslationY());
+                filterTabsView.setTranslationY(ExteraConfig.bottomNavigation ? 0 : actionBar.getTranslationY());
                 filterTabsView.setAlpha(1f);
             }
             updateContextViewPosition();
@@ -1004,14 +1004,22 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     } else {
                         childTop = commentView.getBottom();
                     }
-                } else if (child == filterTabsView || child == searchTabsView || child == filtersView) {
+                } else if (child == filterTabsView) {
+                    if (ExteraConfig.bottomNavigation) {
+                        childTop = ((b - paddingBottom) - t) - height - lp.bottomMargin;
+                    } else {
+                        childTop = actionBar.getMeasuredHeight();
+                    }
+                } else if (child == searchTabsView || child == filtersView) {
                     childTop = actionBar.getMeasuredHeight();
                 } else if (child == searchViewPager) {
                     childTop = (onlySelect && initialDialogsType != DIALOGS_TYPE_FORWARD ? 0 : actionBar.getMeasuredHeight()) + topPadding + (searchTabsView == null ? 0 : AndroidUtilities.dp(48));
                 } else if (child instanceof DatabaseMigrationHint) {
                     childTop = actionBar.getMeasuredHeight();
                 } else if (child instanceof ViewPage) {
-                    if (!onlySelect || initialDialogsType == DIALOGS_TYPE_FORWARD) {
+                    if (ExteraConfig.bottomNavigation) {
+                        childTop = actionBar.getMeasuredHeight();
+                    } else if (!onlySelect || initialDialogsType == DIALOGS_TYPE_FORWARD) {
                         if (filterTabsView != null && filterTabsView.getVisibility() == VISIBLE) {
                             childTop = AndroidUtilities.dp(48);
                         } else {
@@ -1023,11 +1031,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         childTop += dialogsHintCell.height();
                     }
                 } else if (child instanceof DialogsHintCell) {
-                    childTop += actionBar.getMeasuredHeight() + (filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE ? filterTabsView.getMeasuredHeight() : 0);
+                    childTop += actionBar.getMeasuredHeight() + (filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE && !ExteraConfig.bottomNavigation ? filterTabsView.getMeasuredHeight() : 0);
                 } else if (child instanceof FragmentContextView) {
                     childTop += actionBar.getMeasuredHeight();
-                } else if (child == floatingButtonContainer && selectAnimatedEmojiDialog != null) {
-                    childTop += keyboardSize;
+                } else if (child == floatingButtonContainer) {
+                    if (selectAnimatedEmojiDialog != null) {
+                        childTop += keyboardSize;
+                    }
+                    if (ExteraConfig.bottomNavigation && filterTabsView != null && filterTabsView.getVisibility() == VISIBLE) {
+                        childTop -= AndroidUtilities.dp(48);
+                    }
                 }
                 child.layout(childLeft, childTop, childLeft + width, childTop + height);
             }

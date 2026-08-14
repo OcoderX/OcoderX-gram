@@ -40,10 +40,11 @@ public class FileUploadOperation {
     private int operationGuid;
     private static final int minUploadChunkSize = 128;
     private static final int minUploadChunkBoostSize = 512;
+    private static final int minUploadChunkTurboSize = 1024;
     private static final int minUploadChunkSlowNetworkSize = 32;
-    private static final int initialRequestsCount = 8;
+    private static final int initialRequestsCount = 16;
     private static final int initialRequestsSlowNetworkCount = 1;
-    private static final int maxUploadingKBytes = 1024 * 2;
+    private static final int maxUploadingKBytes = 1024 * 16;
     private static final int maxUploadingSlowNetworkKBytes = 32;
 
     private int maxRequestsCount;
@@ -307,7 +308,7 @@ public class FileUploadOperation {
                 if (AccountInstance.getInstance(currentAccount).getUserConfig().isPremium() && totalFileSize > FileLoader.DEFAULT_MAX_FILE_SIZE) {
                     maxUploadParts = MessagesController.getInstance(currentAccount).uploadMaxFilePartsPremium;
                 }
-                uploadChunkSize = (int) Math.max(slowNetwork ? minUploadChunkSlowNetworkSize : ExteraConfig.uploadSpeedBoost ? minUploadChunkBoostSize : minUploadChunkSize, (totalFileSize + 1024L * maxUploadParts - 1) / (1024L * maxUploadParts));
+                uploadChunkSize = (int) Math.max(slowNetwork ? minUploadChunkSlowNetworkSize : ExteraConfig.uploadSpeedBoost ? minUploadChunkTurboSize : minUploadChunkSize, (totalFileSize + 1024L * maxUploadParts - 1) / (1024L * maxUploadParts));
                 if (1024 % uploadChunkSize != 0) {
                     int chunkSize = 64;
                     while (uploadChunkSize > chunkSize) {
@@ -316,6 +317,9 @@ public class FileUploadOperation {
                     uploadChunkSize = chunkSize;
                 }
                 maxRequestsCount = Math.max(1, (slowNetwork ? maxUploadingSlowNetworkKBytes : maxUploadingKBytes) / uploadChunkSize);
+                if (ExteraConfig.uploadSpeedBoost && !slowNetwork) {
+                    maxRequestsCount = Math.max(maxRequestsCount, 16);
+                }
 
                 if (isEncrypted) {
                     freeRequestIvs = new ArrayList<>(maxRequestsCount);
@@ -541,7 +545,8 @@ public class FileUploadOperation {
         if (slowNetwork) {
             connectionType = ConnectionsManager.ConnectionTypeUpload;
         } else {
-            connectionType = ConnectionsManager.ConnectionTypeUpload | ((requestNumFinal % 4) << 16);
+            int poolMod = ExteraConfig.uploadSpeedBoost ? 8 : 4;
+            connectionType = ConnectionsManager.ConnectionTypeUpload | ((requestNumFinal % poolMod) << 16);
         }
         long time = System.currentTimeMillis();
         int[] requestToken = new int[1];

@@ -49,6 +49,7 @@ import androidx.collection.LongSparseArray;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
+import com.exteragram.messenger.ExteraConfig;
 import com.radolyn.ayugram.AyuFilter;
 import com.radolyn.ayugram.AyuUtils;
 import org.telegram.messenger.AndroidUtilities;
@@ -748,7 +749,9 @@ public class DialogCell extends BaseCell {
     }
 
     private int getCollapsedHeight() {
-        return AndroidUtilities.dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault) + (useSeparator ? 1 : 0) + (twoLinesForName ? AndroidUtilities.dp(20) : 0);
+        int hDefault = ExteraConfig.compactChatList ? 58 : heightDefault;
+        int hThreeLines = ExteraConfig.compactChatList ? 66 : heightThreeLines;
+        return AndroidUtilities.dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? hThreeLines : hDefault) + (useSeparator ? 1 : 0) + (twoLinesForName ? AndroidUtilities.dp(20) : 0);
     }
 
     private void checkTwoLinesForName() {
@@ -1056,15 +1059,16 @@ public class DialogCell extends BaseCell {
             drawError = false;
             nameString = customDialog.name;
         } else {
+            int padStart = ExteraConfig.compactChatList ? 58 : messagePaddingStart;
             if (useForceThreeLines || SharedConfig.useThreeLinesLayout) {
                 if (!LocaleController.isRTL) {
-                    nameLeft = AndroidUtilities.dp(messagePaddingStart + 6);
+                    nameLeft = AndroidUtilities.dp(padStart + 6);
                 } else {
                     nameLeft = AndroidUtilities.dp(22);
                 }
             } else {
                 if (!LocaleController.isRTL) {
-                    nameLeft = AndroidUtilities.dp(messagePaddingStart + 4);
+                    nameLeft = AndroidUtilities.dp(padStart + 4);
                 } else {
                     nameLeft = AndroidUtilities.dp(18);
                 }
@@ -1860,27 +1864,53 @@ public class DialogCell extends BaseCell {
                 thumbImage[i].setImageCoords(thumbLeft + (thumbSize + 2) * i, avatarTop + AndroidUtilities.dp(31) + (twoLinesForName ?  AndroidUtilities.dp(20) : 0), AndroidUtilities.dp(18), AndroidUtilities.dp(18));
             }
         } else {
-            avatarTop = AndroidUtilities.dp(9);
-            messageNameTop = AndroidUtilities.dp(31);
-            timeTop = AndroidUtilities.dp(16);
-            errorTop = AndroidUtilities.dp(39);
-            pinTop = AndroidUtilities.dp(39);
-            countTop = isTopic ? AndroidUtilities.dp(36) : AndroidUtilities.dp(39);
-            checkDrawTop = AndroidUtilities.dp(17);
-            messageWidth = getMeasuredWidth() - AndroidUtilities.dp(messagePaddingStart + 23 - (LocaleController.isRTL ? 0 : 12));
+            if (ExteraConfig.compactChatList) {
+                avatarTop = AndroidUtilities.dp(7);
+                messageNameTop = AndroidUtilities.dp(25);
+                timeTop = AndroidUtilities.dp(9);
+                errorTop = AndroidUtilities.dp(33);
+                pinTop = AndroidUtilities.dp(33);
+                countTop = isTopic ? AndroidUtilities.dp(30) : AndroidUtilities.dp(33);
+                checkDrawTop = AndroidUtilities.dp(10);
+                int compactPadding = 58;
+                messageWidth = getMeasuredWidth() - AndroidUtilities.dp(compactPadding + 23 - (LocaleController.isRTL ? 0 : 12));
 
-            if (LocaleController.isRTL) {
-                buttonLeft = typingLeft = messageLeft = messageNameLeft = AndroidUtilities.dp(22);
-                avatarLeft = getMeasuredWidth() - AndroidUtilities.dp(64);
-                thumbLeft = avatarLeft - AndroidUtilities.dp(11 + (thumbsCount * (thumbSize + 2) - 2));
+                if (LocaleController.isRTL) {
+                    buttonLeft = typingLeft = messageLeft = messageNameLeft = AndroidUtilities.dp(18);
+                    avatarLeft = getMeasuredWidth() - AndroidUtilities.dp(52);
+                    thumbLeft = avatarLeft - AndroidUtilities.dp(9 + (thumbsCount * (thumbSize + 2) - 2));
+                } else {
+                    buttonLeft = typingLeft = messageLeft = messageNameLeft = AndroidUtilities.dp(compactPadding + 4);
+                    avatarLeft = AndroidUtilities.dp(8);
+                    thumbLeft = avatarLeft + AndroidUtilities.dp(44 + 9);
+                }
+                avatarImage.setImageCoords(avatarLeft, avatarTop, AndroidUtilities.dp(44), AndroidUtilities.dp(44));
+                for (int i = 0; i < thumbImage.length; ++i) {
+                    thumbImage[i].setImageCoords(thumbLeft + (thumbSize + 2) * i, avatarTop + AndroidUtilities.dp(24) + (twoLinesForName ? AndroidUtilities.dp(20) : 0), AndroidUtilities.dp(thumbSize), AndroidUtilities.dp(thumbSize));
+                }
             } else {
-                buttonLeft = typingLeft = messageLeft = messageNameLeft = AndroidUtilities.dp(messagePaddingStart + 4);
-                avatarLeft = AndroidUtilities.dp(10);
-                thumbLeft = avatarLeft + AndroidUtilities.dp(56 + 11);
-            }
-            avatarImage.setImageCoords(avatarLeft, avatarTop, AndroidUtilities.dp(54), AndroidUtilities.dp(54));
-            for (int i = 0; i < thumbImage.length; ++i) {
-                thumbImage[i].setImageCoords(thumbLeft + (thumbSize + 2) * i, avatarTop + AndroidUtilities.dp(30) + (twoLinesForName ? AndroidUtilities.dp(20) : 0), AndroidUtilities.dp(thumbSize), AndroidUtilities.dp(thumbSize));
+                avatarTop = AndroidUtilities.dp(9);
+                messageNameTop = AndroidUtilities.dp(31);
+                timeTop = AndroidUtilities.dp(16);
+                errorTop = AndroidUtilities.dp(39);
+                pinTop = AndroidUtilities.dp(39);
+                countTop = isTopic ? AndroidUtilities.dp(36) : AndroidUtilities.dp(39);
+                checkDrawTop = AndroidUtilities.dp(17);
+                messageWidth = getMeasuredWidth() - AndroidUtilities.dp(messagePaddingStart + 23 - (LocaleController.isRTL ? 0 : 12));
+
+                if (LocaleController.isRTL) {
+                    buttonLeft = typingLeft = messageLeft = messageNameLeft = AndroidUtilities.dp(22);
+                    avatarLeft = getMeasuredWidth() - AndroidUtilities.dp(64);
+                    thumbLeft = avatarLeft - AndroidUtilities.dp(11 + (thumbsCount * (thumbSize + 2) - 2));
+                } else {
+                    buttonLeft = typingLeft = messageLeft = messageNameLeft = AndroidUtilities.dp(messagePaddingStart + 4);
+                    avatarLeft = AndroidUtilities.dp(10);
+                    thumbLeft = avatarLeft + AndroidUtilities.dp(56 + 11);
+                }
+                avatarImage.setImageCoords(avatarLeft, avatarTop, AndroidUtilities.dp(54), AndroidUtilities.dp(54));
+                for (int i = 0; i < thumbImage.length; ++i) {
+                    thumbImage[i].setImageCoords(thumbLeft + (thumbSize + 2) * i, avatarTop + AndroidUtilities.dp(30) + (twoLinesForName ? AndroidUtilities.dp(20) : 0), AndroidUtilities.dp(thumbSize), AndroidUtilities.dp(thumbSize));
+                }
             }
         }
         if (twoLinesForName) {
@@ -2044,7 +2074,7 @@ public class DialogCell extends BaseCell {
                     thumbImage[i].setImageY(avatarTop + yoff + AndroidUtilities.dp(21));
                 }
             } else {
-                messageTop = AndroidUtilities.dp(39);
+                messageTop = ExteraConfig.compactChatList ? AndroidUtilities.dp(31) : AndroidUtilities.dp(39);
             }
         }
 
@@ -3322,7 +3352,7 @@ public class DialogCell extends BaseCell {
                     Theme.dialogs_namePaint[paintIndex].setColor(Theme.dialogs_namePaint[paintIndex].linkColor = Theme.getColor(Theme.key_chats_name, resourcesProvider));
                 }
                 canvas.save();
-                canvas.translate(nameLeft + nameLayoutTranslateX, AndroidUtilities.dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 10 : 13));
+                canvas.translate(nameLeft + nameLayoutTranslateX, AndroidUtilities.dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 10 : (ExteraConfig.compactChatList ? 8 : 13)));
                 nameLayout.draw(canvas);
                 AnimatedEmojiSpan.drawAnimatedEmojis(canvas, nameLayout, animatedEmojiStackName, -.075f, null, 0, 0, 0, 1f);
                 canvas.restore();

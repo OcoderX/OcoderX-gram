@@ -4474,6 +4474,36 @@ public class Theme {
             themesDict.put("Monet Dark", themeInfo);
         }
 
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "AMOLED Black";
+        themeInfo.assetName = "amoled_black.attheme";
+        themeInfo.previewBackgroundColor = 0xff000000;
+        themeInfo.previewInColor = 0xff151515;
+        themeInfo.previewOutColor = 0xff1E1E22;
+        themeInfo.sortIndex = 8;
+        themes.add(themeInfo);
+        themesDict.put("AMOLED Black", themeInfo);
+
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Cyberpunk";
+        themeInfo.assetName = "cyberpunk.attheme";
+        themeInfo.previewBackgroundColor = 0xff0B0813;
+        themeInfo.previewInColor = 0xff1C152F;
+        themeInfo.previewOutColor = 0xff3E105C;
+        themeInfo.sortIndex = 9;
+        themes.add(themeInfo);
+        themesDict.put("Cyberpunk", themeInfo);
+
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Glassmorphism";
+        themeInfo.assetName = "glassmorphism.attheme";
+        themeInfo.previewBackgroundColor = 0xff0C1015;
+        themeInfo.previewInColor = 0xff1C2536;
+        themeInfo.previewOutColor = 0xff24375A;
+        themeInfo.sortIndex = 10;
+        themes.add(themeInfo);
+        themesDict.put("Glassmorphism", themeInfo);
+
         String themesString = themeConfig.getString("themes2", null);
 
         int remoteVersion = themeConfig.getInt("remote_version", 0);

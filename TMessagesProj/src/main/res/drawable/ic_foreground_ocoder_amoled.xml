@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.68"
+        android:scaleY="0.68"
+        android:translateX="17.28"
+        android:translateY="17.28">
+        <!-- Pure AMOLED High Contrast White & Electric Blue Vector -->
+        <path
+            android:pathData="M47.98 25.81 C48.61 24.81 50.16 25.44 49.91 26.60 L40.33 70.88 C40.22 71.37 39.80 71.72 39.30 71.72 H21.10 C20.27 71.72 19.76 70.80 20.20 70.10 L47.98 25.81 Z"
+            android:fillColor="#FFFFFFFF" />
+        <path
+            android:pathData="M52.05 81.42 C52.05 82.43 50.77 82.86 50.16 82.06 L44.20 74.24 C44.01 74.00 43.94 73.68 44.01 73.38 L49.96 45.81 C50.23 44.58 52.05 44.77 52.05 46.04 V81.42 Z"
+            android:fillColor="#FF2EA6FF" />
+
+        <path
+            android:pathData="M60.23 25.81 C59.60 24.81 58.05 25.44 58.30 26.60 L67.88 70.88 C67.99 71.37 68.42 71.72 68.91 71.72 H87.11 C87.94 71.72 88.45 70.80 88.01 70.10 L60.23 25.81 Z"
+            android:fillColor="#FFFFFFFF" />
+        <path
+            android:pathData="M56.16 81.42 C56.16 82.43 57.44 82.86 58.06 82.06 L64.01 74.24 C64.20 74.00 64.27 73.68 64.20 73.38 L58.25 45.81 C57.98 44.58 56.16 44.77 56.16 46.04 L56.16 81.42 Z"
+            android:fillColor="#FF2EA6FF" />
+    </group>
+</vector>

@@ -1779,8 +1779,11 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				FileLog.d("initital source = " + ssrc);
 			}
 			TLRPC.TL_phone_joinGroupCall req = new TLRPC.TL_phone_joinGroupCall();
-			req.muted = true;
-			req.video_stopped = videoState[CAPTURE_DEVICE_CAMERA] != Instance.VIDEO_STATE_ACTIVE;
+			req.muted = AyuConfig.ghostVoiceChat || true;
+			req.video_stopped = AyuConfig.ghostVoiceChat || videoState[CAPTURE_DEVICE_CAMERA] != Instance.VIDEO_STATE_ACTIVE;
+			if (AyuConfig.ghostVoiceChat) {
+				micMute = true;
+			}
 			req.call = groupCall.getInputGroupCall();
 			req.params = new TLRPC.TL_dataJSON();
 			req.params.data = json;

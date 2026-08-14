@@ -3205,6 +3205,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 //                    Bundle bundle = new Bundle();
 //                    bundle.putLong("chat_id", -dialog_id);
 //                    presentFragment(new TopicsFragment(bundle));
+                } else if (id == AyuConstants.OPTION_EXPORT_CHAT) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), themeDelegate);
+                    builder.setTitle(LocaleController.getString("ExportChatHistory", R.string.ExportChatHistory));
+                    builder.setItems(new CharSequence[]{
+                            LocaleController.getString("ExportAsTxt", R.string.ExportAsTxt),
+                            LocaleController.getString("ExportAsJson", R.string.ExportAsJson)
+                    }, (dialog, which) -> {
+                        com.radolyn.ayugram.messages.AyuExporter.exportChatHistory(ChatActivity.this, dialog_id, which == 1);
+                    });
+                    builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                    showDialog(builder.create());
                 }
             }
         });
@@ -3505,6 +3516,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             if (!isTopic) {
                 clearHistoryItem = headerItem.lazilyAddSubItem(clear_history, R.drawable.msg_clear, LocaleController.getString("ClearHistory", R.string.ClearHistory));
+                headerItem.lazilyAddSubItem(AyuConstants.OPTION_EXPORT_CHAT, R.drawable.msg_download, LocaleController.getString("ExportChatHistory", R.string.ExportChatHistory));
             }
             boolean addedSettings = false;
             if (!isTopic) {
@@ -24058,7 +24070,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             }
                         }
                         if (!selectedObject.isSponsored() && chatMode != MODE_SCHEDULED && (!selectedObject.needDrawBluredPreview() || selectedObject.hasExtendedMediaPreview()) &&
-                                !selectedObject.isLiveLocation() && selectedObject.type != MessageObject.TYPE_PHONE_CALL && !noforwards &&
+                                !selectedObject.isLiveLocation() && selectedObject.type != MessageObject.TYPE_PHONE_CALL && (!noforwards || true) &&
                                 selectedObject.type != MessageObject.TYPE_GIFT_PREMIUM && selectedObject.type != MessageObject.TYPE_SUGGEST_PHOTO && !selectedObject.isWallpaperAction()) {
                             items.add(LocaleController.getString("Forward", R.string.Forward));
                             options.add(OPTION_FORWARD);
@@ -24142,7 +24154,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             options.add(OPTION_REPLY);
                             icons.add(R.drawable.msg_reply);
                         }
-                        if ((selectedObject.type == MessageObject.TYPE_TEXT || selectedObject.isAnimatedEmoji() || selectedObject.isAnimatedEmojiStickers() || getMessageCaption(selectedObject, selectedObjectGroup) != null) && !noforwards) {
+                        if ((selectedObject.type == MessageObject.TYPE_TEXT || selectedObject.isAnimatedEmoji() || selectedObject.isAnimatedEmojiStickers() || getMessageCaption(selectedObject, selectedObjectGroup) != null)) {
                             items.add(LocaleController.getString("Copy", R.string.Copy));
                             options.add(OPTION_COPY);
                             icons.add(R.drawable.msg_copy);
@@ -24236,8 +24248,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             /// --- AyuGram menu
             if (message != null
-                    && message.messageOwner.from_id != null
-                    && message.messageOwner.from_id.user_id != getAccountInstance().getUserConfig().getClientUserId()
                     && AyuMessagesController.getInstance().hasAnyRevisions(getAccountInstance().getUserConfig().getClientUserId(), dialog_id, message.messageOwner.id)
             ) {
                 var idx = options.size() - 1;
@@ -24302,6 +24312,46 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 items.add(LocaleController.getString("ReadUntilMenuText", R.string.ReadUntilMenuText));
                 options.add(AyuConstants.OPTION_READ_UNTIL);
                 icons.add(R.drawable.msg_view_file);
+            }
+
+            if (AyuConfig.showUserHistoryButton && !isAyuDeleted
+                    && message != null
+                    && message.messageOwner.from_id != null
+                    && message.messageOwner.from_id.user_id != getAccountInstance().getUserConfig().getClientUserId()
+                    && currentChat != null && !currentChat.broadcast
+            ) {
+                var idx = options.size() - 1;
+
+                if (options.contains(OPTION_DETAILS)) {
+                    idx = options.indexOf(OPTION_DETAILS);
+                }
+
+                items.add(idx, LocaleController.getString("MessageHistory", R.string.MessageHistory));
+                options.add(idx, AyuConstants.OPTION_USER_HISTORY);
+                icons.add(idx, R.drawable.msg_recent);
+            }
+
+            if (message != null && !selectedObject.isSponsored()) {
+                if (AyuConfig.showCopyIdInMenu) {
+                    items.add(LocaleController.getString("ContextCopyID", R.string.ContextCopyID));
+                    options.add(AyuConstants.OPTION_COPY_ID);
+                    icons.add(R.drawable.msg_copy);
+                }
+                if (AyuConfig.showRawViewerInMenu) {
+                    items.add(LocaleController.getString("RawMessageViewer", R.string.RawMessageViewer));
+                    options.add(AyuConstants.OPTION_RAW_VIEWER);
+                    icons.add(R.drawable.msg_log);
+                }
+                if (selectedObject.isVideo() && !selectedObject.isRoundVideo() && ChatObject.canSendRoundVideo(currentChat)) {
+                    items.add(LocaleController.getString("SendAsVideoNote", R.string.SendAsVideoNote));
+                    options.add(AyuConstants.OPTION_CONVERT_ROUND_VIDEO);
+                    icons.add(R.drawable.msg_video);
+                }
+                if (currentChat != null && (currentChat.creator || (currentChat.admin_rights != null && currentChat.admin_rights.delete_messages)) && selectedObject != null && selectedObject.messageOwner != null && selectedObject.messageOwner.from_id != null && !selectedObject.isOutOwner()) {
+                    items.add(LocaleController.getString("DeleteAllFromUser", R.string.DeleteAllFromUser));
+                    options.add(AyuConstants.OPTION_DELETE_ALL_FROM_USER);
+                    icons.add(R.drawable.msg_delete);
+                }
             }
             // --- AyuGram menu
 
@@ -25873,6 +25923,79 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             case AyuConstants.OPTION_READ_UNTIL:
                 AyuGhostUtils.markReadOnServer(currentAccount, selectedObject.messageOwner.id, getMessagesController().getInputPeer(selectedObject.messageOwner.peer_id));
                 break;
+            case AyuConstants.OPTION_USER_HISTORY: {
+                TLRPC.Peer peer = selectedObject.messageOwner.from_id;
+                if ((threadMessageId == 0 || isTopic) && !UserObject.isReplyUser(currentUser)) {
+                    openSearchWithText();
+                } else {
+                    searchItem.openSearch(false);
+                }
+                if (peer.user_id != 0) {
+                    TLRPC.User user = getMessagesController().getUser(peer.user_id);
+                    searchUserMessages(user, null);
+                } else if (peer.chat_id != 0) {
+                    TLRPC.Chat chat = getMessagesController().getChat(peer.chat_id);
+                    searchUserMessages(null, chat);
+                } else if (peer.channel_id != 0) {
+                    TLRPC.Chat chat = getMessagesController().getChat(peer.channel_id);
+                    searchUserMessages(null, chat);
+                }
+                showMessagesSearchListView(true);
+                break;
+            }
+            case AyuConstants.OPTION_RAW_VIEWER:
+                new com.radolyn.ayugram.ui.RawMessageViewerBottomSheet(getParentActivity(), this, selectedObject).show();
+                break;
+            case AyuConstants.OPTION_CONVERT_ROUND_VIDEO:
+                com.radolyn.ayugram.utils.VideoNoteHelper.convertMessageToVideoNote(this, selectedObject);
+                break;
+            case AyuConstants.OPTION_COPY_ID: {
+                long targetId = 0;
+                String typeLabel = "ID";
+                if (selectedObject.messageOwner.from_id != null) {
+                    targetId = MessageObject.getPeerId(selectedObject.messageOwner.from_id);
+                    typeLabel = "User ID";
+                } else if (selectedObject.messageOwner.peer_id != null) {
+                    targetId = MessageObject.getPeerId(selectedObject.messageOwner.peer_id);
+                    typeLabel = "Peer ID";
+                } else {
+                    targetId = selectedObject.getDialogId();
+                }
+                if (targetId == 0) {
+                    targetId = selectedObject.getId();
+                    typeLabel = "Msg ID";
+                }
+                AndroidUtilities.addToClipboard(String.valueOf(targetId));
+                BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("IDCopiedToast", R.string.IDCopiedToast) + " (" + typeLabel + ": " + targetId + ")").show();
+                break;
+            }
+            case AyuConstants.OPTION_DELETE_ALL_FROM_USER: {
+                if (currentChat == null || selectedObject == null || selectedObject.messageOwner == null || selectedObject.messageOwner.from_id == null) {
+                    break;
+                }
+                TLRPC.Peer from = selectedObject.messageOwner.from_id;
+                TLRPC.User fromUser = from.user_id != 0 ? getMessagesController().getUser(from.user_id) : null;
+                TLRPC.Chat fromChat = from.channel_id != 0 ? getMessagesController().getChat(from.channel_id) : (from.chat_id != 0 ? getMessagesController().getChat(from.chat_id) : null);
+                String name = fromUser != null ? ContactsController.formatName(fromUser.first_name, fromUser.last_name) : (fromChat != null ? fromChat.title : "User");
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), themeDelegate);
+                builder.setTitle(LocaleController.getString("DeleteAllFromUser", R.string.DeleteAllFromUser));
+                builder.setMessage(LocaleController.formatString("DeleteAllFromUserAlert", R.string.DeleteAllFromUserAlert, name));
+                builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), (dialog, which) -> {
+                    getMessagesController().deleteUserChannelHistory(currentChat, fromUser, fromChat, 0);
+                    if (BulletinFactory.canShowBulletin(ChatActivity.this)) {
+                        BulletinFactory.of(ChatActivity.this).createSimpleBulletin(R.raw.ic_delete, LocaleController.getString("DeleteAllFromUserDone", R.string.DeleteAllFromUserDone)).show();
+                    }
+                });
+                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                AlertDialog dialog = builder.create();
+                showDialog(dialog);
+                TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                if (button != null) {
+                    button.setTextColor(getThemedColor(Theme.key_text_RedBold));
+                }
+                break;
+            }
             case OPTION_RETRY: {
                 if (selectedObjectGroup != null) {
                     boolean success = true;
@@ -29704,12 +29827,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         public boolean didLongPressUserAvatar(ChatMessageCell cell, TLRPC.User user, float touchX, float touchY) {
             if (isAvatarPreviewerEnabled()) {
                 final boolean enableMention = currentChat != null && (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE) && (bottomOverlay == null || bottomOverlay.getVisibility() != View.VISIBLE);
-                final AvatarPreviewer.MenuItem[] menuItems = new AvatarPreviewer.MenuItem[3 + (enableMention ? 1 : 0)];
+                final AvatarPreviewer.MenuItem[] menuItems = new AvatarPreviewer.MenuItem[4 + (enableMention ? 1 : 0)];
                 menuItems[0] = AvatarPreviewer.MenuItem.OPEN_PROFILE;
                 menuItems[1] = AvatarPreviewer.MenuItem.SEND_MESSAGE;
                 menuItems[2] = AvatarPreviewer.MenuItem.MSG_HISTORY;
+                menuItems[3] = AvatarPreviewer.MenuItem.COPY_ID;
                 if (enableMention) {
-                    menuItems[3] = AvatarPreviewer.MenuItem.MENTION;
+                    menuItems[4] = AvatarPreviewer.MenuItem.MENTION;
                 }
                 final TLRPC.UserFull userFull = getMessagesController().getUserFull(user.id);
                 final AvatarPreviewer.Data data;
@@ -29735,6 +29859,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 }
                                 searchUserMessages(user, null);
                                 showMessagesSearchListView(true);
+                                break;
+                            case COPY_ID:
+                                AndroidUtilities.addToClipboard(String.valueOf(user.id));
+                                BulletinFactory.of(ChatActivity.this).createCopyBulletin(LocaleController.getString("IDCopiedToast", R.string.IDCopiedToast) + " (" + user.id + ")").show();
                                 break;
                             case MENTION:
                                 appendMention(user);

@@ -35,6 +35,13 @@ public class RegexFiltersPreferencesActivity extends BasePreferencesActivity {
     private int caseInsensitiveRow;
     private int generalDividerRow;
 
+    private int mediaHeaderRow;
+    private int filterStickersRow;
+    private int filterGifsRow;
+    private int filterVoiceMessagesRow;
+    private int filterRoundVideosRow;
+    private int mediaDividerRow;
+
     private int addFilterBtnRow;
     private int addFilterDividerRow;
 
@@ -51,6 +58,13 @@ public class RegexFiltersPreferencesActivity extends BasePreferencesActivity {
         enableInChatsRow = newRow();
         caseInsensitiveRow = newRow();
         generalDividerRow = newRow();
+
+        mediaHeaderRow = newRow();
+        filterStickersRow = newRow();
+        filterGifsRow = newRow();
+        filterVoiceMessagesRow = newRow();
+        filterRoundVideosRow = newRow();
+        mediaDividerRow = newRow();
 
         addFilterBtnRow = newRow();
         addFilterDividerRow = newRow();
@@ -79,6 +93,18 @@ public class RegexFiltersPreferencesActivity extends BasePreferencesActivity {
             ((TextCheckCell) view).setChecked(AyuConfig.regexFiltersCaseInsensitive);
 
             AyuFilter.rebuildCache();
+        } else if (position == filterStickersRow) {
+            AyuConfig.editor.putBoolean("filterStickers", AyuConfig.filterStickers ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.filterStickers);
+        } else if (position == filterGifsRow) {
+            AyuConfig.editor.putBoolean("filterGifs", AyuConfig.filterGifs ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.filterGifs);
+        } else if (position == filterVoiceMessagesRow) {
+            AyuConfig.editor.putBoolean("filterVoiceMessages", AyuConfig.filterVoiceMessages ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.filterVoiceMessages);
+        } else if (position == filterRoundVideosRow) {
+            AyuConfig.editor.putBoolean("filterRoundVideos", AyuConfig.filterRoundVideos ^= true).apply();
+            ((TextCheckCell) view).setChecked(AyuConfig.filterRoundVideos);
         } else if (position == addFilterBtnRow) {
             presentFragment(new RegexFilterEditActivity());
         }
@@ -128,6 +154,8 @@ public class RegexFiltersPreferencesActivity extends BasePreferencesActivity {
                         headerCell.setText(LocaleController.getString(R.string.General));
                     } else if (position == filtersHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.RegexFiltersHeader));
+                    } else if (position == mediaHeaderRow) {
+                        headerCell.setText(LocaleController.getString(R.string.RegexFiltersMediaHeader));
                     }
                     break;
                 case 5:
@@ -137,6 +165,14 @@ public class RegexFiltersPreferencesActivity extends BasePreferencesActivity {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.RegexFiltersEnableInChats), AyuConfig.regexFiltersInChats, true);
                     } else if (position == caseInsensitiveRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString(R.string.RegexFiltersCaseInsensitive), AyuConfig.regexFiltersCaseInsensitive, false);
+                    } else if (position == filterStickersRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.RegexFiltersFilterStickers), AyuConfig.filterStickers, true);
+                    } else if (position == filterGifsRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.RegexFiltersFilterGifs), AyuConfig.filterGifs, true);
+                    } else if (position == filterVoiceMessagesRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.RegexFiltersFilterVoice), AyuConfig.filterVoiceMessages, true);
+                    } else if (position == filterRoundVideosRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString(R.string.RegexFiltersFilterRoundVideos), AyuConfig.filterRoundVideos, false);
                     }
                     break;
             }
@@ -146,17 +182,23 @@ public class RegexFiltersPreferencesActivity extends BasePreferencesActivity {
         public int getItemViewType(int position) {
             if (
                     position == generalDividerRow ||
+                            position == mediaDividerRow ||
                             position == addFilterDividerRow
             ) {
                 return 1;
             } else if (
                     position == generalHeaderRow ||
-                            position == filtersHeaderRow
+                            position == filtersHeaderRow ||
+                            position == mediaHeaderRow
             ) {
                 return 3;
             } else if (
                     position == enableInChatsRow ||
-                            position == caseInsensitiveRow
+                            position == caseInsensitiveRow ||
+                            position == filterStickersRow ||
+                            position == filterGifsRow ||
+                            position == filterVoiceMessagesRow ||
+                            position == filterRoundVideosRow
             ) {
                 return 5;
             }

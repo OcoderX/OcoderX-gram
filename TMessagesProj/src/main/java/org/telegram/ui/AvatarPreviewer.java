@@ -147,7 +147,8 @@ public class AvatarPreviewer {
         OPEN_GROUP("OpenGroup2", R.string.OpenGroup2, R.drawable.msg_discussion),
         SEND_MESSAGE("SendMessage", R.string.SendMessage, R.drawable.msg_discussion),
         MENTION("Mention", R.string.Mention, R.drawable.msg_mention),
-        MSG_HISTORY("MessageHistory", R.string.MessageHistory, R.drawable.msg_recent);
+        MSG_HISTORY("MessageHistory", R.string.MessageHistory, R.drawable.msg_recent),
+        COPY_ID("ContextCopyID", R.string.ContextCopyID, R.drawable.msg_copy);
 
         private final String labelKey;
         private final int labelResId;

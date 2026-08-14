@@ -27,6 +27,10 @@ public class AyuConfig {
     public static boolean sendOnlinePackets;
     public static boolean sendOfflinePacketAfterOnline;
     public static boolean sendUploadProgress;
+    public static boolean hideTypingStatus;
+    public static boolean frozenLastSeen;
+    public static boolean ghostVoiceChat;
+    public static boolean incognitoStories;
     public static boolean useScheduledMessages;
     public static boolean saveDeletedMessages;
     public static boolean saveMessagesHistory;
@@ -50,9 +54,27 @@ public class AyuConfig {
     public static boolean regexFiltersCaseInsensitive;
     public static boolean showGhostToggleInDrawer;
     public static boolean showKillButtonInDrawer;
+    public static boolean showUserHistoryButton;
     public static boolean syncEnabled;
     public static boolean useSecureConnection;
     public static boolean WALMode;
+
+    public static boolean autoCleanupEnabled;
+    public static int autoCleanupDays;
+
+    public static boolean ghostModeScheduleEnabled;
+    public static int ghostModeScheduleStartHour;
+    public static int ghostModeScheduleEndHour;
+
+    public static boolean filterStickers;
+    public static boolean filterGifs;
+    public static boolean filterVoiceMessages;
+    public static boolean filterRoundVideos;
+
+    // ~ Power Tools
+    public static boolean codeSyntaxHighlighting;
+    public static boolean showRawViewerInMenu;
+    public static boolean showCopyIdInMenu;
 
     private static boolean configLoaded;
 
@@ -74,6 +96,10 @@ public class AyuConfig {
             sendOnlinePackets = preferences.getBoolean("sendOnlinePackets", true);
             sendUploadProgress = preferences.getBoolean("sendUploadProgress", true);
             sendOfflinePacketAfterOnline = preferences.getBoolean("sendOfflinePacketAfterOnline", false);
+            hideTypingStatus = preferences.getBoolean("hideTypingStatus", false);
+            frozenLastSeen = preferences.getBoolean("frozenLastSeen", false);
+            ghostVoiceChat = preferences.getBoolean("ghostVoiceChat", false);
+            incognitoStories = preferences.getBoolean("incognitoStories", true);
 
             markReadAfterSend = preferences.getBoolean("markReadAfterSend", true);
             useScheduledMessages = preferences.getBoolean("useScheduledMessages", false);
@@ -108,6 +134,7 @@ public class AyuConfig {
             // editedMarkText
             showGhostToggleInDrawer = preferences.getBoolean("showGhostToggleInDrawer", true);
             showKillButtonInDrawer = preferences.getBoolean("showKillButtonInDrawer", false);
+            showUserHistoryButton = preferences.getBoolean("showUserHistoryButton", true);
 
             // ~ AyuSync
             // syncServerURL
@@ -117,6 +144,26 @@ public class AyuConfig {
 
             // ~ Debug
             WALMode = preferences.getBoolean("walMode", true);
+
+            // ~ Storage maintenance
+            autoCleanupEnabled = preferences.getBoolean("autoCleanupEnabled", false);
+            autoCleanupDays = preferences.getInt("autoCleanupDays", 30);
+
+            // ~ Ghost mode schedule
+            ghostModeScheduleEnabled = preferences.getBoolean("ghostModeScheduleEnabled", false);
+            ghostModeScheduleStartHour = preferences.getInt("ghostModeScheduleStartHour", 23);
+            ghostModeScheduleEndHour = preferences.getInt("ghostModeScheduleEndHour", 7);
+
+            // ~ Media filters
+            filterStickers = preferences.getBoolean("filterStickers", false);
+            filterGifs = preferences.getBoolean("filterGifs", false);
+            filterVoiceMessages = preferences.getBoolean("filterVoiceMessages", false);
+            filterRoundVideos = preferences.getBoolean("filterRoundVideos", false);
+
+            // ~ Power Tools
+            codeSyntaxHighlighting = preferences.getBoolean("codeSyntaxHighlighting", true);
+            showRawViewerInMenu = preferences.getBoolean("showRawViewerInMenu", true);
+            showCopyIdInMenu = preferences.getBoolean("showCopyIdInMenu", true);
 
             configLoaded = true;
         }
@@ -224,5 +271,24 @@ public class AyuConfig {
         editor.putString("regexFilters", str).apply();
 
         AyuFilter.rebuildCache();
+    }
+
+    public static void setAutoCleanupDays(int days) {
+        if (days < 1) {
+            days = 1;
+        }
+
+        autoCleanupDays = days;
+        editor.putInt("autoCleanupDays", autoCleanupDays).apply();
+    }
+
+    public static void setGhostModeScheduleStartHour(int hour) {
+        ghostModeScheduleStartHour = ((hour % 24) + 24) % 24;
+        editor.putInt("ghostModeScheduleStartHour", ghostModeScheduleStartHour).apply();
+    }
+
+    public static void setGhostModeScheduleEndHour(int hour) {
+        ghostModeScheduleEndHour = ((hour % 24) + 24) % 24;
+        editor.putInt("ghostModeScheduleEndHour", ghostModeScheduleEndHour).apply();
     }
 }

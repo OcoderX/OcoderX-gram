@@ -249,4 +249,57 @@ public class AyuMessagesController {
         // force to recreate a database to avoid crash
         instance = null;
     }
+
+    public void runAutoCleanup() {
+        if (!AyuConfig.autoCleanupEnabled) {
+            return;
+        }
+
+        try {
+            var cutoff = (int) (System.currentTimeMillis() / 1000L) - AyuConfig.autoCleanupDays * 24 * 60 * 60;
+
+            var oldDeleted = deletedMessageDao.getOlderThan(cutoff);
+            for (var msg : oldDeleted) {
+                if (!TextUtils.isEmpty(msg.mediaPath)) {
+                    var f = new File(msg.mediaPath);
+                    if (f.exists()) {
+                        f.delete();
+                    }
+                }
+            }
+            deletedMessageDao.deleteOlderThan(cutoff);
+
+            var oldEdited = editedMessageDao.getOlderThan(cutoff);
+            for (var msg : oldEdited) {
+                if (!TextUtils.isEmpty(msg.mediaPath)) {
+                    var f = new File(msg.mediaPath);
+                    if (f.exists()) {
+                        f.delete();
+                    }
+                }
+            }
+            editedMessageDao.deleteOlderThan(cutoff);
+
+            Log.d("AyuGram", "auto-cleanup: removed entries older than " + AyuConfig.autoCleanupDays + " days");
+        } catch (Exception e) {
+            Log.e("AyuGram", "error runAutoCleanup", e);
+            FileLog.e("runAutoCleanup", e);
+        }
+    }
+
+    public int getDeletedMessagesCount() {
+        return deletedMessageDao.getTotalCount();
+    }
+
+    public int getEditedMessagesCount() {
+        return editedMessageDao.getTotalCount();
+    }
+
+    public int getOldestEntryDate() {
+        return deletedMessageDao.getOldestEntryDate();
+    }
+
+    public List<com.radolyn.ayugram.database.entities.DialogCount> getTopDialogs(int limit) {
+        return deletedMessageDao.getTopDialogs(limit);
+    }
 }
