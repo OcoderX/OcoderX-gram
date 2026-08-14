@@ -12,7 +12,7 @@
 -->
 
 <resources>
-    <string name="Preferences">Настройки exteraGram</string>
+    <string name="Preferences">Настройки X-Gram</string>
 
     <!-- Main Menu -->
     <string name="Links">Ссылки</string>
@@ -201,7 +201,7 @@
 
     <!-- Other -->
     <string name="RestartRequired">Перезапустите приложение, чтобы изменения вступили в силу.</string>
-    <string name="ResetSettingsBulletin">Настройки **exteraGram** сброшены.</string>
+    <string name="ResetSettingsBulletin">Настройки **X-Gram** сброшены.</string>
     <string name="UserNotFound">Пользователь с этим **ID** не найден.</string>
     <string name="PhotoCopied">Фото скопировано в буфер обмена.</string>
 
@@ -232,6 +232,7 @@
     <string name="AppIconOcoderCyber">OcoderX Киберпанк</string>
     <string name="AppIconOcoderAmoled">OcoderX AMOLED</string>
     <string name="AppIconOcoderGlass">OcoderX Стеклянная</string>
+    <string name="AppIconOcoderNeon">OcoderX Неон</string>
 
     <string name="BottomNavigation">Нижняя панель навигации</string>
     <string name="BottomNavigationInfo">Разместить папки и вкладки чатов внизу экрана.</string>

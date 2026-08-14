@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.72"
+        android:scaleY="0.72"
+        android:translateX="15.12"
+        android:translateY="15.12">
+        <!-- Outer Neon Glow Hex / Wings Accent -->
+        <path
+            android:pathData="M22 68 L48 24 C48.8 22.8 50.6 23.4 50.4 24.8 L42 68 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="22"
+                    android:startY="24"
+                    android:endX="50"
+                    android:endY="68"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#FF00E5FF" />
+                    <item android:offset="1.0" android:color="#FF0055FF" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:fillColor="#FF00E5FF"
+            android:pathData="M52 80 C52 81 50.8 81.6 50.2 80.8 L44 72 L50 48 C50.2 46.8 52 47 52 48.2 Z" />
+
+        <!-- Neon Magenta/Purple Right Wing & X Accent -->
+        <path
+            android:pathData="M86 68 L60 24 C59.2 22.8 57.4 23.4 57.6 24.8 L66 68 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="58"
+                    android:startY="24"
+                    android:endX="86"
+                    android:endY="68"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#FFD500F9" />
+                    <item android:offset="1.0" android:color="#FF651FFF" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:fillColor="#FFD500F9"
+            android:pathData="M56 80 C56 81 57.2 81.6 57.8 80.8 L64 72 L58 48 C57.8 46.8 56 47 56 48.2 Z" />
+    </group>
+</vector>

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 
 import java.lang.reflect.Field;
@@ -97,9 +98,8 @@ public class TLJsonConverter {
         if (owner.edit_hide) flags.add("edit_hide");
         if (owner.pinned) flags.add("pinned");
         if (owner.noforwards) flags.add("noforwards");
-        if (owner.invert_media) flags.add("invert_media");
         if (owner.ayuDeleted) flags.add("ayu_deleted");
-        if (owner.ayuModified) flags.add("ayu_modified");
+        if (owner.edit_date > 0) flags.add("edited");
         params.flagsSummary = String.join(", ", flags);
 
         return params;
@@ -117,7 +117,7 @@ public class TLJsonConverter {
         }
     }
 
-    public static String toFormattedJson(TLRPC.TLObject tlObject) {
+    public static String toFormattedJson(TLObject tlObject) {
         if (tlObject == null) {
             return "{}";
         }
@@ -129,7 +129,7 @@ public class TLJsonConverter {
         }
     }
 
-    public static JSONObject toJson(TLRPC.TLObject tlObject) {
+    public static JSONObject toJson(TLObject tlObject) {
         Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         return (JSONObject) serializeValue(tlObject, visited, 0);
     }
@@ -166,7 +166,7 @@ public class TLJsonConverter {
             return arr;
         }
 
-        if (obj instanceof TLRPC.TLObject) {
+        if (obj instanceof TLObject) {
             if (!visited.add(obj)) {
                 return "[Circular: " + obj.getClass().getSimpleName() + "]";
             }

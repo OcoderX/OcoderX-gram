@@ -56,7 +56,8 @@ public class LauncherIconController {
         OCODER_DARK("OcoderDarkIcon", R.color.ic_background_ocoder_dark, R.drawable.ic_foreground_ocoder_dark, R.string.AppIconOcoderDark),
         OCODER_CYBER("OcoderCyberIcon", R.color.ic_background_ocoder_cyber, R.drawable.ic_foreground_ocoder_cyber, R.string.AppIconOcoderCyber),
         OCODER_AMOLED("OcoderAmoledIcon", R.color.ic_background_ocoder_amoled, R.drawable.ic_foreground_ocoder_amoled, R.string.AppIconOcoderAmoled),
-        OCODER_GLASS("OcoderGlassIcon", R.color.ic_background_ocoder_glass, R.drawable.ic_foreground_ocoder_glass, R.string.AppIconOcoderGlass);
+        OCODER_GLASS("OcoderGlassIcon", R.color.ic_background_ocoder_glass, R.drawable.ic_foreground_ocoder_glass, R.string.AppIconOcoderGlass),
+        OCODER_NEON("OcoderNeonIcon", R.color.ic_background_ocoder_neon, R.drawable.ic_foreground_ocoder_neon, R.string.AppIconOcoderNeon);
 
         public final String key;
         public final int background;

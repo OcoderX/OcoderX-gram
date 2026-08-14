@@ -158,7 +158,7 @@ public class AyuExporter {
                         map.put("from_id", msg.getFromChatId());
                         map.put("out", msg.isOut());
                         map.put("text", msg.messageText != null ? msg.messageText.toString() : (msg.caption != null ? msg.caption.toString() : ""));
-                        map.put("is_media", msg.hasMedia());
+                        map.put("is_media", !msg.isMediaEmpty());
                         if (msg.messageOwner.media != null) {
                             map.put("media_type", msg.messageOwner.media.getClass().getSimpleName());
                         }

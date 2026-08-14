@@ -143,6 +143,14 @@ android {
             keyAlias localProperties.getProperty("SIGNING_KEY_ALIAS")
             keyPassword localProperties.getProperty("SIGNING_KEY_PASSWORD")
         }
+        // Local-only debug key so `debug`/`beta` builds don't depend on the real
+        // release keystore password, which isn't available in this environment.
+        ocoderxDebug {
+            storeFile file("config/ocoderx-debug.jks")
+            storePassword "ocoderxdebug"
+            keyAlias "ocoderxdebug"
+            keyPassword "ocoderxdebug"
+        }
     }
 
     packagingOptions.exclude 'META-INF/DEPENDENCIES'
@@ -151,7 +159,7 @@ android {
         debug {
             debuggable true
             jniDebuggable false
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.ocoderxDebug
             minifyEnabled false
             shrinkResources false
             multiDexEnabled true

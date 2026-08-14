@@ -41,6 +41,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241188506271:android:2886f3d7ee90b82c7fb0aa",
+        "android_client_info": {
+          "package_name": "com.radolyn.ayugram.ocoderx"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "241188506271-3n5ru8fm0kn3ujr5tphajrtpu076dqa7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzki2--tsG2w92-f842qRmY7UfhLO9sg8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "241188506271-3n5ru8fm0kn3ujr5tphajrtpu076dqa7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
