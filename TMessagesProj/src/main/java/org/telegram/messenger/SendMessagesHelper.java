@@ -3386,6 +3386,18 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             caption = "";
         }
 
+        if (getUserConfig().isBotApiMode()) {
+            org.telegram.messenger.botapi.BotApiSendHelper botHelper = org.telegram.messenger.botapi.BotApiSendHelper.getInstance(currentAccount);
+            if (photo != null) {
+                botHelper.sendPhoto(peer, path, caption != null ? caption : "");
+            } else if (document != null) {
+                botHelper.sendDocument(peer, path, caption != null ? caption : "", document.mime_type);
+            } else {
+                botHelper.sendText(peer, message != null ? message : "");
+            }
+            return;
+        }
+
         // --- AyuGram scheduled hook
         if (AyuConfig.useScheduledMessages && !DialogObject.isEncryptedDialog(peer) && scheduleDate == 0) {
             scheduleDate = ConnectionsManager.getInstance(currentAccount).getCurrentTime() + 10; // min t = 10 sec

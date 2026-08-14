@@ -46,8 +46,9 @@ public class OtherPreferencesActivity extends BasePreferencesActivity {
     private int analyticsRow;
     private int analyticsDividerRow;
 
-    private int deleteAccountRow;
+    private int maintenanceHeaderRow;
     private int resetSettingsRow;
+    private int deleteAccountRow;
     private int deleteAccountDividerRow;
 
     @Override
@@ -58,7 +59,8 @@ public class OtherPreferencesActivity extends BasePreferencesActivity {
         crashlyticsRow = newRow();
         analyticsRow = newRow();
         analyticsDividerRow = newRow();
-        
+
+        maintenanceHeaderRow = newRow();
         resetSettingsRow = newRow();
         deleteAccountRow = newRow();
         deleteAccountDividerRow = newRow();
@@ -181,23 +183,25 @@ public class OtherPreferencesActivity extends BasePreferencesActivity {
                         textCell.setTextAndCheckAndIcon("Crashlytics", ExteraConfig.useGoogleCrashlytics, R.drawable.msg_report, true);
                     } else if (position == analyticsRow) {
                         textCell.setTextAndCheckAndIcon("Analytics", ExteraConfig.useGoogleAnalytics, R.drawable.msg_data, false);
-                    } else if (position == deleteAccountRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("DeleteAccount", R.string.DeleteAccount), R.drawable.msg_clearcache, false);
-                        textCell.setColors(Theme.key_text_RedBold, Theme.key_text_RedBold);
                     } else if (position == resetSettingsRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("ResetSettings", R.string.ResetSettings), R.drawable.msg_reset, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("ResetSettings", R.string.ResetSettings), LocaleController.getString("ResetSettingsSub", R.string.ResetSettingsSub), R.drawable.msg_reset, true);
+                    } else if (position == deleteAccountRow) {
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("DeleteAccount", R.string.DeleteAccount), LocaleController.getString("DeleteAccountSub", R.string.DeleteAccountSub), R.drawable.msg_clearcache, false);
+                        textCell.setColors(Theme.key_text_RedBold, Theme.key_text_RedBold);
                     }
                     break;
                 case 3:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == analyticsHeaderRow) {
-                        headerCell.setText("Google");
+                        headerCell.setText(LocaleController.getString("PrefDiagnostics", R.string.PrefDiagnostics));
+                    } else if (position == maintenanceHeaderRow) {
+                        headerCell.setText(LocaleController.getString("PrefMaintenance", R.string.PrefMaintenance));
                     }
                     break;
                 case 8:
                     TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) holder.itemView;
                     if (position == analyticsDividerRow) {
-                        textInfoPrivacyCell.setText(LocaleController.getString("YandexAppMetricaInfo", R.string.AnalyticsInfo));
+                        textInfoPrivacyCell.setText(LocaleController.getString("AnalyticsInfo", R.string.AnalyticsInfo));
                     }
                     break;
             }
@@ -207,7 +211,7 @@ public class OtherPreferencesActivity extends BasePreferencesActivity {
         public int getItemViewType(int position) {
             if (position == deleteAccountDividerRow) {
                 return 1;
-            } else if (position == analyticsHeaderRow) {
+            } else if (position == analyticsHeaderRow || position == maintenanceHeaderRow) {
                 return 3;
             } else if (position == analyticsDividerRow) {
                 return 8;

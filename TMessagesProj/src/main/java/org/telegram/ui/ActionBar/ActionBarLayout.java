@@ -1082,9 +1082,9 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                     } else {
                         interpolated = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(animationProgress);
                     }
-} else {
-                        interpolated = decelerateInterpolator.getInterpolation(animationProgress);
-                    }
+                } else {
+                    interpolated = decelerateInterpolator.getInterpolation(animationProgress);
+                }
                 if (open) {
                     float clampedInterpolated = MathUtils.clamp(interpolated, 0, 1);
                     if (preview) {

@@ -264,4 +264,80 @@
     <string name="TouchPictureChat">Open Chat</string>
     <string name="OpenChat">Open Chat</string>
     <string name="ShowPhoto">Show Photo</string>
+
+    <!-- Main Categories Subtitles -->
+    <string name="GeneralPrefSubtitle">Animations, avatars, speeds, and profile</string>
+    <string name="AppearancePrefSubtitle">Tabs, chat list layout, themes, and icons</string>
+    <string name="ChatsPrefSubtitle">Stickers, double tap, behavior, and media</string>
+    <string name="OtherPrefSubtitle">Analytics, account management, and reset</string>
+
+    <!-- Section Headers with Emojis -->
+    <string name="PrefInterfaceAndAnimations">🎨 Interface &amp; Animations</string>
+    <string name="PrefAvatarsAndActions">👤 Avatars &amp; Touch Actions</string>
+    <string name="PrefSpeedBoosters">⚡️ Network Speed Boosters</string>
+    <string name="PrefProfileAndPrivacy">🔒 Profile &amp; Privacy</string>
+    <string name="PrefArchivedChats">📦 Archived Chats</string>
+    <string name="PrefCamera">📷 Camera Settings</string>
+
+    <string name="PrefTabsAndNavigation">📁 Tabs &amp; Navigation</string>
+    <string name="PrefChatList">💬 Chat List</string>
+    <string name="PrefVisualStyle">✨ Visual Style &amp; Icons</string>
+    <string name="PrefDrawerMenu">📂 Side Navigation Drawer</string>
+
+    <string name="PrefStickers">🎭 Stickers &amp; Emojis</string>
+    <string name="PrefDoubleTap">👆 Double Tap Actions</string>
+    <string name="PrefChatBehavior">✉️ Chat Interface &amp; Behavior</string>
+    <string name="PrefMessageMenu">📋 Message Context Menu</string>
+    <string name="PrefMediaPlayback">🎬 Media &amp; Video Playback</string>
+
+    <!-- Clear Explanatory Subtitles -->
+    <string name="AnimationTypeSub">Fragment &amp; screen transition effect</string>
+    <string name="FormatTimeWithSecondsSub">Show seconds in timestamps (11:22:33)</string>
+    <string name="DisableNumberRoundingSub">Show exact numbers instead of 1.2K (1,234)</string>
+    <string name="TabletModeSub">Multi-column layout for large screens</string>
+    <string name="ShowStatusIndicatorSub">Display online status indicator on avatars</string>
+    <string name="TouchUserPictureSub">Action when tapping user avatar</string>
+    <string name="TouchGroupPictureSub">Action when tapping group/channel avatar</string>
+    <string name="UploadSpeedBoostSub">Accelerate uploading media &amp; documents</string>
+    <string name="HidePhoneNumberSub">Hide phone number from drawer and profile</string>
+    <string name="ShowIdAndDcSub">Display user and chat ID / DC info</string>
+    <string name="ArchiveOnPullSub">Pull down chat list to reveal archive</string>
+    <string name="DisableUnarchiveSwipeSub">Prevent swipe-to-unarchive action</string>
+    <string name="PerformanceModeSub">Optimize CameraX FPS and latency</string>
+
+    <string name="BottomNavigationSub">Move chat folders and tabs to screen bottom</string>
+    <string name="TabStyleSub">Customize folder tabs shape and style</string>
+    <string name="TabTitleSub">Display icons, text, or both on tabs</string>
+    <string name="TabCounterSub">Show unread message badge count on tabs</string>
+    <string name="HideAllChatsSub">Hide 'All Chats' tab and show custom folders</string>
+    <string name="CompactChatListSub">Reduce row height to fit more chats on screen</string>
+    <string name="CenterTitleSub">Center header title in the top bar</string>
+    <string name="HideActionBarStatusSub">Hide connecting &amp; updating status text</string>
+    <string name="SolarIconsSub">Modern duotone Solar vector icon pack</string>
+    <string name="SquareFabSub">Modern square floating new chat button</string>
+    <string name="NewSwitchStyleSub">Redesigned iOS-style toggle switches</string>
+    <string name="UseSystemFontsSub">Use device system typography</string>
+    <string name="UseSystemEmojiSub">Use native device system emojis</string>
+    <string name="ForceBlurSub">Liquid real-time glass blur on bars</string>
+    <string name="ForceSnowSub">Festive falling snow particle effect</string>
+    <string name="DisableDividersSub">Borderless flat list row layout</string>
+    <string name="SmoothDrawerAnimationSub">Modern sliding drawer transition</string>
+
+    <string name="HideStickerTimeSub">Do not show timestamp overlay on stickers</string>
+    <string name="UnlimitedRecentStickersSub">Keep unlimited stickers in recent panel</string>
+    <string name="HideCategoriesSub">Hide category tabs in sticker panel</string>
+    <string name="DisableJumpToNextChannelSub">Do not auto-open next channel at scroll end</string>
+    <string name="HideKeyboardOnScrollSub">Auto-dismiss keyboard when scrolling</string>
+    <string name="ShowActionTimestampsSub">Show exact time in chat service events</string>
+    <string name="AddCommaAfterMentionSub">Insert comma when selecting @username</string>
+    <string name="HideCounterSub">Hide selection counter in media picker</string>
+    <string name="HideCameraTileSub">Do not show camera tile in attachment sheet</string>
+    <string name="StaticZoomSub">Lock zoom ratio in round video messages</string>
+    <string name="PauseOnMinimizeSub">Pause video when minimizing app</string>
+    <string name="DisablePlaybackSub">Open videos in external media player</string>
+
+    <string name="PrefDiagnostics">📊 Diagnostics &amp; Analytics</string>
+    <string name="PrefMaintenance">⚙️ Maintenance &amp; Account</string>
+    <string name="ResetSettingsSub">Reset all app settings to defaults</string>
+    <string name="DeleteAccountSub">Permanently delete Telegram account</string>
 </resources>

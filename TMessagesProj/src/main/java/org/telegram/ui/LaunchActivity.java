@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -528,8 +529,21 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     freeAccounts -= (UserConfig.MAX_ACCOUNT_COUNT - UserConfig.MAX_ACCOUNT_DEFAULT_COUNT);
                 }
                 if (freeAccounts > 0) {
-                    presentFragment(new LoginActivity(availableAccount));
-                    drawerLayoutContainer.closeDrawer(false);
+                    final int accountToUse = availableAccount;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setItems(new CharSequence[]{
+                            "Telefon raqami",
+                            "Bot Token (@BotFather)"
+                    }, (dialogInterface, i) -> {
+                        if (i == 0) {
+                            presentFragment(new LoginActivity(accountToUse));
+                        } else {
+                            presentFragment(new org.telegram.ui.LoginBotTokenActivity(accountToUse));
+                        }
+                        drawerLayoutContainer.closeDrawer(false);
+                    });
+                    builder.setNegativeButton(LocaleController.getString("Cancel", org.telegram.messenger.R.string.Cancel), null);
+                    builder.show();
                 } else if (!UserConfig.hasPremiumOnAccounts()) {
                     if (actionBarLayout.getFragmentStack().size() > 0) {
                         BaseFragment fragment = actionBarLayout.getFragmentStack().get(0);

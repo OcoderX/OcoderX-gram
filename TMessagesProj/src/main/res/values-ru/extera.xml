@@ -260,4 +260,80 @@
     <string name="TouchPictureChat">Открыть чат</string>
     <string name="OpenChat">Открыть чат</string>
     <string name="ShowPhoto">Показать фото</string>
+
+    <!-- Main Categories Subtitles -->
+    <string name="GeneralPrefSubtitle">Анимации, аватары, скорость сети и профиль</string>
+    <string name="AppearancePrefSubtitle">Вкладки, список чатов, темы и иконки</string>
+    <string name="ChatsPrefSubtitle">Стикеры, двойное нажатие, поведение и медиа</string>
+    <string name="OtherPrefSubtitle">Аналитика, управление аккаунтом и сброс</string>
+
+    <!-- Section Headers with Emojis -->
+    <string name="PrefInterfaceAndAnimations">🎨 Интерфейс и анимации</string>
+    <string name="PrefAvatarsAndActions">👤 Аватары и действия</string>
+    <string name="PrefSpeedBoosters">⚡️ Ускорение сети</string>
+    <string name="PrefProfileAndPrivacy">🔒 Профиль и конфиденциальность</string>
+    <string name="PrefArchivedChats">📦 Архив чатов</string>
+    <string name="PrefCamera">📷 Настройки камеры</string>
+
+    <string name="PrefTabsAndNavigation">📁 Папки и навигация</string>
+    <string name="PrefChatList">💬 Список чатов</string>
+    <string name="PrefVisualStyle">✨ Визуальный стиль и иконки</string>
+    <string name="PrefDrawerMenu">📂 Боковое меню</string>
+
+    <string name="PrefStickers">🎭 Стикеры и эмодзи</string>
+    <string name="PrefDoubleTap">👆 Двойное нажатие</string>
+    <string name="PrefChatBehavior">✉️ Интерфейс и поведение чата</string>
+    <string name="PrefMessageMenu">📋 Меню действий с сообщением</string>
+    <string name="PrefMediaPlayback">🎬 Медиа и воспроизведение видео</string>
+
+    <!-- Clear Explanatory Subtitles -->
+    <string name="AnimationTypeSub">Эффект перехода между экранами и чатами</string>
+    <string name="FormatTimeWithSecondsSub">Отображать секунды во времени (11:22:33)</string>
+    <string name="DisableNumberRoundingSub">Точные числа вместо сокращений 1.2K (1,234)</string>
+    <string name="TabletModeSub">Многоколоночный режим для больших экранов</string>
+    <string name="ShowStatusIndicatorSub">Цветной индикатор статуса на аватарах</string>
+    <string name="TouchUserPictureSub">Действие при нажатии на фото пользователя</string>
+    <string name="TouchGroupPictureSub">Действие при нажатии на фото группы/канала</string>
+    <string name="UploadSpeedBoostSub">Ускорение отправки медиа и файлов</string>
+    <string name="HidePhoneNumberSub">Скрыть номер телефона в меню и профиле</string>
+    <string name="ShowIdAndDcSub">Показывать ID и DC пользователя и чатов</string>
+    <string name="ArchiveOnPullSub">Тяните список чатов вниз для открытия архива</string>
+    <string name="DisableUnarchiveSwipeSub">Запретить свайп влево для разархивации</string>
+    <string name="PerformanceModeSub">Снижение разрешения для повышения плавности</string>
+
+    <string name="BottomNavigationSub">Переместить вкладки папок вниз экрана</string>
+    <string name="TabStyleSub">Стиль вкладок: скругленные, чипы, таблетки</string>
+    <string name="TabTitleSub">Иконки, текст или всё вместе на вкладках</string>
+    <string name="TabCounterSub">Счётчики непрочитанных сообщений на вкладках</string>
+    <string name="HideAllChatsSub">Скрыть вкладку «Все чаты»</string>
+    <string name="CompactChatListSub">Уменьшить высоту строк списка чатов</string>
+    <string name="CenterTitleSub">Выравнивание заголовка по центру</string>
+    <string name="HideActionBarStatusSub">Скрыть статус подключения в шапке</string>
+    <string name="SolarIconsSub">Современный пак иконок Solar</string>
+    <string name="SquareFabSub">Квадратная плавающая кнопка нового чата</string>
+    <string name="NewSwitchStyleSub">Современный стиль переключателей</string>
+    <string name="UseSystemFontsSub">Использовать системные шрифты устройства</string>
+    <string name="UseSystemEmojiSub">Использовать системные эмодзи</string>
+    <string name="ForceBlurSub">Плавное размытие (блюр) панелей</string>
+    <string name="ForceSnowSub">Анимация падающего снега</string>
+    <string name="DisableDividersSub">Убрать разделительные линии между строками</string>
+    <string name="SmoothDrawerAnimationSub">Плавная анимация открытия бокового меню</string>
+
+    <string name="HideStickerTimeSub">Не накладывать время на стикеры</string>
+    <string name="UnlimitedRecentStickersSub">Не ограничивать число недавних стикеров</string>
+    <string name="HideCategoriesSub">Скрыть строку категорий в стикерах</string>
+    <string name="DisableJumpToNextChannelSub">Запретить автопереход к следующему каналу</string>
+    <string name="HideKeyboardOnScrollSub">Скрывать клавиатуру при прокрутке</string>
+    <string name="ShowActionTimestampsSub">Показывать время в служебных сообщениях</string>
+    <string name="AddCommaAfterMentionSub">Ставить запятую после @упоминания</string>
+    <string name="HideCounterSub">Скрыть счётчик при выборе медиа</string>
+    <string name="HideCameraTileSub">Скрыть плитку камеры в галерее</string>
+    <string name="StaticZoomSub">Фиксированный зум в видеосообщениях</string>
+    <string name="PauseOnMinimizeSub">Пауза видео при сворачивании приложения</string>
+    <string name="DisablePlaybackSub">Открывать видео во внешнем плеере</string>
+
+    <string name="PrefDiagnostics">📊 Диагностика и аналитика</string>
+    <string name="PrefMaintenance">⚙️ Обслуживание и аккаунт</string>
+    <string name="ResetSettingsSub">Сбросить все настройки приложения</string>
+    <string name="DeleteAccountSub">Удалить свой аккаунт Telegram</string>
 </resources>

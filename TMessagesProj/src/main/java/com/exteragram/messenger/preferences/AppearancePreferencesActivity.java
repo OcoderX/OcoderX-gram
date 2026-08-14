@@ -428,26 +428,26 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                 case 3:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == appearanceHeaderRow) {
-                        headerCell.setText(LocaleController.getString("Appearance", R.string.Appearance));
+                        headerCell.setText(LocaleController.getString("PrefVisualStyle", R.string.PrefVisualStyle));
                     } else if (position == drawerHeaderRow) {
-                        headerCell.setText(LocaleController.getString("DrawerElements", R.string.DrawerElements));
+                        headerCell.setText(LocaleController.getString("PrefDrawerMenu", R.string.PrefDrawerMenu));
                     } else if (position == drawerOptionsHeaderRow) {
                         headerCell.setText(LocaleController.getString("DrawerOptions", R.string.DrawerOptions));
                     } else if (position == solarIconsHeaderRow) {
                         headerCell.setText(LocaleController.getString("IconPack", R.string.IconPack));
                     } else if (position == foldersHeaderRow) {
-                        headerCell.setText(LocaleController.getString("Filters", R.string.Filters));
+                        headerCell.setText(LocaleController.getString("PrefTabsAndNavigation", R.string.PrefTabsAndNavigation));
                     } else if (position == chatListHeaderRow) {
-                        headerCell.setText(LocaleController.getString("ListOfChats", R.string.ListOfChats));
+                        headerCell.setText(LocaleController.getString("PrefChatList", R.string.PrefChatList));
                     }
                     break;
                 case 5:
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     textCheckCell.setEnabled(true, null);
                     if (position == useSystemFontsRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("UseSystemFonts", R.string.UseSystemFonts), ExteraConfig.useSystemFonts, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseSystemFonts", R.string.UseSystemFonts), LocaleController.getString("UseSystemFontsSub", R.string.UseSystemFontsSub), ExteraConfig.useSystemFonts, true, true);
                     } else if (position == useSystemEmojiRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("UseSystemEmoji", R.string.UseSystemEmoji), SharedConfig.useSystemEmoji, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseSystemEmoji", R.string.UseSystemEmoji), LocaleController.getString("UseSystemEmojiSub", R.string.UseSystemEmojiSub), SharedConfig.useSystemEmoji, true, true);
                     } else if (position == forceBlurRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("ForceBlur", R.string.ForceBlur), LocaleController.getString("ForceBlurInfo", R.string.ForceBlurInfo), ExteraConfig.forceBlur, true, true);
                     } else if (position == forceSnowRow) {
@@ -455,25 +455,25 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                     } else if (position == alternativeNavigationRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation), ExteraConfig.useLNavigation, false);
                     } else if (position == centerTitleRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("CenterTitle", R.string.CenterTitle), ExteraConfig.centerTitle, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("CenterTitle", R.string.CenterTitle), LocaleController.getString("CenterTitleSub", R.string.CenterTitleSub), ExteraConfig.centerTitle, true, false);
                     } else if (position == compactChatListRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("CompactChatList", R.string.CompactChatList), LocaleController.getString("CompactChatListInfo", R.string.CompactChatListInfo), ExteraConfig.compactChatList, true, true);
                     } else if (position == bottomNavigationRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("BottomNavigation", R.string.BottomNavigation), LocaleController.getString("BottomNavigationInfo", R.string.BottomNavigationInfo), ExteraConfig.bottomNavigation, true, true);
                     } else if (position == hideAllChatsRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.formatString("HideAllChats", R.string.HideAllChats, LocaleController.getString("AllChats", R.string.FilterAllChats)), ExteraConfig.hideAllChats, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.formatString("HideAllChats", R.string.HideAllChats, LocaleController.getString("AllChats", R.string.FilterAllChats)), LocaleController.getString("HideAllChatsSub", R.string.HideAllChatsSub), ExteraConfig.hideAllChats, true, false);
                     } else if (position == tabCounterRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("TabCounter", R.string.TabCounter), ExteraConfig.tabCounter, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("TabCounter", R.string.TabCounter), LocaleController.getString("TabCounterSub", R.string.TabCounterSub), ExteraConfig.tabCounter, true, true);
                     } else if (position == newSwitchStyleRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("NewSwitchStyle", R.string.NewSwitchStyle), ExteraConfig.newSwitchStyle, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("NewSwitchStyle", R.string.NewSwitchStyle), LocaleController.getString("NewSwitchStyleSub", R.string.NewSwitchStyleSub), ExteraConfig.newSwitchStyle, true, true);
                     } else if (position == disableDividersRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("DisableDividers", R.string.DisableDividers), ExteraConfig.disableDividers, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("DisableDividers", R.string.DisableDividers), LocaleController.getString("DisableDividersSub", R.string.DisableDividersSub), ExteraConfig.disableDividers, true, true);
                     } else if (position == hideActionBarStatusRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("HideActionBarStatus", R.string.HideActionBarStatus), ExteraConfig.hideActionBarStatus, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HideActionBarStatus", R.string.HideActionBarStatus), LocaleController.getString("HideActionBarStatusSub", R.string.HideActionBarStatusSub), ExteraConfig.hideActionBarStatus, true, true);
                     } else if (position == solarIconsRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("SolarIcons", R.string.SolarIcons), ExteraConfig.useSolarIcons, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("SolarIcons", R.string.SolarIcons), LocaleController.getString("SolarIconsSub", R.string.SolarIconsSub), ExteraConfig.useSolarIcons, true, false);
                     } else if (position == alternativeOpenAnimationRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("DrawerAlternativeOpeningAnimation", R.string.DrawerAlternativeOpeningAnimation), ExteraConfig.alternativeOpenAnimation, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("DrawerAlternativeOpeningAnimation", R.string.DrawerAlternativeOpeningAnimation), LocaleController.getString("SmoothDrawerAnimationSub", R.string.SmoothDrawerAnimationSub), ExteraConfig.alternativeOpenAnimation, true, false);
                     }
                     break;
                 case 2:

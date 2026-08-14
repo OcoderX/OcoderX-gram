@@ -621,6 +621,14 @@ public class FileLoader extends BaseController {
         if (imageLocation == null) {
             return;
         }
+        if (getUserConfig().isBotApiMode()) {
+            if (imageLocation.document != null) {
+                org.telegram.messenger.botapi.BotApiFileLoader.getInstance(currentAccount).downloadDocument(imageLocation.document);
+            } else if (imageLocation.photoSize != null) {
+                org.telegram.messenger.botapi.BotApiFileLoader.getInstance(currentAccount).downloadPhoto(null, imageLocation.photoSize);
+            }
+            return;
+        }
         if (cacheType == 0 && (imageLocation.isEncrypted() || imageLocation.photoSize != null && imageLocation.getSize() == 0)) {
             cacheType = 1;
         }
@@ -636,6 +644,10 @@ public class FileLoader extends BaseController {
 
     public void loadFile(TLRPC.Document document, Object parentObject, int priority, int cacheType) {
         if (document == null) {
+            return;
+        }
+        if (getUserConfig().isBotApiMode()) {
+            org.telegram.messenger.botapi.BotApiFileLoader.getInstance(currentAccount).downloadDocument(document);
             return;
         }
         if (cacheType == 0 && document.key != null) {

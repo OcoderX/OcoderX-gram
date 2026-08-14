@@ -213,7 +213,11 @@ public class ApplicationLoader extends Application {
             TLRPC.User user = UserConfig.getInstance(a).getCurrentUser();
             if (user != null) {
                 MessagesController.getInstance(a).putUser(user, true);
-                SendMessagesHelper.getInstance(a).checkUnsentMessages();
+                if (UserConfig.getInstance(a).isBotApiMode()) {
+                    org.telegram.messenger.botapi.BotApiPoller.getInstance(a).start();
+                } else {
+                    SendMessagesHelper.getInstance(a).checkUnsentMessages();
+                }
             }
         }
 
@@ -225,7 +229,9 @@ public class ApplicationLoader extends Application {
 
         MediaController.getInstance();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account
-            ContactsController.getInstance(a).checkAppAccount();
+            if (!UserConfig.getInstance(a).isBotApiMode()) {
+                ContactsController.getInstance(a).checkAppAccount();
+            }
             DownloadController.getInstance(a);
         }
         ChatThemeController.init();

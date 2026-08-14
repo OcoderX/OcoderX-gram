@@ -272,13 +272,13 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
                 case 2:
                     TextCell textCell = (TextCell) holder.itemView;
                     if (position == generalRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("General", R.string.General), R.drawable.msg_media, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("General", R.string.General), LocaleController.getString("GeneralPrefSubtitle", R.string.GeneralPrefSubtitle), R.drawable.msg_settings_old, true);
                     } else if (position == appearanceRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("Appearance", R.string.Appearance), R.drawable.msg_theme, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("Appearance", R.string.Appearance), LocaleController.getString("AppearancePrefSubtitle", R.string.AppearancePrefSubtitle), R.drawable.msg_theme, true);
                     } else if (position == chatsRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), R.drawable.msg_discussion, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), LocaleController.getString("ChatsPrefSubtitle", R.string.ChatsPrefSubtitle), R.drawable.msg_discussion, true);
                     } else if (position == otherRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("LocalOther", R.string.LocalOther), R.drawable.msg_fave, false);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("LocalOther", R.string.LocalOther), LocaleController.getString("OtherPrefSubtitle", R.string.OtherPrefSubtitle), R.drawable.msg_fave, false);
                     } else if (position == channelRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("Channel", R.string.Channel), "@OcoderXs", R.drawable.msg_channel, true);
                     } else if (position == groupRow) {

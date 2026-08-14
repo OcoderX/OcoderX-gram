@@ -616,53 +616,49 @@ public class ChatsPreferencesActivity extends BasePreferencesActivity implements
                     break;
                 case 3:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
-                    if (position == stickersHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.StickersName));
+                    if (position == stickersHeaderRow || position == stickerShapeHeaderRow) {
+                        headerCell.setText(LocaleController.getString("PrefStickers", R.string.PrefStickers));
                     } else if (position == chatsHeaderRow) {
-                        headerCell.setText(LocaleController.getString("GroupsAndChannelsLimitTitle", R.string.GroupsAndChannelsLimitTitle));
+                        headerCell.setText(LocaleController.getString("PrefChatBehavior", R.string.PrefChatBehavior));
                     } else if (position == messagesHeaderRow) {
-                        headerCell.setText(LocaleController.getString("MessagesChartTitle", R.string.MessagesChartTitle));
-                    } else if (position == videosHeaderRow) {
-                        headerCell.setText(LocaleController.getString("AutoDownloadVideos", R.string.AutoDownloadVideos));
-                    } else if (position == stickerShapeHeaderRow) {
-                        headerCell.setText(LocaleController.getString("StickerShape", R.string.StickerShape));
+                        headerCell.setText(LocaleController.getString("PrefMessageMenu", R.string.PrefMessageMenu));
+                    } else if (position == videosHeaderRow || position == photosHeaderRow) {
+                        headerCell.setText(LocaleController.getString("PrefMediaPlayback", R.string.PrefMediaPlayback));
                     } else if (position == doubleTapHeaderRow) {
-                        headerCell.setText(LocaleController.getString("DoubleTap", R.string.DoubleTap));
-                    } else if (position == photosHeaderRow) {
-                        headerCell.setText(LocaleController.getString("AutoDownloadPhotos", R.string.AutoDownloadPhotos));
+                        headerCell.setText(LocaleController.getString("PrefDoubleTap", R.string.PrefDoubleTap));
                     }
                     break;
                 case 5:
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     textCheckCell.setEnabled(true, null);
                     if (position == hideStickerTimeRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("StickerTime", R.string.StickerTime), ExteraConfig.hideStickerTime, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("StickerTime", R.string.StickerTime), LocaleController.getString("HideStickerTimeSub", R.string.HideStickerTimeSub), ExteraConfig.hideStickerTime, true, true);
                     } else if (position == unlimitedRecentStickersRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("UnlimitedRecentStickers", R.string.UnlimitedRecentStickers), ExteraConfig.unlimitedRecentStickers, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UnlimitedRecentStickers", R.string.UnlimitedRecentStickers), LocaleController.getString("UnlimitedRecentStickersSub", R.string.UnlimitedRecentStickersSub), ExteraConfig.unlimitedRecentStickers, true, true);
                     } else if (position == hideCategoriesRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("HideCategories", R.string.HideCategories), ExteraConfig.hideCategories, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HideCategories", R.string.HideCategories), LocaleController.getString("HideCategoriesSub", R.string.HideCategoriesSub), ExteraConfig.hideCategories, true, false);
                     } else if (position == addCommaAfterMentionRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("AddCommaAfterMention", R.string.AddCommaAfterMention), ExteraConfig.addCommaAfterMention, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("AddCommaAfterMention", R.string.AddCommaAfterMention), LocaleController.getString("AddCommaAfterMentionSub", R.string.AddCommaAfterMentionSub), ExteraConfig.addCommaAfterMention, true, false);
                     } else if (position == hideKeyboardOnScrollRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("HideKeyboardOnScroll", R.string.HideKeyboardOnScroll), ExteraConfig.hideKeyboardOnScroll, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HideKeyboardOnScroll", R.string.HideKeyboardOnScroll), LocaleController.getString("HideKeyboardOnScrollSub", R.string.HideKeyboardOnScrollSub), ExteraConfig.hideKeyboardOnScroll, true, true);
                     } else if (position == hideShareButtonRow) {
                         textCheckCell.setTextAndCheck(LocaleController.formatString("HideShareButton", R.string.HideShareButton, LocaleController.getString("ShareFile", R.string.ShareFile)), ExteraConfig.hideShareButton, true);
                     } else if (position == disableJumpToNextChannelRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("DisableJumpToNextChannel", R.string.DisableJumpToNextChannel), ExteraConfig.disableJumpToNextChannel, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("DisableJumpToNextChannel", R.string.DisableJumpToNextChannel), LocaleController.getString("DisableJumpToNextChannelSub", R.string.DisableJumpToNextChannelSub), ExteraConfig.disableJumpToNextChannel, true, true);
                     } else if (position == showActionTimestampsRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("ShowActionTimestamps", R.string.ShowActionTimestamps), ExteraConfig.showActionTimestamps, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("ShowActionTimestamps", R.string.ShowActionTimestamps), LocaleController.getString("ShowActionTimestampsSub", R.string.ShowActionTimestampsSub), ExteraConfig.showActionTimestamps, true, false);
                     } else if (position == staticZoomRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("StaticZoom", R.string.StaticZoom), LocaleController.getString("StaticZoomInfo", R.string.StaticZoomInfo), ExteraConfig.staticZoom, true, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("StaticZoom", R.string.StaticZoom), LocaleController.getString("StaticZoomSub", R.string.StaticZoomSub), ExteraConfig.staticZoom, true, true);
                     } else if (position == rememberLastUsedCameraRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("RememberLastUsedCamera", R.string.RememberLastUsedCamera), LocaleController.getString("RememberLastUsedCameraInfo", R.string.RememberLastUsedCameraInfo), ExteraConfig.rememberLastUsedCamera, true, true);
                     } else if (position == hideCameraTileRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("HideCameraTile", R.string.HideCameraTile), ExteraConfig.hideCameraTile, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HideCameraTile", R.string.HideCameraTile), LocaleController.getString("HideCameraTileSub", R.string.HideCameraTileSub), ExteraConfig.hideCameraTile, true, false);
                     } else if (position == pauseOnMinimizeRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("PauseOnMinimize", R.string.PauseOnMinimize), LocaleController.getString("PauseOnMinimizeInfo", R.string.PauseOnMinimizeInfo), ExteraConfig.pauseOnMinimize, true, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("PauseOnMinimize", R.string.PauseOnMinimize), LocaleController.getString("PauseOnMinimizeSub", R.string.PauseOnMinimizeSub), ExteraConfig.pauseOnMinimize, true, true);
                     } else if (position == disablePlaybackRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("DisablePlayback", R.string.DisablePlayback), ExteraConfig.disablePlayback, false);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("DisablePlayback", R.string.DisablePlayback), LocaleController.getString("DisablePlaybackSub", R.string.DisablePlaybackSub), ExteraConfig.disablePlayback, true, false);
                     } else if (position == hideCounterRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HidePhotoCounter", R.string.HidePhotoCounter), LocaleController.getString("HidePhotoCounterInfo", R.string.HidePhotoCounterInfo), ExteraConfig.hidePhotoCounter, true, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HidePhotoCounter", R.string.HidePhotoCounter), LocaleController.getString("HideCounterSub", R.string.HideCounterSub), ExteraConfig.hidePhotoCounter, true, true);
                     }
                     break;
                 case 7:

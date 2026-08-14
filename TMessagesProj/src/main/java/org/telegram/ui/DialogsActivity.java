@@ -6864,7 +6864,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else {
             profileArgs.putLong("chat_id", -dialogId);
         }
-        options.add(isUser ? R.drawable.msg_user : R.drawable.msg_channel, LocaleController.getString("OpenProfile", R.string.OpenProfile), () -> {
+        options.add(R.drawable.msg_openprofile, LocaleController.getString("OpenProfile", R.string.OpenProfile), () -> {
             presentFragment(new ProfileActivity(profileArgs));
         });
 
@@ -6878,7 +6878,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             presentFragment(new ChatActivity(chatArgs));
         });
 
-        options.add(R.drawable.msg_photo, LocaleController.getString("ShowPhoto", R.string.ShowPhoto), () -> {
+        options.add(R.drawable.msg_photos, LocaleController.getString("ShowPhoto", R.string.ShowPhoto), () -> {
             showChatPreview(cell);
         });
 
@@ -6892,9 +6892,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             boolean hasUnread = dialog.unread_count > 0 || dialog.unread_mark;
             options.add(hasUnread ? R.drawable.msg_markread : R.drawable.msg_markunread, hasUnread ? LocaleController.getString("MarkAsRead", R.string.MarkAsRead) : LocaleController.getString("MarkAsUnread", R.string.MarkAsUnread), () -> {
                 if (hasUnread) {
-                    getMessagesStorage().markDialogAsRead(dialogId, 0, 0, 0, false, 0, 0, true, 0);
+                    getMessagesController().markDialogAsRead(dialogId, dialog.top_message, dialog.top_message, dialog.last_message_date, false, 0, 0, true, 0);
                 } else {
-                    getMessagesStorage().markDialogAsUnread(dialogId, 0);
+                    getMessagesController().markDialogAsUnread(dialogId, null, 0);
                 }
             });
         }

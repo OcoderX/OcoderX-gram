@@ -67,6 +67,10 @@ public class UserConfig extends BaseController {
     public TLRPC.TL_help_termsOfService unacceptedTermsOfService;
     public long autoDownloadConfigLoadTime;
 
+    public boolean botApiMode;
+    public String botApiToken;
+    public int botApiUpdateOffset;
+
     public List<String> awaitBillingProductIds = new ArrayList<>();
     public TLRPC.InputStorePaymentPurpose billingPaymentPurpose;
 
@@ -161,6 +165,13 @@ public class UserConfig extends BaseController {
                     editor.putBoolean("syncContacts", syncContacts);
                     editor.putBoolean("suggestContacts", suggestContacts);
                     editor.putBoolean("hasSecureData", hasSecureData);
+                    editor.putBoolean("botApiMode", botApiMode);
+                    if (botApiToken != null) {
+                        editor.putString("botApiToken", botApiToken);
+                    } else {
+                        editor.remove("botApiToken");
+                    }
+                    editor.putInt("botApiUpdateOffset", botApiUpdateOffset);
                     editor.putBoolean("notificationsSettingsLoaded3", notificationsSettingsLoaded);
                     editor.putBoolean("notificationsSignUpSettingsLoaded", notificationsSignUpSettingsLoaded);
                     editor.putLong("autoDownloadConfigLoadTime", autoDownloadConfigLoadTime);
@@ -265,6 +276,17 @@ public class UserConfig extends BaseController {
         }
     }
 
+    public boolean isBotApiMode() {
+        synchronized (sync) {
+            return botApiMode;
+        }
+    }
+
+    public void setBotApiUpdateOffset(int offset) {
+        botApiUpdateOffset = offset;
+        saveConfig(false);
+    }
+
     public void setCurrentUser(TLRPC.User user) {
         synchronized (sync) {
             TLRPC.User oldUser = currentUser;
@@ -312,6 +334,9 @@ public class UserConfig extends BaseController {
             syncContacts = preferences.getBoolean("syncContacts", true);
             suggestContacts = preferences.getBoolean("suggestContacts", true);
             hasSecureData = preferences.getBoolean("hasSecureData", false);
+            botApiMode = preferences.getBoolean("botApiMode", false);
+            botApiToken = preferences.getString("botApiToken", null);
+            botApiUpdateOffset = preferences.getInt("botApiUpdateOffset", 0);
             notificationsSettingsLoaded = preferences.getBoolean("notificationsSettingsLoaded3", false);
             notificationsSignUpSettingsLoaded = preferences.getBoolean("notificationsSignUpSettingsLoaded", false);
             autoDownloadConfigLoadTime = preferences.getLong("autoDownloadConfigLoadTime", 0);
@@ -497,6 +522,9 @@ public class UserConfig extends BaseController {
         unacceptedTermsOfService = null;
         filtersLoaded = false;
         hasSecureData = false;
+        botApiMode = false;
+        botApiToken = null;
+        botApiUpdateOffset = 0;
         loginTime = (int) (System.currentTimeMillis() / 1000);
         lastContactsSyncTime = (int) (System.currentTimeMillis() / 1000) - 23 * 60 * 60;
         lastHintsSyncTime = (int) (System.currentTimeMillis() / 1000) - 25 * 60 * 60;
