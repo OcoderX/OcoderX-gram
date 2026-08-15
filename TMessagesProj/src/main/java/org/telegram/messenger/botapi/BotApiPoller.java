@@ -71,11 +71,13 @@ public class BotApiPoller extends BaseController {
         int offset = getUserConfig().botApiUpdateOffset;
         try {
             List<BotApiModels.Update> updates = client.getUpdates(token, offset, 30);
+            BotApiDebugLog.log("pollLoop got " + updates.size() + " updates, offset=" + offset);
             int newOffset = offset;
             for (BotApiModels.Update update : updates) {
                 try {
                     BotApiTranslator.getInstance(currentAccount).processUpdate(update);
                 } catch (Exception e) {
+                    BotApiDebugLog.log("processUpdate failed for update " + update.updateId, e);
                     FileLog.e(e);
                 }
                 if (update.updateId >= newOffset) {
@@ -86,6 +88,7 @@ public class BotApiPoller extends BaseController {
                 getUserConfig().setBotApiUpdateOffset(newOffset);
             }
         } catch (Exception e) {
+            BotApiDebugLog.log("pollLoop outer exception", e);
             FileLog.e(e);
             try {
                 Thread.sleep(3000);

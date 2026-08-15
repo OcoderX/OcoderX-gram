@@ -8506,6 +8506,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     }
                     attributeVideo.round_message = isRound;
                     document.attributes.add(attributeVideo);
+                    android.util.Log.d("OCODERX_ROUND_DEBUG", "prepareSendingVideo: isRound=" + isRound + " videoEditedInfo.roundVideo=" + (videoEditedInfo != null ? videoEditedInfo.roundVideo : "null") + " needConvert=" + (videoEditedInfo != null && videoEditedInfo.needConvert()) + " resultWidth=" + (videoEditedInfo != null ? videoEditedInfo.resultWidth : -1) + " resultHeight=" + (videoEditedInfo != null ? videoEditedInfo.resultHeight : -1) + " originalWidth=" + (videoEditedInfo != null ? videoEditedInfo.originalWidth : -1) + " originalHeight=" + (videoEditedInfo != null ? videoEditedInfo.originalHeight : -1));
                     if (videoEditedInfo != null && videoEditedInfo.needConvert()) {
                         if (videoEditedInfo.muted) {
                             document.attributes.add(new TLRPC.TL_documentAttributeAnimated());

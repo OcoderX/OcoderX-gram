@@ -12639,6 +12639,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     }
                     if (sendPhotoType != SELECT_TYPE_NO_SELECT) {
                         processOpenVideo(currentPathObject, isMuted, start, end, compressQuality);
+                        android.util.Log.d("OCODERX_ROUND_DEBUG", "branch check: isDocumentsPicker=" + isDocumentsPicker + " sdk=" + Build.VERSION.SDK_INT + " sendPhotoType=" + sendPhotoType + " SELECT_TYPE_AVATAR=" + SELECT_TYPE_AVATAR + " roundItem_null=" + (roundItem == null));
                         if (isDocumentsPicker || Build.VERSION.SDK_INT < 18) {
                             showVideoTimeline(false, animated);
                             videoAvatarTooltip.setVisibility(View.GONE);
@@ -12672,6 +12673,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                 mirrorItem.setTag(null);
                                 AndroidUtilities.updateViewVisibilityAnimated(muteItem, true, 1f, animated);
                                 compressItem.setVisibility(View.VISIBLE);
+                                itemsLayout.post(() -> android.util.Log.d("OCODERX_ROUND_DEBUG", "after-set roundItem.visibility=" + roundItem.getVisibility() + " (VISIBLE=" + View.VISIBLE + ") width=" + roundItem.getWidth() + " height=" + roundItem.getHeight() + " itemsLayoutChildren=" + itemsLayout.getChildCount() + " itemsLayoutWidth=" + itemsLayout.getWidth()));
                             } else {
                                 videoAvatarTooltip.setVisibility(View.VISIBLE);
                                 roundItem.setVisibility(View.GONE);

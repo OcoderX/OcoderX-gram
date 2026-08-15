@@ -4135,6 +4135,16 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         lastHeight = AndroidUtilities.displaySize.y;
         lastWidth = getParentWidth();
         isRoundVideo = messageObject != null && messageObject.isRoundVideo();
+        if (messageObject != null && messageObject.getDocument() != null && MessageObject.isVideoDocument(messageObject.getDocument())) {
+            TLRPC.Document dbg_doc = messageObject.getDocument();
+            boolean dbg_roundAttr = false;
+            for (int dbg_i = 0; dbg_i < dbg_doc.attributes.size(); dbg_i++) {
+                if (dbg_doc.attributes.get(dbg_i) instanceof TLRPC.TL_documentAttributeVideo) {
+                    dbg_roundAttr = ((TLRPC.TL_documentAttributeVideo) dbg_doc.attributes.get(dbg_i)).round_message;
+                }
+            }
+            android.util.Log.d("OCODERX_ROUND_DEBUG", "cell bind: mid=" + messageObject.getId() + " isRoundVideo()=" + isRoundVideo + " type=" + messageObject.type + " document.round_message=" + dbg_roundAttr + " w=" + dbg_doc.thumbs.size());
+        }
         mediaSpoilerRevealProgress = 0f;
         TLRPC.Message newReply = messageObject.hasValidReplyMessageObject() ? messageObject.replyMessageObject.messageOwner : null;
         boolean messageIdChanged = currentMessageObject == null || currentMessageObject.getId() != messageObject.getId();

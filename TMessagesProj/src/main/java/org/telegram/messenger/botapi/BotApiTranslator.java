@@ -44,9 +44,13 @@ public class BotApiTranslator extends BaseController {
     public void processUpdate(BotApiModels.Update update) {
         BotApiModels.Message msg = update.message != null ? update.message : update.channelPost;
         if (msg == null) {
+            BotApiDebugLog.log("processUpdate " + update.updateId + " has no message/channelPost, skipping");
             return;
         }
+        BotApiDebugLog.log("processUpdate " + update.updateId + " chatType=" + (msg.chat != null ? msg.chat.type : "null")
+                + " chatId=" + (msg.chat != null ? msg.chat.id : 0) + " fromId=" + (msg.from != null ? msg.from.id : 0) + " text=" + msg.text);
         ingestMessage(msg, true);
+        BotApiDebugLog.log("processUpdate " + update.updateId + " ingestMessage returned normally");
     }
 
     /**
@@ -132,10 +136,15 @@ public class BotApiTranslator extends BaseController {
 
         boolean notify = !message.out;
         AndroidUtilities.runOnUIThread(() -> {
-            getMessagesController().updateInterfaceWithMessages(dialogId, pushMessages, false);
-            getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
-            if (notify) {
-                getNotificationsController().processNewMessages(pushMessages, true, false, null);
+            try {
+                getMessagesController().updateInterfaceWithMessages(dialogId, pushMessages, false);
+                getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
+                if (notify) {
+                    getNotificationsController().processNewMessages(pushMessages, true, false, null);
+                }
+                BotApiDebugLog.log("UI update applied for dialog " + dialogId);
+            } catch (Exception e) {
+                BotApiDebugLog.log("UI update failed for dialog " + dialogId, e);
             }
         });
 
