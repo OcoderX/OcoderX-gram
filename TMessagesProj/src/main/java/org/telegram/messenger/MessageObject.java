@@ -3891,10 +3891,25 @@ public class MessageObject {
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaInvoice) {
                     messageText = getMedia(messageOwner).description;
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaUnsupported) {
-                    messageText = LocaleController.getString("UnsupportedMedia", R.string.UnsupportedMedia)
-                            .replace("https://telegram.org/update", "https://t.me/OcoderXs")
-                            .replace("http://telegram.org/update", "https://t.me/OcoderXs")
-                            .replace("Telegram", AyuConstants.APP_NAME);
+                    if (!TextUtils.isEmpty(messageOwner.message)) {
+                        messageText = messageOwner.message;
+                    } else {
+                        String lang = LocaleController.getInstance().getCurrentLocale().getLanguage();
+                        CharSequence rawText;
+                        if ("uz".equals(lang)) {
+                            rawText = "🚀 **Yangi formatdagi xabar**\n\nUshbu xabar Telegram\'ning yangi yangilanishida yaratilgan (Story, Giveaway yoki maxsus media).\n\n📢 Yangilanishlar: https://t.me/OcoderXs";
+                        } else if ("ru".equals(lang)) {
+                            rawText = "🚀 **Сообщение нового формата**\n\nЭто сообщение создано в новой версии Telegram (История, Розыгрыш или спец. медиа).\n\n📢 Обновления: https://t.me/OcoderXs";
+                        } else {
+                            rawText = "🚀 **New Format Message**\n\nThis message was created in a newer Telegram version (Story, Giveaway or special media).\n\n📢 Updates: https://t.me/OcoderXs";
+                        }
+                        CharSequence[] messageArr = new CharSequence[]{rawText};
+                        ArrayList<TLRPC.MessageEntity> parsed = MediaDataController.getInstance(currentAccount).getEntities(messageArr, true);
+                        messageText = messageArr[0];
+                        if (parsed != null && !parsed.isEmpty()) {
+                            messageOwner.entities = parsed;
+                        }
+                    }
                 } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument) {
                     if (isSticker() || isAnimatedStickerDocument(getDocument(), true)) {
                         String sch = getStickerChar();

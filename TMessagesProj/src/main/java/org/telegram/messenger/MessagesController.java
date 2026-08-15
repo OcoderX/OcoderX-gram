@@ -8586,6 +8586,13 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void loadDialogs(final int folderId, int offset, int count, boolean fromCache, Runnable onEmptyCallback) {
+        if (getUserConfig().isBotApiMode()) {
+            loadingDialogs.put(folderId, false);
+            dialogsEndReached.put(folderId, true);
+            serverDialogsEndReached.put(folderId, true);
+            getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
+            return;
+        }
         if (loadingDialogs.get(folderId) || resetingDialogs) {
             return;
         }
@@ -12921,6 +12928,9 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void loadPinnedDialogs(final int folderId, long newDialogId, ArrayList<Long> order) {
+        if (getUserConfig().isBotApiMode()) {
+            return;
+        }
         if (loadingPinnedDialogs.indexOfKey(folderId) >= 0 || getUserConfig().isPinnedDialogsLoaded(folderId)) {
             return;
         }

@@ -58,6 +58,10 @@ public class ExteraConfig {
     public static boolean useLNavigation;
     public static boolean bottomNavigation;
     public static boolean compactChatList;
+    public static final int CHAT_LIST_STYLE_DEFAULT = 0;
+    public static final int CHAT_LIST_STYLE_CARDS = 1;
+    public static final int CHAT_LIST_STYLE_GROUPED = 2;
+    public static int chatListStyle;
 
     public static int eventType;
     public static boolean alternativeOpenAnimation;
@@ -208,6 +212,7 @@ public class ExteraConfig {
             useLNavigation = preferences.getBoolean("useLNavigation", false);
             bottomNavigation = preferences.getBoolean("bottomNavigation", false);
             compactChatList = preferences.getBoolean("compactChatList", false);
+            chatListStyle = preferences.getInt("chatListStyle", CHAT_LIST_STYLE_CARDS);
 
             eventType = preferences.getInt("eventType", 0);
             alternativeOpenAnimation = preferences.getBoolean("alternativeOpenAnimation", true);

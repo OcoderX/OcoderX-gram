@@ -27811,30 +27811,10 @@ public class TLRPC {
         }
     }
 
-    public static class TL_messageReplyHeader extends TLObject {
+    public static class TL_messageReplyHeader_layer158 extends TL_messageReplyHeader {
         public static int constructor = 0xa6d57763;
 
-        public int flags;
-        public boolean reply_to_scheduled;
-        public boolean forum_topic;
-        public int reply_to_msg_id;
-        public Peer reply_to_peer_id;
-        public int reply_to_top_id;
-        public long reply_to_random_id; //custom
-
-        public static TL_messageReplyHeader TLdeserialize(AbstractSerializedData stream, int constructor, boolean exception) {
-            if (TL_messageReplyHeader.constructor != constructor) {
-                if (exception) {
-                    throw new RuntimeException(String.format("can't parse magic %x in TL_messageReplyHeader", constructor));
-                } else {
-                    return null;
-                }
-            }
-            TL_messageReplyHeader result = new TL_messageReplyHeader();
-            result.readParams(stream, exception);
-            return result;
-        }
-
+        @Override
         public void readParams(AbstractSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
             reply_to_scheduled = (flags & 4) != 0;
@@ -27848,6 +27828,7 @@ public class TLRPC {
             }
         }
 
+        @Override
         public void serializeToStream(AbstractSerializedData stream) {
             stream.writeInt32(constructor);
             flags = reply_to_scheduled ? (flags | 4) : (flags &~ 4);
@@ -27859,6 +27840,196 @@ public class TLRPC {
             }
             if ((flags & 2) != 0) {
                 stream.writeInt32(reply_to_top_id);
+            }
+        }
+    }
+
+    public static class TL_messageReplyHeader_layer166 extends TL_messageReplyHeader {
+        public static int constructor = 0xafb6742d;
+
+        @Override
+        public void readParams(AbstractSerializedData stream, boolean exception) {
+            flags = stream.readInt32(exception);
+            reply_to_scheduled = (flags & 4) != 0;
+            forum_topic = (flags & 8) != 0;
+            quote = (flags & 512) != 0;
+            if ((flags & 16) != 0) {
+                reply_to_msg_id = stream.readInt32(exception);
+            }
+            if ((flags & 1) != 0) {
+                reply_to_peer_id = Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 32) != 0) {
+                reply_from = MessageFwdHeader.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 256) != 0) {
+                reply_media = MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 2) != 0) {
+                reply_to_top_id = stream.readInt32(exception);
+            }
+            if ((flags & 64) != 0) {
+                quote_text = stream.readString(exception);
+            }
+            if ((flags & 128) != 0) {
+                int magic = stream.readInt32(exception);
+                if (magic != 0x1cb5c415) {
+                    if (exception) {
+                        throw new RuntimeException(String.format("wrong Vector magic, got %x", magic));
+                    }
+                    return;
+                }
+                int count = stream.readInt32(exception);
+                for (int a = 0; a < count; a++) {
+                    MessageEntity object = MessageEntity.TLdeserialize(stream, stream.readInt32(exception), exception);
+                    if (object == null) {
+                        return;
+                    }
+                    quote_entities.add(object);
+                }
+            }
+            if ((flags & 1024) != 0) {
+                quote_offset = stream.readInt32(exception);
+            }
+        }
+    }
+
+    public static class TL_messageReplyHeader extends TLObject {
+        public static int constructor = 0x1b97dd66;
+
+        public int flags;
+        public boolean reply_to_scheduled;
+        public boolean forum_topic;
+        public boolean quote;
+        public boolean reply_to_ephemeral;
+        public int reply_to_msg_id;
+        public Peer reply_to_peer_id;
+        public MessageFwdHeader reply_from;
+        public MessageMedia reply_media;
+        public int reply_to_top_id;
+        public String quote_text;
+        public ArrayList<MessageEntity> quote_entities = new ArrayList<>();
+        public int quote_offset;
+        public int todo_item_id;
+        public byte[] poll_option;
+        public long reply_to_random_id; //custom
+
+        public static TL_messageReplyHeader TLdeserialize(AbstractSerializedData stream, int constructor, boolean exception) {
+            TL_messageReplyHeader result = null;
+            switch (constructor) {
+                case 0xa6d57763:
+                    result = new TL_messageReplyHeader_layer158();
+                    break;
+                case 0xafb6742d:
+                    result = new TL_messageReplyHeader_layer166();
+                    break;
+                case 0x1b97dd66:
+                    result = new TL_messageReplyHeader();
+                    break;
+            }
+            if (result == null && exception) {
+                throw new RuntimeException(String.format("can't parse magic %x in TL_messageReplyHeader", constructor));
+            }
+            if (result != null) {
+                result.readParams(stream, exception);
+            }
+            return result;
+        }
+
+        public void readParams(AbstractSerializedData stream, boolean exception) {
+            flags = stream.readInt32(exception);
+            reply_to_scheduled = (flags & 4) != 0;
+            forum_topic = (flags & 8) != 0;
+            quote = (flags & 512) != 0;
+            reply_to_ephemeral = (flags & 8192) != 0;
+            if ((flags & 16) != 0) {
+                reply_to_msg_id = stream.readInt32(exception);
+            }
+            if ((flags & 1) != 0) {
+                reply_to_peer_id = Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 32) != 0) {
+                reply_from = MessageFwdHeader.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 256) != 0) {
+                reply_media = MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 2) != 0) {
+                reply_to_top_id = stream.readInt32(exception);
+            }
+            if ((flags & 64) != 0) {
+                quote_text = stream.readString(exception);
+            }
+            if ((flags & 128) != 0) {
+                int magic = stream.readInt32(exception);
+                if (magic != 0x1cb5c415) {
+                    if (exception) {
+                        throw new RuntimeException(String.format("wrong Vector magic, got %x", magic));
+                    }
+                    return;
+                }
+                int count = stream.readInt32(exception);
+                for (int a = 0; a < count; a++) {
+                    MessageEntity object = MessageEntity.TLdeserialize(stream, stream.readInt32(exception), exception);
+                    if (object == null) {
+                        return;
+                    }
+                    quote_entities.add(object);
+                }
+            }
+            if ((flags & 1024) != 0) {
+                quote_offset = stream.readInt32(exception);
+            }
+            if ((flags & 2048) != 0) {
+                todo_item_id = stream.readInt32(exception);
+            }
+            if ((flags & 4096) != 0) {
+                poll_option = stream.readByteArray(exception);
+            }
+        }
+
+        public void serializeToStream(AbstractSerializedData stream) {
+            stream.writeInt32(constructor);
+            flags = reply_to_scheduled ? (flags | 4) : (flags &~ 4);
+            flags = forum_topic ? (flags | 8) : (flags &~ 8);
+            flags = quote ? (flags | 512) : (flags &~ 512);
+            flags = reply_to_ephemeral ? (flags | 8192) : (flags &~ 8192);
+            flags = reply_to_msg_id != 0 ? (flags | 16) : (flags &~ 16);
+            stream.writeInt32(flags);
+            if ((flags & 16) != 0) {
+                stream.writeInt32(reply_to_msg_id);
+            }
+            if ((flags & 1) != 0) {
+                reply_to_peer_id.serializeToStream(stream);
+            }
+            if ((flags & 32) != 0) {
+                reply_from.serializeToStream(stream);
+            }
+            if ((flags & 256) != 0) {
+                reply_media.serializeToStream(stream);
+            }
+            if ((flags & 2) != 0) {
+                stream.writeInt32(reply_to_top_id);
+            }
+            if ((flags & 64) != 0) {
+                stream.writeString(quote_text);
+            }
+            if ((flags & 128) != 0) {
+                stream.writeInt32(0x1cb5c415);
+                int count = quote_entities.size();
+                stream.writeInt32(count);
+                for (int a = 0; a < count; a++) {
+                    quote_entities.get(a).serializeToStream(stream);
+                }
+            }
+            if ((flags & 1024) != 0) {
+                stream.writeInt32(quote_offset);
+            }
+            if ((flags & 2048) != 0) {
+                stream.writeInt32(todo_item_id);
+            }
+            if ((flags & 4096) != 0) {
+                stream.writeByteArray(poll_option);
             }
         }
     }

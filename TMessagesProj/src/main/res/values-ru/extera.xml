@@ -236,6 +236,10 @@
     <string name="BottomNavigationInfo">Разместить папки и вкладки чатов внизу экрана.</string>
     <string name="CompactChatList">Компактный список чатов</string>
     <string name="CompactChatListInfo">Уменьшить высоту строк и отступы, чтобы на экране помещалось больше чатов.</string>
+    <string name="ChatListStyle">Стиль списка чатов</string>
+    <string name="ChatListStyleDefault">Классический / Плоский</string>
+    <string name="ChatListStyleCards">Блочные карточки (По умолчанию)</string>
+    <string name="ChatListStyleGrouped">iOS Группированный Inset</string>
 
     <string name="ThemeAmoledBlack">Pure AMOLED Black</string>
     <string name="ThemeCyberpunk">Cyberpunk</string>

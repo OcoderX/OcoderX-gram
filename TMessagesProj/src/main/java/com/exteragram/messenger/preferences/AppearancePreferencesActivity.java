@@ -76,6 +76,10 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
             LocaleController.getString("NewYear", R.string.NewYear),
             LocaleController.getString("ValentinesDay", R.string.ValentinesDay),
             LocaleController.getString("Halloween", R.string.Halloween)
+    }, chatListStyles = new CharSequence[]{
+            LocaleController.getString("ChatListStyleDefault", R.string.ChatListStyleDefault),
+            LocaleController.getString("ChatListStyleCards", R.string.ChatListStyleCards),
+            LocaleController.getString("ChatListStyleGrouped", R.string.ChatListStyleGrouped)
     };
 
     private int avatarCornersPreviewRow;
@@ -92,6 +96,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
 
     private int chatListHeaderRow;
     private int chatListPreviewRow;
+    private int chatListStyleRow;
     private int hideActionBarStatusRow;
     private int centerTitleRow;
     private int actionBarTitleRow;
@@ -141,6 +146,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
 
         chatListHeaderRow = newRow();
         chatListPreviewRow = newRow();
+        chatListStyleRow = newRow();
         actionBarTitleRow = newRow();
         hideActionBarStatusRow = getUserConfig().isPremium() ? newRow() : -1;
         centerTitleRow = newRow();
@@ -320,6 +326,18 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
             chatListPreviewCell.updateStatus(true);
             ((TextCheckCell) view).setChecked(ExteraConfig.hideActionBarStatus);
             parentLayout.rebuildAllFragmentViews(false, false);
+        } else if (position == chatListStyleRow) {
+            if (getParentActivity() == null) {
+                return;
+            }
+            PopupUtils.showDialog(chatListStyles, LocaleController.getString("ChatListStyle", R.string.ChatListStyle), ExteraConfig.chatListStyle, getContext(), i -> {
+                ExteraConfig.editor.putInt("chatListStyle", ExteraConfig.chatListStyle = i).apply();
+                listAdapter.notifyItemChanged(chatListStyleRow, payload);
+                if (getListView().getLayoutManager() != null)
+                    recyclerViewState = getListView().getLayoutManager().onSaveInstanceState();
+                parentLayout.rebuildAllFragmentViews(true, true);
+                getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
+            });
         } else if (position == actionBarTitleRow) {
             if (getParentActivity() == null) {
                 return;
@@ -506,6 +524,8 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                     TextSettingsCell textSettingsCell = (TextSettingsCell) holder.itemView;
                     if (position == eventChooserRow) {
                         textSettingsCell.setTextAndValue(LocaleController.getString("DrawerIconSet", R.string.DrawerIconSet), events[ExteraConfig.eventType], payload, true);
+                    } else if (position == chatListStyleRow) {
+                        textSettingsCell.setTextAndValue(LocaleController.getString("ChatListStyle", R.string.ChatListStyle), chatListStyles[Math.min(chatListStyles.length - 1, Math.max(0, ExteraConfig.chatListStyle))], payload, true);
                     } else if (position == actionBarTitleRow) {
                         textSettingsCell.setTextAndValue(LocaleController.getString("ActionBarTitle", R.string.ActionBarTitle), titles[ExteraConfig.titleText], payload, true);
                     } else if (position == tabTitleRow) {
@@ -537,7 +557,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                 return 2;
             } else if (position == appearanceHeaderRow || position == drawerHeaderRow || position == drawerOptionsHeaderRow || position == solarIconsHeaderRow || position == foldersHeaderRow || position == chatListHeaderRow) {
                 return 3;
-            } else if (position == eventChooserRow || position == actionBarTitleRow || position == tabStyleRow || position == tabTitleRow) {
+            } else if (position == eventChooserRow || position == actionBarTitleRow || position == tabStyleRow || position == tabTitleRow || position == chatListStyleRow) {
                 return 7;
             } else if (position == appearanceDividerRow || position == solarIconsInfoRow || position == foldersDividerRow || position == chatListDividerRow) {
                 return 8;

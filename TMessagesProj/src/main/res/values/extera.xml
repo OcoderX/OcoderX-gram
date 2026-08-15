@@ -240,6 +240,10 @@
     <string name="BottomNavigationInfo">Place chat folders and tabs at the bottom of the screen.</string>
     <string name="CompactChatList">Compact Chat List</string>
     <string name="CompactChatListInfo">Reduce chat row height and spacing to fit more chats on the screen.</string>
+    <string name="ChatListStyle">Chat List Style</string>
+    <string name="ChatListStyleDefault">Classic / Flat</string>
+    <string name="ChatListStyleCards">Cards / Bubble</string>
+    <string name="ChatListStyleGrouped">iOS Grouped Inset</string>
 
     <string name="ThemeAmoledBlack">Pure AMOLED Black</string>
     <string name="ThemeCyberpunk">Cyberpunk</string>
@@ -309,7 +313,7 @@
     <string name="TabStyleSub">Customize folder tabs shape and style</string>
     <string name="TabTitleSub">Display icons, text, or both on tabs</string>
     <string name="TabCounterSub">Show unread message badge count on tabs</string>
-    <string name="HideAllChatsSub">Hide 'All Chats' tab and show custom folders</string>
+    <string name="HideAllChatsSub">Hide \'All Chats\' tab and show custom folders</string>
     <string name="CompactChatListSub">Reduce row height to fit more chats on screen</string>
     <string name="CenterTitleSub">Center header title in the top bar</string>
     <string name="HideActionBarStatusSub">Hide connecting &amp; updating status text</string>

@@ -24331,7 +24331,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 icons.add(idx, R.drawable.msg_recent);
             }
 
-            if (message != null && !selectedObject.isSponsored()) {
+            if (message != null && !message.isSponsored()) {
                 if (AyuConfig.showCopyIdInMenu) {
                     items.add(LocaleController.getString("ContextCopyID", R.string.ContextCopyID));
                     options.add(AyuConstants.OPTION_COPY_ID);
@@ -24342,7 +24342,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     options.add(AyuConstants.OPTION_RAW_VIEWER);
                     icons.add(R.drawable.msg_log);
                 }
-                if (selectedObject.isVideo() && !selectedObject.isRoundVideo() && ChatObject.canSendRoundVideo(currentChat)) {
+                if (selectedObject != null && selectedObject.isVideo() && !selectedObject.isRoundVideo() && ChatObject.canSendRoundVideo(currentChat)) {
                     items.add(LocaleController.getString("SendAsVideoNote", R.string.SendAsVideoNote));
                     options.add(AyuConstants.OPTION_CONVERT_ROUND_VIDEO);
                     icons.add(R.drawable.msg_video);

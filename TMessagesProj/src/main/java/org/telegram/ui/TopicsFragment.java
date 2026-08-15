@@ -2785,6 +2785,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                 TopicDialogCell dialogCell = (TopicDialogCell) holder.itemView;
 
                 TLRPC.Message tlMessage = topic.topMessage;
+                if (tlMessage == null && topic.topicStartMessage != null) {
+                    tlMessage = topic.topicStartMessage;
+                }
                 int oldId = dialogCell.forumTopic == null ? 0 : dialogCell.forumTopic.id;
                 int newId = topic.id;
                 boolean animated = oldId == newId && dialogCell.position == position && animatedUpdateEnabled;
@@ -2861,7 +2864,11 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
             xOffset = inPreviewMode && checkBox != null ? checkBox.getProgress() * AndroidUtilities.dp(30) : 0;
             canvas.save();
             canvas.translate(xOffset, translateY = -AndroidUtilities.dp(4));
-            canvas.drawColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            if (ExteraConfig.chatListStyle == ExteraConfig.CHAT_LIST_STYLE_DEFAULT) {
+                canvas.drawColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            } else {
+                canvas.drawColor(getThemedColor(Theme.key_windowBackgroundGray));
+            }
             super.onDraw(canvas);
             canvas.restore();
             canvas.save();

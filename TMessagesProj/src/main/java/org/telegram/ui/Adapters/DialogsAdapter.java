@@ -792,6 +792,9 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                     cell.setChecked(selectedDialogs.contains(cell.getDialogId()), oldDialogId == cell.getDialogId());
                 } else {
                     DialogCell cell = (DialogCell) holder.itemView;
+                    TLRPC.Dialog prevDialog = i > 0 && getItem(i - 1) instanceof TLRPC.Dialog ? (TLRPC.Dialog) getItem(i - 1) : null;
+                    cell.isFirstInGroup = (prevDialog == null || prevDialog.pinned != dialog.pinned);
+                    cell.isLastInGroup = (nextDialog == null || nextDialog.pinned != dialog.pinned);
                     cell.useSeparator = nextDialog != null;
                     cell.fullSeparator = dialog.pinned && nextDialog != null && !nextDialog.pinned;
                     if (dialogsType == DialogsActivity.DIALOGS_TYPE_DEFAULT) {

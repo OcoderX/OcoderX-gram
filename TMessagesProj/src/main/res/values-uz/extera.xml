@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+ Bu exteraGram uchun Android manba kodi.
+
+ Biz kodimizdan foydalanishni taqiqlamaymiz va taqiqlay olmaymiz,
+ ammo hurmatli bo'ling va asl mualliflarni ko'rsating.
+
+ Copyright @immat0x1, 2023
+
+-->
+
+<resources>
+    <string name="Preferences">Ox-gram sozlamalari</string>
+    <string name="OcoderXPreferences">Ox-gram sozlamalari</string>
+    <string name="DeletedMessages">O\'chirilgan xabarlar</string>
+    <string name="RestartApp">Ilovani qayta ishga tushirish</string>
+
+    <!-- Main Menu -->
+    <string name="Links">Havolalar</string>
+    <string name="AboutExteraDescription">Rasmiy manba asosida yaratilgan tajribaviy Telegram mijozi!</string>
+    <string name="Channel">Kanal</string>
+    <string name="ContactAdmin">Administrator bilan bog\'lanish</string>
+    <string name="SpamBot">Spam bot</string>
+    <string name="SourceCode">Manba kodi</string>
+    <string name="Categories">Kategoriyalar</string>
+
+    <!-- Appearance -->
+    <string name="AvatarCorners">Avatar burchaklari</string>
+    <string name="AvatarCornersLeft">Kvadrat</string>
+    <string name="AvatarCornersRight">Doira</string>
+
+    <string name="ListOfChats">Chatlar ro\'yxati</string>
+    <string name="ActionBarTitle">Sarlavha matni</string>
+    <string name="ActionBarTitleUsername">Foydalanuvchi nomi</string>
+    <string name="ActionBarTitleName">Ism</string>
+    <string name="HideActionBarStatus">Holatni yashirish</string>
+    <string name="CenterTitle">Sarlavhani markazlashtirish</string>
+    <string name="ListOfChatsInfo">Faqat belgilar yoqilganda sarlavha matni papka nomiga qarab o\'zgaradi.</string>
+
+    <string name="TabTitleStyle">Papka nomi</string>
+    <string name="TabTitleStyleTextWithIcons">Nomlar va belgilar</string>
+    <string name="TabTitleStyleIconsOnly">Faqat belgilar</string>
+    <string name="TabTitleStyleTextOnly">Faqat nomlar</string>
+    <string name="TabStyle">Papka uslubi</string>
+    <string name="TabStyleTextOnly">Matn</string>
+    <string name="TabStyleRounded">Yumaloq</string>
+    <string name="TabStyleChips">Chiplar</string>
+    <string name="TabStylePills">Tabletkalar</string>
+    <string name="TabCounter">Bildirishnoma hisoblagichi</string>
+    <string name="HideAllChats">\"%1$s\" varag\'ini yashirish</string>
+    <string name="FoldersInfo">Belgilar Telegram bilan sinxronlashtiriladi.</string>
+
+    <string name="IconPack">Belgilar</string>
+    <string name="SolarIcons">\"Solar\" belgilaridan foydalanish</string>
+
+    <string name="ForceBlur">Majburiy xiralashtirish</string>
+    <string name="ForceBlurInfo">Xiralashtirish barcha mavzularga qo\'llaniladi.</string>
+    <string name="ForceSnow">Majburiy qor</string>
+    <string name="ForceSnowInfo">Qor amal panelida, yon menyuda va chatlar fonida ko\'rinadi.</string>
+    <string name="UseSystemFonts">Tizim shriftlaridan foydalanish</string>
+    <string name="UseSystemEmoji">Tizim emojilaridan foydalanish</string>
+    <string name="NewSwitchStyle">MD3 uslubidagi tugmachalar</string>
+    <string name="DisableDividers">Ajratuvchi chiziqlarni o\'chirish</string>
+    <string name="AlternativeNavigation">Muqobil navigatsiya</string>
+    <string name="AlternativeNavigationInfo">Ekranlar orasida yangi, silliqroq o\'tish animatsiyalarini o\'z ichiga olgan tajribaviy funksiya.</string>
+
+    <string name="DrawerOptions">Yon menyu sozlamalari</string>
+    <string name="DrawerIconSet">Belgilar to\'plami</string>
+    <string name="DrawerAlternativeOpeningAnimation">Muqobil ochilish animatsiyasi</string>
+
+    <string name="DependsOnTheDate">Sanaga bog\'liq</string>
+    <string name="NewYear">Yangi yil</string>
+    <string name="ValentinesDay">Sevishganlar kuni</string>
+    <string name="Halloween">Halloween</string>
+
+    <string name="DrawerElements">Yon menyu elementlari</string>
+
+    <!-- General -->
+    <string name="CameraType">Kamera turi</string>
+    <string name="CameraTypeSystem">Tizim</string>
+    <string name="DefaultCameraInfo">Telegramning o\'rnatilgan kamerasidan foydalanish.</string>
+    <string name="CameraXInfo">CameraX faqat <![CDATA[<a href="https://developer.android.com/training/camerax/devices">tanlangan qurilmalarda</a>]]> qo\'llab-quvvatlanadi, effektlar va linzalar ishlab chiqaruvchingizga bog\'liq.</string>
+    <string name="SystemCameraInfo">Tizim kamerasiga to\'g\'ridan-to\'g\'ri kirish (video xabarlar uchun amal qilmaydi).</string>
+    <string name="PerformanceMode">Unumdorlik rejimi</string>
+    <string name="PerformanceModeInfo">Unumdorlik foydasiga CameraX sifati pasaytiriladi.</string>
+    <string name="CameraQuality">Kamera sifati</string>
+
+    <string name="DisableNumberRounding">Raqamlarni yaxlitlashni o\'chirish</string>
+    <string name="FormatTimeWithSeconds">Vaqtni soniyalar bilan ko\'rsatish</string>
+    <string name="TabletMode">Planshet rejimi</string>
+
+    <string name="DownloadSpeedBoost">Yuklab olish tezligini oshirish</string>
+    <string name="UploadSpeedBoost">Yuklab yuborish tezligini oshirish</string>
+    <string name="Ultra">Ultra</string>
+    <string name="SpeedExtreme">Turbo ⚡️</string>
+    <string name="SpeedBoostInfo">Ultra tezlashtirish sekin internet aloqasida fayllarni yuklashda va video oqimlarida muammolarga sabab bo\'lishi mumkin.</string>
+
+    <string name="Profile">Profil</string>
+    <string name="HidePhoneNumber">Telefon raqamini yashirish</string>
+    <string name="ShowIdAndDc">ID va DC ko\'rsatish</string>
+    <string name="ShowIdAndDcInfo">Telegram API IDlarni bo\'lgan holicha ko\'rsatadi, Bot API esa guruhlar uchun minus belgisini va supergruppa, translyatsiya guruhlari hamda kanallar uchun -100 ni qo\'shadi.</string>
+
+    <string name="ArchiveOnPull">Pastga tortib arxivni ochish</string>
+    <string name="DisableUnarchiveSwipe">\"Arxivdan chiqarish\" svaypini o\'chirish</string>
+    <string name="DisableUnarchiveSwipeInfo">Chapga svayp qilish chatlarni arxivdan olib tashlamaydi.</string>
+
+    <!-- Other -->
+    <string name="AnalyticsInfo">Bu parametrlar yoqilganda qurilma haqidagi ma\'lumotlar yig\'ilib Google Analytics va Crashlytics\'ga yuboriladi, bu esa foydalanish statistikasini yuritish va ilovadagi xatolarni kuzatish imkonini beradi. \n\nAgar parametrlar o\'chirilgan bo\'lsa, ma\'lumot yig\'ish to\'xtaydi va yuborilgan ma\'lumotlar darhol o\'chiriladi.</string>
+    <string name="DeleteAccount">Hisobni o\'chirish</string>
+    <string name="ResetSettings">Sozlamalarni tiklash</string>
+
+    <!-- Chats -->
+    <string name="StickerSize">Stiker o\'lchami</string>
+    <string name="StickerSizeLeft">Kichik</string>
+    <string name="StickerSizeRight">Katta</string>
+    <string name="StickerSizeDialogMessageReplyTo">voy</string>
+    <string name="StickerSizeDialogMessage">voy, u juda shirin!</string>
+
+    <string name="StickerShape">Stiker shakli</string>
+    <string name="StickerShapeRounded">Yumaloq</string>
+    <string name="StickerShapeRoundedMsg">Xabar</string>
+
+    <string name="StickerTime">Stikerlarda vaqtni yashirish</string>
+    <string name="UnlimitedRecentStickers">Cheksiz so\'nggi stikerlar</string>
+    <string name="HideCategories">Kategoriyalarni yashirish</string>
+    <string name="HideCategoriesInfo">Kategoriyalar reaksiya tanlash oynasi va emoji panelidagi qidiruv satridan yo\'qoladi.</string>
+
+    <string name="DoubleTap">Ikki marta bosish</string>
+    <string name="DoubleTapIncoming">Kiruvchi xabarlar</string>
+    <string name="DoubleTapOutgoing">Chiquvchi xabarlar</string>
+    <string name="DoubleTapInfo">Ba\'zi amallar chat yoki kanalda administrator huquqlarini talab qiladi.</string>
+
+    <string name="BottomButton">Pastki tugma</string>
+    <string name="AdminShortcuts">Tezkor administrator amallari</string>
+    <string name="HideKeyboardOnScroll">Aylantirishda klaviaturani yashirish</string>
+    <string name="DisableJumpToNextChannel">\"Keyingi kanalga o\'tish\"ni o\'chirish</string>
+    <string name="ShowActionTimestamps">Amallar uchun vaqtni ko\'rsatish</string>
+    <string name="HideShareButton">Yon \"%1$s\" tugmasini yashirish</string>
+    <string name="MessageMenu">Xabar menyusi</string>
+    <string name="AddCommaAfterMention">Eslatishdan keyin vergul qo\'shish</string>
+    <string name="AddCommaAfterMentionInfo">Eslatmoqchi bo\'lgan foydalanuvchini bosgandan so\'ng avtomatik vergul qo\'yiladi.</string>
+
+    <string name="HidePhotoCounter">Foto hisoblagichini yashirish</string>
+    <string name="HidePhotoCounterInfo">Ekran yuqorisidagi zerikarli foto hisoblagichi ko\'rinishdan yo\'qoladi.</string>
+    <string name="HideCameraTile">Tezkor kamera plitkasini yashirish</string>
+    <string name="HideCameraTileInfo">Kamera plitkasi suzuvchi tugma bilan almashtiriladi. Tugmani bosish Telegram kamerasini, bosib turish esa tizim kamerasini ishga tushiradi.</string>
+
+    <string name="StaticZoom">Statik masshtablash</string>
+    <string name="StaticZoomInfo">Video xabar yozishda barmoqlaringizni qo\'yib yuborsangiz ham masshtab qaytarilmaydi.</string>
+    <string name="VideoMessagesCamera">Video xabarlardagi kamera</string>
+    <string name="VideoMessagesCameraRear">Orqa</string>
+    <string name="VideoMessagesCameraFront">Old</string>
+    <string name="VideoMessagesCameraAsk">So\'rash</string>
+    <string name="RearCamera">Orqa kamera</string>
+    <string name="FrontCamera">Old kamera</string>
+    <string name="DoubleTapSeekDuration">Ikki marta bosib o\'tkazib yuborish vaqti</string>
+    <string name="RememberLastUsedCamera">Oxirgi ishlatilgan kamerani eslab qolish</string>
+    <string name="RememberLastUsedCameraInfo">Video xabar yozishda oxirgi ishlatilgan kamera tanlanadi.</string>
+    <string name="PauseOnMinimize">Avtomatik pauza</string>
+    <string name="PauseOnMinimizeInfo">Qurilma qulflanganda yoki X-Gram kichraytirilganda video ijrosini to\'xtatadi.</string>
+    <string name="DisablePlayback">Ijroni o\'chirish</string>
+    <string name="DisablePlaybackInfo">Ovoz balandligi tugmasi bosilganda ijroni o\'chiradi.</string>
+
+    <!-- Boost -->
+    <string name="Encryptors">Shifrlovchilar</string>
+    <string name="Encrypt">Shifrlash</string>
+    <string name="Decrypt">Shifrni ochish</string>
+    <string name="EncryptionKeyInfo">Bu kalit ushbu chatdagi xabarlarni shifrlash va shifrini ochish uchun ishlatiladi.</string>
+
+    <!-- Updates -->
+    <string name="LastCheck">Oxirgi tekshiruv</string>
+    <string name="CurrentVersion">Joriy versiya</string>
+    <string name="BuildType">Yig\'ilma turi</string>
+    <string name="BTRelease">Relis</string>
+    <string name="BTBeta">Beta</string>
+    <string name="CheckOnLaunch">Ishga tushganda tekshirish</string>
+    <string name="ClearUpdatesCache">Yangilanishlar keshini tozalash</string>
+    <string name="ClearedUpdatesCache">**%1$s** kesh tozalandi.</string>
+    <string name="NothingToClear">Tozalash uchun hech narsa yo\'q.</string>
+
+    <string name="CheckForUpdates">Yangilanishlarni tekshirish</string>
+    <string name="CheckingForUpdates">Yangilanishlar tekshirilmoqda…</string>
+    <string name="NoUpdates">Yangilanishlar topilmadi.</string>
+
+    <string name="UpdateAvailable">Yangilanish mavjud!</string>
+    <string name="Version">Versiya</string>
+    <string name="UpdateSize">Yangilanish hajmi</string>
+    <string name="Changelog">O\'zgarishlar ro\'yxati:</string>
+
+    <!-- Message Details -->
+    <string name="Details">Tafsilotlar</string>
+    <string name="Date">Sana</string>
+    <string name="EditedDate">Tahrirlash sanasi</string>
+    <string name="ForwardedDate">Yuborilgan sana</string>
+    <string name="FileSize">Fayl hajmi</string>
+    <string name="FileName">Fayl nomi</string>
+    <string name="FilePath">Fayl manzili</string>
+    <string name="Resolution">O\'lchamlar</string>
+    <string name="Bitrate">Bitreyt</string>
+    <string name="MimeType">Mime turi</string>
+    <string name="Datacenter">Ma\'lumotlar markazi</string>
+
+    <!-- Other -->
+    <string name="RestartRequired">O\'zgarishlar kuchga kirishi uchun ilovani qayta ishga tushiring.</string>
+    <string name="ResetSettingsBulletin">**X-Gram** sozlamalari tiklandi.</string>
+    <string name="UserNotFound">Bu **ID** raqamli foydalanuvchi topilmadi.</string>
+    <string name="PhotoCopied">Rasm vaqtinchalik xotiraga nusxalandi.</string>
+
+    <string name="MutualContact">o\'zaro kontakt</string>
+    <string name="ToBeginning">Boshiga</string>
+    <string name="MessageHistory">Tarix</string>
+    <string name="BoldItalic">Qalin kursiv</string>
+    <string name="OpenPremiumBot">Rasmiy botni ochish</string>
+    <string name="CopyPhoto">Rasmni nusxalash</string>
+    <string name="CopySticker">Stikerni nusxalash</string>
+    <string name="SaveMessage">Xabarni saqlash</string>
+
+    <string name="TrackSaved">Trek **%1$s** ga saqlandi.</string>
+    <string name="ChannelToSaveChanged">Treklar **%1$s** ga saqlanadi.</string>
+
+    <string name="ConfirmCall">Qo\'ng\'iroqni tasdiqlash</string>
+    <string name="CallTo">**%1$s** ga qo\'ng\'iroq qilinsinmi?</string>
+
+    <string name="AppIconOcoderNeon">OcoderX Neon</string>
+    <string name="AppIconOcoderV2">OcoderX v2</string>
+    <string name="AppIconOcoderWhite">OcoderX Yorug\'</string>
+    <string name="AppIconOxgramVivid">OXgram Yorqin</string>
+    <string name="AppIconOxgramEmerald">OXgram Zumrad</string>
+    <string name="AppIconOxgramBlue">OXgram Sapfir</string>
+    <string name="AppIconOxgramRed">OXgram Yoqut</string>
+
+    <string name="BottomNavigation">Pastki navigatsiya paneli</string>
+    <string name="BottomNavigationInfo">Chat papkalari va varaqlarini ekran pastiga joylashtirish.</string>
+    <string name="CompactChatList">Ixcham chatlar ro\'yxati</string>
+    <string name="CompactChatListInfo">Ekranga ko\'proq chat sig\'ishi uchun qator balandligi va oraliqlarini kamaytirish.</string>
+    <string name="ChatListStyle">Chatlar ro\'yxati uslubi</string>
+    <string name="ChatListStyleDefault">Klassik / Tekis</string>
+    <string name="ChatListStyleCards">Blokli kartalar (Standart)</string>
+    <string name="ChatListStyleGrouped">iOS Guruhlangan bloklar</string>
+
+    <string name="ThemeAmoledBlack">Sof AMOLED qora</string>
+    <string name="ThemeCyberpunk">Kiberpank</string>
+    <string name="ThemeGlassmorphism">Glassmorfizm</string>
+
+    <!-- Telegraph Features -->
+    <string name="AnimationType">Animatsiya turi</string>
+    <string name="AnimationTypeTelegram">Telegram</string>
+    <string name="AnimationTypeSlide">Slayd</string>
+    <string name="AnimationTypeFade">So\'nish</string>
+    <string name="AnimationTypeZoom">Masshtablash</string>
+    <string name="AnimationTypeNone">Yo\'q</string>
+
+    <string name="ShowStatusIndicator">Holat ko\'rsatkichini ko\'rsatish</string>
+    <string name="ShowStatusIndicatorInfo">Foydalanuvchi avatari yonida bitta doira orqali holatni ko\'rsatadi.\nAgar rangli bo\'lsa — onlayn. Agar och kulrang bo\'lsa — yaqinda faol bo\'lgan. Agar qora bo\'lsa — ancha oldin faol bo\'lgan. Aks holda rang kulrang bo\'ladi.</string>
+
+    <string name="TouchUserPicture">Foydalanuvchi rasmiga bosish</string>
+    <string name="TouchGroupPicture">Guruh/kanal rasmiga bosish</string>
+    <string name="TouchPictureProfileMenu">Profil menyusini ochish</string>
+    <string name="TouchPictureProfile">Profilni ochish</string>
+    <string name="TouchPicturePhoto">Rasmni ko\'rsatish</string>
+    <string name="TouchPictureChat">Chatni ochish</string>
+    <string name="OpenChat">Chatni ochish</string>
+    <string name="ShowPhoto">Rasmni ko\'rsatish</string>
+
+    <!-- Main Categories Subtitles -->
+    <string name="GeneralPrefSubtitle">Animatsiyalar, avatarlar, tezliklar va profil</string>
+    <string name="AppearancePrefSubtitle">Varaqlar, chat ro\'yxati ko\'rinishi, mavzular va belgilar</string>
+    <string name="ChatsPrefSubtitle">Stikerlar, ikki marta bosish, xatti-harakat va media</string>
+    <string name="OtherPrefSubtitle">Tahlil, hisobni boshqarish va tiklash</string>
+
+    <!-- Section Headers with Emojis -->
+    <string name="PrefInterfaceAndAnimations">🎨 Interfeys va animatsiyalar</string>
+    <string name="PrefAvatarsAndActions">👤 Avatarlar va bosish amallari</string>
+    <string name="PrefSpeedBoosters">⚡️ Tarmoq tezligini oshirish</string>
+    <string name="PrefProfileAndPrivacy">🔒 Profil va maxfiylik</string>
+    <string name="PrefArchivedChats">📦 Arxivlangan chatlar</string>
+    <string name="PrefCamera">📷 Kamera sozlamalari</string>
+
+    <string name="PrefTabsAndNavigation">📁 Varaqlar va navigatsiya</string>
+    <string name="PrefChatList">💬 Chatlar ro\'yxati</string>
+    <string name="PrefVisualStyle">✨ Vizual uslub va belgilar</string>
+    <string name="PrefDrawerMenu">📂 Yon navigatsiya menyusi</string>
+
+    <string name="PrefStickers">🎭 Stikerlar va emojilar</string>
+    <string name="PrefDoubleTap">👆 Ikki marta bosish amallari</string>
+    <string name="PrefChatBehavior">✉️ Chat interfeysi va xatti-harakati</string>
+    <string name="PrefMessageMenu">📋 Xabar konteks menyusi</string>
+    <string name="PrefMediaPlayback">🎬 Media va video ijro</string>
+
+    <!-- Clear Explanatory Subtitles -->
+    <string name="AnimationTypeSub">Fragment va ekran o\'tish effekti</string>
+    <string name="FormatTimeWithSecondsSub">Vaqt tamg\'alarida soniyalarni ko\'rsatish (11:22:33)</string>
+    <string name="DisableNumberRoundingSub">1.2K o\'rniga aniq sonlarni ko\'rsatish (1,234)</string>
+    <string name="TabletModeSub">Katta ekranlar uchun ko\'p ustunli ko\'rinish</string>
+    <string name="ShowStatusIndicatorSub">Avatarlarda onlayn holat ko\'rsatkichini ko\'rsatish</string>
+    <string name="TouchUserPictureSub">Foydalanuvchi avatariga bosilganda bajariladigan amal</string>
+    <string name="TouchGroupPictureSub">Guruh/kanal avatariga bosilganda bajariladigan amal</string>
+    <string name="UploadSpeedBoostSub">Media va hujjatlarni yuklab yuborishni tezlashtirish</string>
+    <string name="HidePhoneNumberSub">Telefon raqamini menyu va profildan yashirish</string>
+    <string name="ShowIdAndDcSub">Foydalanuvchi va chat ID / DC ma\'lumotini ko\'rsatish</string>
+    <string name="ArchiveOnPullSub">Arxivni ko\'rish uchun chat ro\'yxatini pastga torting</string>
+    <string name="DisableUnarchiveSwipeSub">Arxivdan chiqarish svaypini bloklash</string>
+    <string name="PerformanceModeSub">CameraX FPS va kechikishini optimallashtirish</string>
+
+    <string name="BottomNavigationSub">Chat papkalari va varaqlarini ekran pastiga ko\'chirish</string>
+    <string name="TabStyleSub">Papka varaqlari shakli va uslubini sozlash</string>
+    <string name="TabTitleSub">Varaqlarda belgi, matn yoki ikkalasini ko\'rsatish</string>
+    <string name="TabCounterSub">Varaqlarda o\'qilmagan xabarlar belgisini ko\'rsatish</string>
+    <string name="HideAllChatsSub">\'Barcha chatlar\' varag\'ini yashirib, maxsus papkalarni ko\'rsatish</string>
+    <string name="CompactChatListSub">Ekranga ko\'proq chat sig\'ishi uchun qator balandligini kamaytirish</string>
+    <string name="CenterTitleSub">Yuqori paneldagi sarlavhani markazlashtirish</string>
+    <string name="HideActionBarStatusSub">Ulanish va yangilanish holati matnini yashirish</string>
+    <string name="SolarIconsSub">Zamonaviy ikki rangli Solar vektor belgilar to\'plami</string>
+    <string name="SquareFabSub">Zamonaviy kvadrat yangi chat tugmasi</string>
+    <string name="NewSwitchStyleSub">Qayta ishlangan iOS uslubidagi almashtirgichlar</string>
+    <string name="UseSystemFontsSub">Qurilma tizim shriftidan foydalanish</string>
+    <string name="UseSystemEmojiSub">Qurilmaning tabiiy emojilaridan foydalanish</string>
+    <string name="ForceBlurSub">Panellarda suyuq real vaqtli oyna xiralashuvi</string>
+    <string name="ForceSnowSub">Bayramona qor zarralari effekti</string>
+    <string name="DisableDividersSub">Chegarasiz tekis ro\'yxat qatorlari</string>
+    <string name="SmoothDrawerAnimationSub">Zamonaviy sirg\'anuvchi menyu o\'tishi</string>
+
+    <string name="HideStickerTimeSub">Stikerlarda vaqt tamg\'asini ko\'rsatmaslik</string>
+    <string name="UnlimitedRecentStickersSub">So\'nggi panelda cheksiz stikerlarni saqlash</string>
+    <string name="HideCategoriesSub">Stiker panelida kategoriya varaqlarini yashirish</string>
+    <string name="DisableJumpToNextChannelSub">Aylantirish oxirida keyingi kanalga avtomatik o\'tmaslik</string>
+    <string name="HideKeyboardOnScrollSub">Aylantirishda klaviaturani avtomatik yopish</string>
+    <string name="ShowActionTimestampsSub">Chat xizmat hodisalarida aniq vaqtni ko\'rsatish</string>
+    <string name="AddCommaAfterMentionSub">@foydalanuvchi tanlanganda vergul qo\'shish</string>
+    <string name="HideCounterSub">Media tanlashda tanlov hisoblagichini yashirish</string>
+    <string name="HideCameraTileSub">Ilova varag\'ida kamera plitkasini ko\'rsatmaslik</string>
+    <string name="StaticZoomSub">Doiraviy video xabarlarda masshtab nisbatini qulflash</string>
+    <string name="PauseOnMinimizeSub">Ilova kichraytirilganda videoni to\'xtatish</string>
+    <string name="DisablePlaybackSub">Videolarni tashqi media pleyerda ochish</string>
+
+    <string name="PrefDiagnostics">📊 Diagnostika va tahlil</string>
+    <string name="PrefMaintenance">⚙️ Texnik xizmat va hisob</string>
+    <string name="ResetSettingsSub">Barcha ilova sozlamalarini standart holatga qaytarish</string>
+    <string name="DeleteAccountSub">Telegram hisobini butunlay o\'chirish</string>
+</resources>
