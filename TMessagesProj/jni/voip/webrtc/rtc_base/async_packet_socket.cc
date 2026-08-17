@@ -10,8 +10,6 @@
 
 #include "rtc_base/async_packet_socket.h"
 
-#include "rtc_base/checks.h"
-
 namespace rtc {
 
 PacketTimeUpdateParams::PacketTimeUpdateParams() = default;
@@ -26,40 +24,22 @@ PacketOptions::PacketOptions(DiffServCodePoint dscp) : dscp(dscp) {}
 PacketOptions::PacketOptions(const PacketOptions& other) = default;
 PacketOptions::~PacketOptions() = default;
 
+AsyncPacketSocket::AsyncPacketSocket() {
+  network_checker_.Detach();
+}
+
 AsyncPacketSocket::~AsyncPacketSocket() = default;
 
-void AsyncPacketSocket::SubscribeCloseEvent(
+void AsyncPacketSocket::SubscribeClose(
     const void* removal_tag,
     std::function<void(AsyncPacketSocket*, int)> callback) {
   RTC_DCHECK_RUN_ON(&network_checker_);
   on_close_.AddReceiver(removal_tag, std::move(callback));
 }
 
-void AsyncPacketSocket::UnsubscribeCloseEvent(const void* removal_tag) {
+void AsyncPacketSocket::UnsubscribeClose(const void* removal_tag) {
   RTC_DCHECK_RUN_ON(&network_checker_);
   on_close_.RemoveReceivers(removal_tag);
-}
-
-void AsyncPacketSocket::RegisterReceivedPacketCallback(
-    absl::AnyInvocable<void(AsyncPacketSocket*, const rtc::ReceivedPacket&)>
-        received_packet_callback) {
-  RTC_DCHECK_RUN_ON(&network_checker_);
-  RTC_CHECK(!received_packet_callback_);
-  received_packet_callback_ = std::move(received_packet_callback);
-}
-
-void AsyncPacketSocket::DeregisterReceivedPacketCallback() {
-  RTC_DCHECK_RUN_ON(&network_checker_);
-  received_packet_callback_ = nullptr;
-}
-
-void AsyncPacketSocket::NotifyPacketReceived(
-    const rtc::ReceivedPacket& packet) {
-  RTC_DCHECK_RUN_ON(&network_checker_);
-  if (received_packet_callback_) {
-    received_packet_callback_(this, packet);
-    return;
-  }
 }
 
 void CopySocketInformationToPacketInfo(size_t packet_size_bytes,

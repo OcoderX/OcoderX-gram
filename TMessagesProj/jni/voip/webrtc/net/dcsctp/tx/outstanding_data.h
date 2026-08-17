@@ -10,30 +10,23 @@
 #ifndef NET_DCSCTP_TX_OUTSTANDING_DATA_H_
 #define NET_DCSCTP_TX_OUTSTANDING_DATA_H_
 
-#include <deque>
 #include <map>
 #include <set>
 #include <utility>
 #include <vector>
 
 #include "absl/types/optional.h"
-#include "api/units/timestamp.h"
-#include "net/dcsctp/common/internal_types.h"
 #include "net/dcsctp/common/sequence_numbers.h"
 #include "net/dcsctp/packet/chunk/forward_tsn_chunk.h"
 #include "net/dcsctp/packet/chunk/iforward_tsn_chunk.h"
 #include "net/dcsctp/packet/chunk/sack_chunk.h"
 #include "net/dcsctp/packet/data.h"
 #include "net/dcsctp/public/types.h"
-#include "rtc_base/containers/flat_set.h"
 
 namespace dcsctp {
 
 // This class keeps track of outstanding data chunks (sent, not yet acked) and
 // handles acking, nacking, rescheduling and abandoning.
-//
-// Items are added to this queue as they are sent and will be removed when the
-// peer acks them using the cumulative TSN ack.
 class OutstandingData {
  public:
   // State for DATA chunks (message fragments) in the queue - used in tests.
@@ -79,9 +72,11 @@ class OutstandingData {
 
   OutstandingData(
       size_t data_chunk_header_size,
+      UnwrappedTSN next_tsn,
       UnwrappedTSN last_cumulative_tsn_ack,
-      std::function<bool(StreamID, OutgoingMessageId)> discard_from_send_queue)
+      std::function<bool(IsUnordered, StreamID, MID)> discard_from_send_queue)
       : data_chunk_header_size_(data_chunk_header_size),
+        next_tsn_(next_tsn),
         last_cumulative_tsn_ack_(last_cumulative_tsn_ack),
         discard_from_send_queue_(std::move(discard_from_send_queue)) {}
 
@@ -101,14 +96,14 @@ class OutstandingData {
   // it?
   std::vector<std::pair<TSN, Data>> GetChunksToBeRetransmitted(size_t max_size);
 
-  size_t unacked_bytes() const { return unacked_bytes_; }
+  size_t outstanding_bytes() const { return outstanding_bytes_; }
 
-  // Returns the number of DATA chunks that are in-flight (not acked or nacked).
-  size_t unacked_items() const { return unacked_items_; }
+  // Returns the number of DATA chunks that are in-flight.
+  size_t outstanding_items() const { return outstanding_items_; }
 
   // Given the current time `now_ms`, expire and abandon outstanding (sent at
   // least once) chunks that have a limited lifetime.
-  void ExpireOutstandingChunks(webrtc::Timestamp now);
+  void ExpireOutstandingChunks(TimeMs now);
 
   bool empty() const { return outstanding_data_.empty(); }
 
@@ -124,9 +119,7 @@ class OutstandingData {
     return last_cumulative_tsn_ack_;
   }
 
-  UnwrappedTSN next_tsn() const {
-    return highest_outstanding_tsn().next_value();
-  }
+  UnwrappedTSN next_tsn() const { return next_tsn_; }
 
   UnwrappedTSN highest_outstanding_tsn() const;
 
@@ -134,11 +127,10 @@ class OutstandingData {
   // parameters. Returns the TSN if the item was actually added and scheduled to
   // be sent, and absl::nullopt if it shouldn't be sent.
   absl::optional<UnwrappedTSN> Insert(
-      OutgoingMessageId message_id,
       const Data& data,
-      webrtc::Timestamp time_sent,
+      TimeMs time_sent,
       MaxRetransmits max_retransmissions = MaxRetransmits::NoLimit(),
-      webrtc::Timestamp expires_at = webrtc::Timestamp::PlusInfinity(),
+      TimeMs expires_at = TimeMs::InfiniteFuture(),
       LifecycleId lifecycle_id = LifecycleId::NotSet());
 
   // Nacks all outstanding data.
@@ -152,8 +144,8 @@ class OutstandingData {
 
   // Given the current time and a TSN, it returns the measured RTT between when
   // the chunk was sent and now. It takes into acccount Karn's algorithm, so if
-  // the chunk has ever been retransmitted, it will return `PlusInfinity()`.
-  webrtc::TimeDelta MeasureRTT(webrtc::Timestamp now, UnwrappedTSN tsn) const;
+  // the chunk has ever been retransmitted, it will return absl::nullopt.
+  absl::optional<DurationMs> MeasureRTT(TimeMs now, UnwrappedTSN tsn) const;
 
   // Returns the internal state of all queued chunks. This is only used in
   // unit-tests.
@@ -164,11 +156,8 @@ class OutstandingData {
   bool ShouldSendForwardTsn() const;
 
   // Sets the next TSN to be used. This is used in handover.
-  void ResetSequenceNumbers(UnwrappedTSN last_cumulative_tsn);
-
-  // Called when an outgoing stream reset is sent, marking the last assigned TSN
-  // as a breakpoint that a FORWARD-TSN shouldn't cross.
-  void BeginResetStreams();
+  void ResetSequenceNumbers(UnwrappedTSN next_tsn,
+                            UnwrappedTSN last_cumulative_tsn);
 
  private:
   // A fragmented message's DATA chunk while in the retransmission queue, and
@@ -181,14 +170,12 @@ class OutstandingData {
       kAbandon,
     };
 
-    Item(OutgoingMessageId message_id,
-         Data data,
-         webrtc::Timestamp time_sent,
+    Item(Data data,
+         TimeMs time_sent,
          MaxRetransmits max_retransmissions,
-         webrtc::Timestamp expires_at,
+         TimeMs expires_at,
          LifecycleId lifecycle_id)
-        : message_id_(message_id),
-          time_sent_(time_sent),
+        : time_sent_(time_sent),
           max_retransmissions_(max_retransmissions),
           expires_at_(expires_at),
           lifecycle_id_(lifecycle_id),
@@ -197,9 +184,7 @@ class OutstandingData {
     Item(const Item&) = delete;
     Item& operator=(const Item&) = delete;
 
-    OutgoingMessageId message_id() const { return message_id_; }
-
-    webrtc::Timestamp time_sent() const { return time_sent_; }
+    TimeMs time_sent() const { return time_sent_; }
 
     const Data& data() const { return data_; }
 
@@ -233,7 +218,7 @@ class OutstandingData {
 
     // Given the current time, and the current state of this DATA chunk, it will
     // indicate if it has expired (SCTP Partial Reliability Extension).
-    bool has_expired(webrtc::Timestamp now) const;
+    bool has_expired(TimeMs now) const;
 
     LifecycleId lifecycle_id() const { return lifecycle_id_; }
 
@@ -259,10 +244,8 @@ class OutstandingData {
     // NOTE: This data structure has been optimized for size, by ordering fields
     // to avoid unnecessary padding.
 
-    const OutgoingMessageId message_id_;
-
     // When the packet was sent, and placed in this queue.
-    const webrtc::Timestamp time_sent_;
+    const TimeMs time_sent_;
     // If the message was sent with a maximum number of retransmissions, this is
     // set to that number. The value zero (0) means that it will never be
     // retransmitted.
@@ -282,7 +265,7 @@ class OutstandingData {
 
     // At this exact millisecond, the item is considered expired. If the message
     // is not to be expired, this is set to the infinite future.
-    const webrtc::Timestamp expires_at_;
+    const TimeMs expires_at_;
 
     // An optional lifecycle id, which may only be set for the last fragment.
     const LifecycleId lifecycle_id_;
@@ -293,9 +276,6 @@ class OutstandingData {
 
   // Returns how large a chunk will be, serialized, carrying the data
   size_t GetSerializedChunkSize(const Data& data) const;
-
-  Item& GetItem(UnwrappedTSN tsn);
-  const Item& GetItem(UnwrappedTSN tsn) const;
 
   // Given a `cumulative_tsn_ack` from an incoming SACK, will remove those items
   // in the retransmission queue up until this value and will update `ack_info`
@@ -320,7 +300,7 @@ class OutstandingData {
 
   // Process the acknowledgement of the chunk referenced by `iter` and updates
   // state in `ack_info` and the object's state.
-  void AckChunk(AckInfo& ack_info, UnwrappedTSN tsn, Item& item);
+  void AckChunk(AckInfo& ack_info, std::map<UnwrappedTSN, Item>::iterator iter);
 
   // Helper method to process an incoming nack of an item and perform the
   // correct operations given the action indicated when nacking an item (e.g.
@@ -330,11 +310,10 @@ class OutstandingData {
   // many times so that it should be retransmitted, this will schedule it to be
   // "fast retransmitted". This is only done just before going into fast
   // recovery.
-  //
-  // Note that since nacking an item may result in it becoming abandoned, which
-  // in turn could alter `outstanding_data_`, any iterators are invalidated
-  // after having called this method.
-  bool NackItem(UnwrappedTSN tsn, bool retransmit_now, bool do_fast_retransmit);
+  bool NackItem(UnwrappedTSN tsn,
+                Item& item,
+                bool retransmit_now,
+                bool do_fast_retransmit);
 
   // Given that a message fragment, `item` has been abandoned, abandon all other
   // fragments that share the same message - both never-before-sent fragments
@@ -349,28 +328,23 @@ class OutstandingData {
 
   // The size of the data chunk (DATA/I-DATA) header that is used.
   const size_t data_chunk_header_size_;
+  // Next TSN to used.
+  UnwrappedTSN next_tsn_;
   // The last cumulative TSN ack number.
   UnwrappedTSN last_cumulative_tsn_ack_;
   // Callback when to discard items from the send queue.
-  std::function<bool(StreamID, OutgoingMessageId)> discard_from_send_queue_;
+  std::function<bool(IsUnordered, StreamID, MID)> discard_from_send_queue_;
 
-  // Outstanding items. If non-empty, the first element has
-  // `TSN=last_cumulative_tsn_ack_ + 1` and the following items are in strict
-  // increasing TSN order. The last item has `TSN=highest_outstanding_tsn()`.
-  std::deque<Item> outstanding_data_;
+  std::map<UnwrappedTSN, Item> outstanding_data_;
   // The number of bytes that are in-flight (sent but not yet acked or nacked).
-  size_t unacked_bytes_ = 0;
+  size_t outstanding_bytes_ = 0;
   // The number of DATA chunks that are in-flight (sent but not yet acked or
   // nacked).
-  size_t unacked_items_ = 0;
+  size_t outstanding_items_ = 0;
   // Data chunks that are eligible for fast retransmission.
   std::set<UnwrappedTSN> to_be_fast_retransmitted_;
   // Data chunks that are to be retransmitted.
   std::set<UnwrappedTSN> to_be_retransmitted_;
-  // Wben a stream reset has begun, the "next TSN to assign" is added to this
-  // set, and removed when the cum-ack TSN reaches it. This is used to limit a
-  // FORWARD-TSN to reset streams past a "stream reset last assigned TSN".
-  webrtc::flat_set<UnwrappedTSN> stream_reset_breakpoint_tsns_;
 };
 }  // namespace dcsctp
 #endif  // NET_DCSCTP_TX_OUTSTANDING_DATA_H_

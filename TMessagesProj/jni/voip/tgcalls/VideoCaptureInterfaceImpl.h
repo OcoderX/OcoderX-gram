@@ -27,14 +27,14 @@ public:
     void setOnFatalError(std::function<void()> error);
     void setOnPause(std::function<void(bool)> pause);
     void setOnIsActiveUpdated(std::function<void(bool)> onIsActiveUpdated);
-    webrtc::scoped_refptr<webrtc::VideoTrackSourceInterface> source();
+    rtc::scoped_refptr<webrtc::VideoTrackSourceInterface> source();
     int getRotation();
     bool isScreenCapture();
 
 private:
     void updateAspectRateAdaptation();
 
-    webrtc::scoped_refptr<webrtc::VideoTrackSourceInterface> _videoSource;
+    rtc::scoped_refptr<webrtc::VideoTrackSourceInterface> _videoSource;
 	std::shared_ptr<rtc::VideoSinkInterface<webrtc::VideoFrame>> _currentUncroppedSink;
 	std::shared_ptr<PlatformContext> _platformContext;
     std::pair<int, int> _videoCapturerResolution;

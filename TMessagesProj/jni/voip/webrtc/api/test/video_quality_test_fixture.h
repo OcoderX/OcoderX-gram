@@ -37,7 +37,6 @@ class VideoQualityTestFixtureInterface {
     struct CallConfig {
       bool send_side_bwe = false;
       bool generic_descriptor = false;
-      bool dependency_descriptor = false;
       BitrateConstraints call_bitrate_config;
       int num_thumbnails = 0;
       // Indicates if secondary_(video|ss|screenshare) structures are used.
@@ -61,7 +60,7 @@ class VideoQualityTestFixtureInterface {
       bool automatic_scaling = false;
       std::string clip_path;  // "Generator" to generate frames instead.
       size_t capture_device_index = 0;
-      CodecParameterMap sdp_params;
+      SdpVideoFormat::Parameters sdp_params;
       double encoder_overshoot_factor = 0.0;
     } video[2];
     struct Audio {

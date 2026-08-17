@@ -13,12 +13,10 @@
 // limitations under the License.
 
 #include <stdint.h>
-
 #include <new>
 
 // This file is a no-op if the required LowLevelAlloc support is missing.
 #include "absl/base/internal/low_level_alloc.h"
-#include "absl/synchronization/internal/waiter.h"
 #ifndef ABSL_LOW_LEVEL_ALLOC_MISSING
 
 #include <string.h>
@@ -39,8 +37,7 @@ ABSL_CONST_INIT static base_internal::SpinLock freelist_lock(
 ABSL_CONST_INIT static base_internal::ThreadIdentity* thread_identity_freelist;
 
 // A per-thread destructor for reclaiming associated ThreadIdentity objects.
-// Since we must preserve their storage, we cache them for re-use instead of
-// truly destructing the object.
+// Since we must preserve their storage we cache them for re-use.
 static void ReclaimThreadIdentity(void* v) {
   base_internal::ThreadIdentity* identity =
       static_cast<base_internal::ThreadIdentity*>(v);
@@ -74,9 +71,6 @@ static intptr_t RoundUp(intptr_t addr, intptr_t align) {
 
 void OneTimeInitThreadIdentity(base_internal::ThreadIdentity* identity) {
   PerThreadSem::Init(identity);
-  identity->ticker.store(0, std::memory_order_relaxed);
-  identity->wait_start.store(0, std::memory_order_relaxed);
-  identity->is_idle.store(false, std::memory_order_relaxed);
 }
 
 static void ResetThreadIdentityBetweenReuse(
@@ -125,9 +119,6 @@ static base_internal::ThreadIdentity* NewThreadIdentity() {
     identity = reinterpret_cast<base_internal::ThreadIdentity*>(
         RoundUp(reinterpret_cast<intptr_t>(allocation),
                 base_internal::PerThreadSynch::kAlignment));
-    // Note that *identity is never constructed.
-    // TODO(b/357097463): change this "one time init" to be a proper
-    // constructor.
     OneTimeInitThreadIdentity(identity);
   }
   ResetThreadIdentityBetweenReuse(identity);

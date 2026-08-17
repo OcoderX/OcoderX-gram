@@ -87,7 +87,7 @@ class StreamScheduler {
     // The parameter `max_size` specifies the maximum amount of actual payload
     // that may be returned. If these constraints prevents the stream from
     // sending some data, `absl::nullopt` should be returned.
-    virtual absl::optional<SendQueue::DataToSend> Produce(webrtc::Timestamp now,
+    virtual absl::optional<SendQueue::DataToSend> Produce(TimeMs now,
                                                           size_t max_size) = 0;
 
     // Returns the number of payload bytes that is scheduled to be sent in the
@@ -132,8 +132,7 @@ class StreamScheduler {
 
     // Produces a message from this stream. This will only be called on streams
     // that have data.
-    absl::optional<SendQueue::DataToSend> Produce(webrtc::Timestamp now,
-                                                  size_t max_size);
+    absl::optional<SendQueue::DataToSend> Produce(TimeMs now, size_t max_size);
 
     void MakeActive(size_t bytes_to_send_next);
     void ForceMarkInactive();
@@ -158,9 +157,8 @@ class StreamScheduler {
 
   // The `mtu` parameter represents the maximum SCTP packet size, which should
   // be the same as `DcSctpOptions::mtu`.
-  StreamScheduler(absl::string_view log_prefix, size_t mtu)
-      : log_prefix_(log_prefix),
-        max_payload_bytes_(mtu - SctpPacket::kHeaderSize -
+  explicit StreamScheduler(size_t mtu)
+      : max_payload_bytes_(mtu - SctpPacket::kHeaderSize -
                            IDataChunk::kHeaderSize) {}
 
   std::unique_ptr<Stream> CreateStream(StreamProducer* producer,
@@ -181,8 +179,7 @@ class StreamScheduler {
   // `now` and will be used to skip chunks with expired limited lifetime. The
   // parameter `max_size` specifies the maximum amount of actual payload that
   // may be returned. If no data can be produced, `absl::nullopt` is returned.
-  absl::optional<SendQueue::DataToSend> Produce(webrtc::Timestamp now,
-                                                size_t max_size);
+  absl::optional<SendQueue::DataToSend> Produce(TimeMs now, size_t max_size);
 
   std::set<StreamID> ActiveStreamsForTesting() const;
 
@@ -201,7 +198,6 @@ class StreamScheduler {
 
   bool IsConsistent() const;
 
-  const absl::string_view log_prefix_;
   const size_t max_payload_bytes_;
 
   // The current virtual time, as defined in the WFQ algorithm.

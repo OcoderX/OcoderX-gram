@@ -11,7 +11,6 @@
 #include "api/video_codecs/video_encoder.h"
 
 #include <string.h>
-
 #include <algorithm>
 
 #include "rtc_base/checks.h"
@@ -58,6 +57,7 @@ VideoCodecH264 VideoEncoder::GetDefaultH264Settings() {
   return h264_settings;
 }
 
+#ifndef DISABLE_H265
 VideoCodecH265 VideoEncoder::GetDefaultH265Settings() {
   VideoCodecH265 h265_settings;
   memset(&h265_settings, 0, sizeof(h265_settings));
@@ -72,6 +72,7 @@ VideoCodecH265 VideoEncoder::GetDefaultH265Settings() {
 
   return h265_settings;
 }
+#endif
 
 VideoEncoder::ScalingSettings::ScalingSettings() = default;
 
@@ -344,5 +345,10 @@ void VideoEncoder::OnRttUpdate(int64_t rtt_ms) {}
 
 void VideoEncoder::OnLossNotification(
     const LossNotification& loss_notification) {}
+
+// TODO(webrtc:9722): Remove and make pure virtual.
+VideoEncoder::EncoderInfo VideoEncoder::GetEncoderInfo() const {
+  return EncoderInfo();
+}
 
 }  // namespace webrtc

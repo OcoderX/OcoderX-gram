@@ -64,7 +64,7 @@ class FuzzerCallbacks : public DcSctpSocketCallbacks {
     // The fuzzer timeouts don't implement |precision|.
     return std::make_unique<FuzzerTimeout>(active_timeouts_);
   }
-  webrtc::Timestamp Now() override { return webrtc::Timestamp::Millis(42); }
+  TimeMs TimeMillis() override { return TimeMs(42); }
   uint32_t GetRandomInt(uint32_t low, uint32_t high) override {
     return kRandomValue;
   }

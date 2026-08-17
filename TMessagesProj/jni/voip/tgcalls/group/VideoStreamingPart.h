@@ -14,7 +14,6 @@
 namespace tgcalls {
 
 class VideoStreamingPartState;
-class VideoStreamingSharedStateInternal;
 
 struct VideoStreamingPartFrame {
     std::string endpointId;
@@ -28,19 +27,6 @@ struct VideoStreamingPartFrame {
     pts(pts_),
     index(index_) {
     }
-};
-
-class VideoStreamingSharedState {
-public:
-    VideoStreamingSharedState();
-    ~VideoStreamingSharedState();
-    
-    VideoStreamingSharedStateInternal *impl() const {
-        return _impl;
-    }
-    
-private:
-    VideoStreamingSharedStateInternal *_impl = nullptr;
 };
 
 class VideoStreamingPart {
@@ -62,7 +48,7 @@ public:
     VideoStreamingPart& operator=(const VideoStreamingPart&) = delete;
     VideoStreamingPart& operator=(VideoStreamingPart&&) = delete;
 
-    absl::optional<VideoStreamingPartFrame> getFrameAtRelativeTimestamp(VideoStreamingSharedState const *sharedState, double timestamp);
+    absl::optional<VideoStreamingPartFrame> getFrameAtRelativeTimestamp(double timestamp);
     absl::optional<std::string> getActiveEndpointId() const;
     bool hasRemainingFrames() const;
     

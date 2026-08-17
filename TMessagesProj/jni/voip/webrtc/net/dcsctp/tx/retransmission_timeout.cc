@@ -12,28 +12,27 @@
 #include <algorithm>
 #include <cstdint>
 
-#include "api/units/time_delta.h"
 #include "net/dcsctp/public/dcsctp_options.h"
 
 namespace dcsctp {
 
 RetransmissionTimeout::RetransmissionTimeout(const DcSctpOptions& options)
-    : min_rto_(options.rto_min.ToTimeDelta()),
-      max_rto_(options.rto_max.ToTimeDelta()),
-      max_rtt_(options.rtt_max.ToTimeDelta()),
+    : min_rto_(*options.rto_min),
+      max_rto_(*options.rto_max),
+      max_rtt_(*options.rtt_max),
       min_rtt_variance_(*options.min_rtt_variance),
       scaled_srtt_(*options.rto_initial << kRttShift),
       rto_(*options.rto_initial) {}
 
-void RetransmissionTimeout::ObserveRTT(webrtc::TimeDelta measured_rtt) {
+void RetransmissionTimeout::ObserveRTT(DurationMs measured_rtt) {
+  const int32_t rtt = *measured_rtt;
+
   // Unrealistic values will be skipped. If a wrongly measured (or otherwise
   // corrupt) value was processed, it could change the state in a way that would
   // take a very long time to recover.
-  if (measured_rtt < webrtc::TimeDelta::Zero() || measured_rtt > max_rtt_) {
+  if (rtt < 0 || rtt > max_rtt_) {
     return;
   }
-
-  const int64_t rtt = measured_rtt.ms();
 
   // From https://tools.ietf.org/html/rfc4960#section-6.3.1, but avoiding
   // floating point math by implementing algorithm from "V. Jacobson: Congestion
@@ -43,7 +42,7 @@ void RetransmissionTimeout::ObserveRTT(webrtc::TimeDelta measured_rtt) {
     scaled_rtt_var_ = (rtt / 2) << kRttVarShift;
     first_measurement_ = false;
   } else {
-    int64_t rtt_diff = rtt - (scaled_srtt_ >> kRttShift);
+    int32_t rtt_diff = rtt - (scaled_srtt_ >> kRttShift);
     scaled_srtt_ += rtt_diff;
     if (rtt_diff < 0) {
       rtt_diff = -rtt_diff;
@@ -59,6 +58,6 @@ void RetransmissionTimeout::ObserveRTT(webrtc::TimeDelta measured_rtt) {
   rto_ = (scaled_srtt_ >> kRttShift) + scaled_rtt_var_;
 
   // Clamp RTO between min and max.
-  rto_ = std::min(std::max(rto_, min_rto_.ms()), max_rto_.ms());
+  rto_ = std::min(std::max(rto_, min_rto_), max_rto_);
 }
 }  // namespace dcsctp

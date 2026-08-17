@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "absl/types/optional.h"
-#include "api/units/time_delta.h"
 #include "net/dcsctp/packet/chunk/data_chunk.h"
 #include "net/dcsctp/packet/chunk/forward_tsn_chunk.h"
 #include "net/dcsctp/packet/chunk/idata_chunk.h"
@@ -26,7 +25,6 @@
 #include "net/dcsctp/packet/chunk/sack_chunk.h"
 #include "net/dcsctp/packet/sctp_packet.h"
 #include "net/dcsctp/public/dcsctp_options.h"
-#include "net/dcsctp/public/types.h"
 #include "net/dcsctp/rx/data_tracker.h"
 #include "net/dcsctp/rx/reassembly_queue.h"
 #include "net/dcsctp/socket/capabilities.h"
@@ -38,8 +36,6 @@
 #include "rtc_base/strings/string_builder.h"
 
 namespace dcsctp {
-using ::webrtc::TimeDelta;
-using ::webrtc::Timestamp;
 
 TransmissionControlBlock::TransmissionControlBlock(
     TimerManager& timer_manager,
@@ -64,20 +60,18 @@ TransmissionControlBlock::TransmissionControlBlock(
       t3_rtx_(timer_manager_.CreateTimer(
           "t3-rtx",
           absl::bind_front(&TransmissionControlBlock::OnRtxTimerExpiry, this),
-          TimerOptions(options.rto_initial.ToTimeDelta(),
+          TimerOptions(options.rto_initial,
                        TimerBackoffAlgorithm::kExponential,
                        /*max_restarts=*/absl::nullopt,
-                       options.max_timer_backoff_duration.has_value()
-                           ? options.max_timer_backoff_duration->ToTimeDelta()
-                           : TimeDelta::PlusInfinity()))),
+                       options.max_timer_backoff_duration))),
       delayed_ack_timer_(timer_manager_.CreateTimer(
           "delayed-ack",
           absl::bind_front(&TransmissionControlBlock::OnDelayedAckTimerExpiry,
                            this),
-          TimerOptions(options.delayed_ack_max_timeout.ToTimeDelta(),
+          TimerOptions(options.delayed_ack_max_timeout,
                        TimerBackoffAlgorithm::kExponential,
                        /*max_restarts=*/0,
-                       /*max_backoff_duration=*/TimeDelta::PlusInfinity(),
+                       /*max_backoff_duration=*/absl::nullopt,
                        webrtc::TaskQueueBase::DelayPrecision::kHigh))),
       my_verification_tag_(my_verification_tag),
       my_initial_tsn_(my_initial_tsn),
@@ -115,22 +109,21 @@ TransmissionControlBlock::TransmissionControlBlock(
   send_queue.EnableMessageInterleaving(capabilities.message_interleaving);
 }
 
-void TransmissionControlBlock::ObserveRTT(TimeDelta rtt) {
-  TimeDelta prev_rto = rto_.rto();
+void TransmissionControlBlock::ObserveRTT(DurationMs rtt) {
+  DurationMs prev_rto = rto_.rto();
   rto_.ObserveRTT(rtt);
-  RTC_DLOG(LS_VERBOSE) << log_prefix_ << "new rtt=" << webrtc::ToString(rtt)
-                       << ", srtt=" << webrtc::ToString(rto_.srtt())
-                       << ", rto=" << webrtc::ToString(rto_.rto()) << " ("
-                       << webrtc::ToString(prev_rto) << ")";
+  RTC_DLOG(LS_VERBOSE) << log_prefix_ << "new rtt=" << *rtt
+                       << ", srtt=" << *rto_.srtt() << ", rto=" << *rto_.rto()
+                       << " (" << *prev_rto << ")";
   t3_rtx_->set_duration(rto_.rto());
 
-  TimeDelta delayed_ack_tmo = std::min(
-      rto_.rto() * 0.5, options_.delayed_ack_max_timeout.ToTimeDelta());
+  DurationMs delayed_ack_tmo =
+      std::min(rto_.rto() * 0.5, options_.delayed_ack_max_timeout);
   delayed_ack_timer_->set_duration(delayed_ack_tmo);
 }
 
-TimeDelta TransmissionControlBlock::OnRtxTimerExpiry() {
-  Timestamp now = callbacks_.Now();
+absl::optional<DurationMs> TransmissionControlBlock::OnRtxTimerExpiry() {
+  TimeMs now = callbacks_.TimeMillis();
   RTC_DLOG(LS_INFO) << log_prefix_ << "Timer " << t3_rtx_->name()
                     << " has expired";
   if (cookie_echo_chunk_.has_value()) {
@@ -143,13 +136,13 @@ TimeDelta TransmissionControlBlock::OnRtxTimerExpiry() {
       SendBufferedPackets(now);
     }
   }
-  return TimeDelta::Zero();
+  return absl::nullopt;
 }
 
-TimeDelta TransmissionControlBlock::OnDelayedAckTimerExpiry() {
+absl::optional<DurationMs> TransmissionControlBlock::OnDelayedAckTimerExpiry() {
   data_tracker_.HandleDelayedAckTimerExpiry();
   MaybeSendSack();
-  return TimeDelta::Zero();
+  return absl::nullopt;
 }
 
 void TransmissionControlBlock::MaybeSendSack() {
@@ -162,7 +155,7 @@ void TransmissionControlBlock::MaybeSendSack() {
 }
 
 void TransmissionControlBlock::MaybeSendForwardTsn(SctpPacket::Builder& builder,
-                                                   Timestamp now) {
+                                                   TimeMs now) {
   if (now >= limit_forward_tsn_until_ &&
       retransmission_queue_.ShouldSendForwardTsn(now)) {
     if (capabilities_.message_interleaving) {
@@ -170,15 +163,14 @@ void TransmissionControlBlock::MaybeSendForwardTsn(SctpPacket::Builder& builder,
     } else {
       builder.Add(retransmission_queue_.CreateForwardTsn());
     }
-    Send(builder);
+    packet_sender_.Send(builder);
     // https://datatracker.ietf.org/doc/html/rfc3758
     // "IMPLEMENTATION NOTE: An implementation may wish to limit the number of
     // duplicate FORWARD TSN chunks it sends by ... waiting a full RTT before
     // sending a duplicate FORWARD TSN."
     // "Any delay applied to the sending of FORWARD TSN chunk SHOULD NOT exceed
     // 200ms and MUST NOT exceed 500ms".
-    limit_forward_tsn_until_ =
-        now + std::min(TimeDelta::Millis(200), rto_.srtt());
+    limit_forward_tsn_until_ = now + std::min(DurationMs(200), rto_.srtt());
   }
 }
 
@@ -206,11 +198,11 @@ void TransmissionControlBlock::MaybeSendFastRetransmit() {
       builder.Add(DataChunk(tsn, std::move(data), false));
     }
   }
-  Send(builder);
+  packet_sender_.Send(builder);
 }
 
 void TransmissionControlBlock::SendBufferedPackets(SctpPacket::Builder& builder,
-                                                   Timestamp now) {
+                                                   TimeMs now) {
   for (int packet_idx = 0;
        packet_idx < options_.max_burst && retransmission_queue_.can_send_data();
        ++packet_idx) {
@@ -253,13 +245,7 @@ void TransmissionControlBlock::SendBufferedPackets(SctpPacket::Builder& builder,
       }
     }
 
-    // https://www.ietf.org/archive/id/draft-tuexen-tsvwg-sctp-zero-checksum-02.html#section-4.2
-    // "When an end point sends a packet containing a COOKIE ECHO chunk, it MUST
-    // include a correct CRC32c checksum in the packet containing the COOKIE
-    // ECHO chunk."
-    bool write_checksum =
-        !capabilities_.zero_checksum || cookie_echo_chunk_.has_value();
-    if (!packet_sender_.Send(builder, write_checksum)) {
+    if (!packet_sender_.Send(builder)) {
       break;
     }
 
@@ -288,9 +274,6 @@ std::string TransmissionControlBlock::ToString() const {
   if (capabilities_.reconfig) {
     sb << "Reconfig,";
   }
-  if (capabilities_.zero_checksum) {
-    sb << "ZeroChecksum,";
-  }
   sb << " max_in=" << capabilities_.negotiated_maximum_incoming_streams;
   sb << " max_out=" << capabilities_.negotiated_maximum_outgoing_streams;
 
@@ -311,7 +294,6 @@ void TransmissionControlBlock::AddHandoverState(
   state.capabilities.partial_reliability = capabilities_.partial_reliability;
   state.capabilities.message_interleaving = capabilities_.message_interleaving;
   state.capabilities.reconfig = capabilities_.reconfig;
-  state.capabilities.zero_checksum = capabilities_.zero_checksum;
   state.capabilities.negotiated_maximum_incoming_streams =
       capabilities_.negotiated_maximum_incoming_streams;
   state.capabilities.negotiated_maximum_outgoing_streams =

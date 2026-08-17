@@ -9,7 +9,7 @@ namespace webrtc {
 
 namespace tgcalls {
 
-class SignalingConnection {
+class SignalingConnection : public std::enable_shared_from_this<SignalingConnection> {
 public:
     SignalingConnection();
     virtual ~SignalingConnection() = default;

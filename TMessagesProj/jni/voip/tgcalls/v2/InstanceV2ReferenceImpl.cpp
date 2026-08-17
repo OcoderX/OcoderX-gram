@@ -8,6 +8,7 @@
 #include "v2/ContentNegotiation.h"
 
 #include "CodecSelectHelper.h"
+#include "platform/PlatformInterface.h"
 
 #include "api/audio_codecs/audio_decoder_factory_template.h"
 #include "api/audio_codecs/audio_encoder_factory_template.h"
@@ -37,11 +38,6 @@
 #include "pc/peer_connection_proxy.h"
 #include "api/rtc_event_log/rtc_event_log_factory.h"
 #include "api/stats/rtc_stats_report.h"
-#include "api/enable_media.h"
-#include "p2p/client/basic_port_allocator.h"
-#include "p2p/base/basic_packet_socket_factory.h"
-#include "rtc_base/network.h"
-#include "p2p/base/default_ice_transport_factory.h"
 
 #include "AudioFrame.h"
 #include "ThreadLocalObject.h"
@@ -57,7 +53,6 @@
 #include "v2/SignalingConnection.h"
 #include "v2/ExternalSignalingConnection.h"
 #include "v2/SignalingSctpConnection.h"
-#include "v2/ReflectorRelayPortFactory.h"
 #ifdef WEBRTC_IOS
 #include "platform/darwin/iOS/tgcalls_audio_device_module_ios.h"
 #endif
@@ -135,10 +130,10 @@ public:
         std::function<void()> onRenegotiationNeeded;
         std::function<void(const webrtc::IceCandidateInterface *)> onIceCandidate;
         std::function<void(webrtc::PeerConnectionInterface::SignalingState state)> onSignalingChange;
-        std::function<void(webrtc::PeerConnectionInterface::IceConnectionState state)> onConnectionChange;
-        std::function<void(webrtc::scoped_refptr<webrtc::DataChannelInterface>)> onDataChannel;
-        std::function<void(webrtc::scoped_refptr<webrtc::RtpTransceiverInterface>)> onTransceiverAdded;
-        std::function<void(webrtc::scoped_refptr<webrtc::RtpReceiverInterface>)> onTransceiverRemoved;
+        std::function<void(webrtc::PeerConnectionInterface::PeerConnectionState state)> onConnectionChange;
+        std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> onDataChannel;
+        std::function<void(rtc::scoped_refptr<webrtc::RtpTransceiverInterface>)> onTransceiverAdded;
+        std::function<void(rtc::scoped_refptr<webrtc::RtpReceiverInterface>)> onTransceiverRemoved;
         std::function<void(const cricket::CandidatePairChangeEvent &)> onCandidatePairChangeEvent;
     };
 
@@ -157,19 +152,19 @@ public:
         }
     }
 
-    void OnAddStream(webrtc::scoped_refptr<webrtc::MediaStreamInterface> stream) override {
+    void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) override {
     }
 
-    void OnRemoveStream(webrtc::scoped_refptr<webrtc::MediaStreamInterface> stream) override {
+    void OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) override {
     }
 
-    void OnTrack(webrtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) override {
+    void OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) override {
         if (_parameters.onTransceiverAdded) {
             _parameters.onTransceiverAdded(transceiver);
         }
     }
 
-    void OnDataChannel(webrtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) override {
+    void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) override {
         if (_parameters.onDataChannel) {
             _parameters.onDataChannel(data_channel);
         }
@@ -182,15 +177,15 @@ public:
     }
 
     void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override {
-        if (_parameters.onConnectionChange) {
-            _parameters.onConnectionChange(new_state);
-        }
     }
 
     void OnStandardizedIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override {
     }
 
     void OnConnectionChange(webrtc::PeerConnectionInterface::PeerConnectionState new_state) override {
+        if (_parameters.onConnectionChange) {
+            _parameters.onConnectionChange(new_state);
+        }
     }
 
     void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state) override {
@@ -211,11 +206,11 @@ public:
         }
     }
 
-    void OnAddTrack(webrtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver, const std::vector<webrtc::scoped_refptr<webrtc::MediaStreamInterface>> &streams) override {
+    void OnAddTrack(rtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver, const std::vector<rtc::scoped_refptr<webrtc::MediaStreamInterface>> &streams) override {
 
     }
 
-    void OnRemoveTrack(webrtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver) override {
+    void OnRemoveTrack(rtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver) override {
         if (_parameters.onTransceiverRemoved) {
             _parameters.onTransceiverRemoved(receiver);
         }
@@ -227,16 +222,16 @@ private:
 
 class StatsCollectorCallbackAdapter : public webrtc::RTCStatsCollectorCallback {
 public:
-    StatsCollectorCallbackAdapter(std::function<void(const webrtc::scoped_refptr<const webrtc::RTCStatsReport> &)> &&completion_) :
+    StatsCollectorCallbackAdapter(std::function<void(const rtc::scoped_refptr<const webrtc::RTCStatsReport> &)> &&completion_) :
     completion(std::move(completion_)) {
     }
 
-    void OnStatsDelivered(const webrtc::scoped_refptr<const webrtc::RTCStatsReport> &report) override {
+    void OnStatsDelivered(const rtc::scoped_refptr<const webrtc::RTCStatsReport> &report) override {
         completion(report);
     }
 
 private:
-    std::function<void(const webrtc::scoped_refptr<const webrtc::RTCStatsReport> &)> completion;
+    std::function<void(const rtc::scoped_refptr<const webrtc::RTCStatsReport> &)> completion;
 };
 
 class VideoSinkImpl : public rtc::VideoSinkInterface<webrtc::VideoFrame> {
@@ -330,8 +325,8 @@ struct StateLogRecord {
 struct NetworkStateLogRecord {
     bool isConnected = false;
     bool isFailed = false;
-    absl::optional<InstanceNetworking::RouteDescription> route;
-    absl::optional<InstanceNetworking::ConnectionDescription> connection;
+    absl::optional<NativeNetworkingImpl::RouteDescription> route;
+    absl::optional<NativeNetworkingImpl::ConnectionDescription> connection;
 
     bool operator==(NetworkStateLogRecord const &rhs) const {
         if (isConnected != rhs.isConnected) {
@@ -374,12 +369,11 @@ public:
     _remotePrefferedAspectRatioUpdated(descriptor.remotePrefferedAspectRatioUpdated),
     _signalingDataEmitted(descriptor.signalingDataEmitted),
     _createAudioDeviceModule(descriptor.createAudioDeviceModule),
-    _createWrappedAudioDeviceModule(descriptor.createWrappedAudioDeviceModule),
     _statsLogPath(descriptor.config.statsLogPath),
     _eventLog(std::make_unique<webrtc::RtcEventLogNull>()),
     _taskQueueFactory(webrtc::CreateDefaultTaskQueueFactory()),
     _videoCapture(descriptor.videoCapture),
-    _platformContext(descriptor.platformContext) {
+     _platformContext(descriptor.platformContext) {
         webrtc::field_trial::InitFieldTrialsFromString(
             "WebRTC-DataChannel-Dcsctp/Enabled/"
             "WebRTC-Audio-iOS-Holding/Enabled/"
@@ -405,6 +399,8 @@ public:
     }
 
     void start() {
+        PlatformInterface::SharedInstance()->configurePlatformAudio();
+
         const auto weak = std::weak_ptr<InstanceV2ReferenceImplInternal>(shared_from_this());
 
         PlatformInterface::SharedInstance()->configurePlatformAudio();
@@ -453,26 +449,27 @@ public:
             _audioDeviceModule = createAudioDeviceModule();
         });
 
+        _relayPortFactory.reset(new ReflectorRelayPortFactory(_rtcServers));
+
         webrtc::PeerConnectionFactoryDependencies peerConnectionFactoryDependencies;
-        peerConnectionFactoryDependencies.network_thread = _threads->getNetworkThread();
         peerConnectionFactoryDependencies.signaling_thread = _threads->getMediaThread();
         peerConnectionFactoryDependencies.worker_thread = _threads->getWorkerThread();
         peerConnectionFactoryDependencies.task_queue_factory = webrtc::CreateDefaultTaskQueueFactory();
         peerConnectionFactoryDependencies.network_monitor_factory = PlatformInterface::SharedInstance()->createNetworkMonitorFactory();
 
-        peerConnectionFactoryDependencies.adm = _audioDeviceModule;
-        
-        webrtc:: AudioProcessingBuilder builder;
-        peerConnectionFactoryDependencies.audio_processing = builder.Create();
-        
-        peerConnectionFactoryDependencies.audio_encoder_factory = webrtc::CreateAudioEncoderFactory<webrtc::AudioEncoderOpus>();
-        peerConnectionFactoryDependencies.audio_decoder_factory = webrtc::CreateAudioDecoderFactory<webrtc::AudioDecoderOpus>();
+        cricket::MediaEngineDependencies mediaDeps;
+        mediaDeps.adm = _audioDeviceModule;
+        mediaDeps.task_queue_factory = peerConnectionFactoryDependencies.task_queue_factory.get();
+        mediaDeps.audio_encoder_factory = webrtc::CreateAudioEncoderFactory<webrtc::AudioEncoderOpus>();
+        mediaDeps.audio_decoder_factory = webrtc::CreateAudioDecoderFactory<webrtc::AudioDecoderOpus>();
 
-        peerConnectionFactoryDependencies.video_encoder_factory = PlatformInterface::SharedInstance()->makeVideoEncoderFactory(_platformContext, true);
-        peerConnectionFactoryDependencies.video_decoder_factory = PlatformInterface::SharedInstance()->makeVideoDecoderFactory(_platformContext);
-        
-        webrtc::EnableMedia(peerConnectionFactoryDependencies);
+        mediaDeps.video_encoder_factory = PlatformInterface::SharedInstance()->makeVideoEncoderFactory(_platformContext, true);
+        mediaDeps.video_decoder_factory = PlatformInterface::SharedInstance()->makeVideoDecoderFactory(_platformContext);
 
+        std::unique_ptr<cricket::MediaEngineInterface> mediaEngine = cricket::CreateMediaEngine(std::move(mediaDeps));
+        peerConnectionFactoryDependencies.media_engine = std::move(mediaEngine);
+
+        peerConnectionFactoryDependencies.call_factory = webrtc::CreateCallFactory();
         peerConnectionFactoryDependencies.event_log_factory = std::make_unique<webrtc::RtcEventLogFactory>(peerConnectionFactoryDependencies.task_queue_factory.get());
 
         _peerConnectionFactory = webrtc::CreateModularPeerConnectionFactory(std::move(peerConnectionFactoryDependencies));
@@ -487,10 +484,8 @@ public:
                     return;
                 }
 
-                if (strong->_didBeginNegotiation) {
-                    if (strong->_encryptionKey.isOutgoing || strong->_peerConnection->remote_description()) {
-                        strong->sendLocalDescription();
-                    }
+                if (strong->_didBeginNegotiation && !strong->_isPerformingConfiguration) {
+                    strong->sendLocalDescription();
                 } else {
                     RTC_LOG(LS_INFO) << "onRenegotiationNeeded: not sending local description";
                 }
@@ -521,7 +516,7 @@ public:
                 }
             }*/
         };
-        delegateParameters.onConnectionChange = [weak](webrtc::PeerConnectionInterface::IceConnectionState state) {
+        delegateParameters.onConnectionChange = [weak](webrtc::PeerConnectionInterface::PeerConnectionState state) {
             const auto strong = weak.lock();
             if (!strong) {
                 return;
@@ -531,15 +526,11 @@ public:
             bool isFailed = false;
 
             switch (state) {
-                case webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionConnected: {
+                case webrtc::PeerConnectionInterface::PeerConnectionState::kConnected: {
                     isConnected = true;
                     break;
                 }
-                case webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionCompleted: {
-                    isConnected = true;
-                    break;
-                }
-                case webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionFailed: {
+                case webrtc::PeerConnectionInterface::PeerConnectionState::kFailed: {
                     isFailed = true;
                     break;
                 }
@@ -555,7 +546,7 @@ public:
                 strong->onNetworkStateUpdated();
             }
         };
-        delegateParameters.onDataChannel = [weak](webrtc::scoped_refptr<webrtc::DataChannelInterface> dataChannel) {
+        delegateParameters.onDataChannel = [weak](rtc::scoped_refptr<webrtc::DataChannelInterface> dataChannel) {
             const auto strong = weak.lock();
             if (!strong) {
                 return;
@@ -567,7 +558,7 @@ public:
                 RTC_LOG(LS_WARNING) << "onDataChannel invoked, but data channel already exists";
             }
         };
-        delegateParameters.onTransceiverAdded = [weak](webrtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) {
+        delegateParameters.onTransceiverAdded = [weak](rtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) {
             const auto strong = weak.lock();
             if (!strong) {
                 return;
@@ -592,7 +583,7 @@ public:
                 }
             }
         };
-        delegateParameters.onTransceiverRemoved = [weak](webrtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver) {
+        delegateParameters.onTransceiverRemoved = [weak](rtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver) {
             const auto strong = weak.lock();
             if (!strong) {
                 return;
@@ -616,10 +607,10 @@ public:
                 return;
             }
 
-            InstanceNetworking::ConnectionDescription connectionDescription;
+            NativeNetworkingImpl::ConnectionDescription connectionDescription;
 
-            connectionDescription.local = InstanceNetworking::connectionDescriptionFromCandidate(event.selected_candidate_pair.local);
-            connectionDescription.remote = InstanceNetworking::connectionDescriptionFromCandidate(event.selected_candidate_pair.remote);
+            connectionDescription.local = NativeNetworkingImpl::connectionDescriptionFromCandidate(event.selected_candidate_pair.local);
+            connectionDescription.remote = NativeNetworkingImpl::connectionDescriptionFromCandidate(event.selected_candidate_pair.remote);
 
             if (!strong->_currentConnectionDescription || strong->_currentConnectionDescription.value() != connectionDescription) {
                 strong->_currentConnectionDescription = std::move(connectionDescription);
@@ -630,21 +621,12 @@ public:
 
         peerConnectionDependencies.observer = _peerConnectionObserver.get();
 
-        _networkMonitorFactory = PlatformInterface::SharedInstance()->createNetworkMonitorFactory();
-        _socketFactory = std::make_unique<rtc::BasicPacketSocketFactory>(_threads->getNetworkThread()->socketserver());
-        _networkManager = std::make_unique<rtc::BasicNetworkManager>(_networkMonitorFactory.get(), _threads->getNetworkThread()->socketserver());
-        _relayPortFactory = std::make_unique<ReflectorRelayPortFactory>(_rtcServers, false, 0, _threads->getNetworkThread()->socketserver());
-
-        auto portAllocator = std::make_unique<cricket::BasicPortAllocator>(_networkManager.get(), _socketFactory.get(), nullptr, _relayPortFactory.get());
-        peerConnectionDependencies.allocator = std::move(portAllocator);
-
         webrtc::PeerConnectionInterface::RTCConfiguration peerConnectionConfiguration;
         if (_enableP2P) {
             peerConnectionConfiguration.type = webrtc::PeerConnectionInterface::IceTransportsType::kAll;
         } else {
             peerConnectionConfiguration.type = webrtc::PeerConnectionInterface::IceTransportsType::kRelay;
         }
-        peerConnectionConfiguration.tcp_candidate_policy = webrtc::PeerConnectionInterface::TcpCandidatePolicy::kTcpCandidatePolicyDisabled;
         peerConnectionConfiguration.enable_ice_renomination = true;
         peerConnectionConfiguration.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
         peerConnectionConfiguration.bundle_policy = webrtc::PeerConnectionInterface::kBundlePolicyMaxBundle;
@@ -652,7 +634,6 @@ public:
         peerConnectionConfiguration.enable_implicit_rollback = true;
         peerConnectionConfiguration.continual_gathering_policy = webrtc::PeerConnectionInterface::ContinualGatheringPolicy::GATHER_CONTINUALLY;
         peerConnectionConfiguration.audio_jitter_buffer_fast_accelerate = true;
-        peerConnectionConfiguration.prioritize_most_likely_ice_candidate_pairs = true;
 
         for (auto &server : _rtcServers) {
             if (server.isTcp) {
@@ -668,8 +649,10 @@ public:
             if (server.isTurn) {
                 webrtc::PeerConnectionInterface::IceServer mappedServer;
 
-                mappedServer.urls.push_back(
-                    "turn:" + address.HostAsURIString() + ":" + std::to_string(server.port));
+                std::ostringstream uri;
+                uri << "turn:" << address.HostAsURIString() << ":" << server.port;
+
+                mappedServer.urls.push_back(uri.str());
                 mappedServer.username = server.login;
                 mappedServer.password = server.password;
 
@@ -677,8 +660,10 @@ public:
             } else {
                 webrtc::PeerConnectionInterface::IceServer mappedServer;
 
-                mappedServer.urls.push_back(
-                    "stun:" + address.HostAsURIString() + ":" + std::to_string(server.port));
+                std::ostringstream uri;
+                uri << "stun:" << address.HostAsURIString() << ":" << server.port;
+
+                mappedServer.urls.push_back(uri.str());
 
                 peerConnectionConfiguration.servers.push_back(mappedServer);
             }
@@ -694,7 +679,7 @@ public:
 
             if (_encryptionKey.isOutgoing) {
                 webrtc::DataChannelInit dataChannelInit;
-                webrtc::RTCErrorOr<webrtc::scoped_refptr<webrtc::DataChannelInterface>> dataChannelOrError = _peerConnection->CreateDataChannelOrError("data", &dataChannelInit);
+                webrtc::RTCErrorOr<rtc::scoped_refptr<webrtc::DataChannelInterface>> dataChannelOrError = _peerConnection->CreateDataChannelOrError("data", &dataChannelInit);
                 if (dataChannelOrError.ok()) {
                     attachDataChannel(dataChannelOrError.value());
                 }
@@ -704,10 +689,10 @@ public:
             transceiverInit.stream_ids = { "0" };
 
             cricket::AudioOptions audioSourceOptions;
-            webrtc::scoped_refptr<webrtc::AudioSourceInterface> audioSource = _peerConnectionFactory->CreateAudioSource(audioSourceOptions);
+            rtc::scoped_refptr<webrtc::AudioSourceInterface> audioSource = _peerConnectionFactory->CreateAudioSource(audioSourceOptions);
 
-            webrtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack = _peerConnectionFactory->CreateAudioTrack("0", audioSource.get());
-            webrtc::RTCErrorOr<webrtc::scoped_refptr<webrtc::RtpTransceiverInterface>> audioTransceiverOrError = _peerConnection->AddTransceiver(audioTrack, transceiverInit);
+            rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack = _peerConnectionFactory->CreateAudioTrack("0", audioSource.get());
+            webrtc::RTCErrorOr<rtc::scoped_refptr<webrtc::RtpTransceiverInterface>> audioTransceiverOrError = _peerConnection->AddTransceiver(audioTrack, transceiverInit);
             if (audioTransceiverOrError.ok()) {
                 _outgoingAudioTrack = audioTrack;
                 _outgoingAudioTransceiver = audioTransceiverOrError.value();
@@ -882,18 +867,16 @@ public:
 
         _isMakingOffer = true;
 
-        webrtc::scoped_refptr<webrtc::SetLocalDescriptionObserverInterface> observer(new rtc::RefCountedObject<SetSessionDescriptionObserver>([threads = _threads, weak](webrtc::RTCError error) {
+        rtc::scoped_refptr<webrtc::SetLocalDescriptionObserverInterface> observer(new rtc::RefCountedObject<SetSessionDescriptionObserver>([threads = _threads, weak](webrtc::RTCError error) {
             threads->getMediaThread()->PostTask([weak]() {
                 const auto strong = weak.lock();
                 if (!strong) {
                     return;
                 }
 
-                strong->doSendLocalDescription();
+                strong->sentLocalDescription();
 
                 strong->_isMakingOffer = false;
-
-                strong->maybeCommitPendingIceCandidates();
             });
         }));
         RTC_LOG(LS_INFO) << "Calling SetLocalDescription";
@@ -915,7 +898,7 @@ public:
         sendRawSignalingMessage(std::vector<uint8_t>(jsonResult.begin(), jsonResult.end()));
     }
 
-    void doSendLocalDescription() {
+    void sentLocalDescription() {
         auto localDescription = _peerConnection->local_description();
         if (localDescription) {
             std::string sdp;
@@ -933,9 +916,8 @@ public:
     }
 
     void beginSignaling() {
-        _didBeginNegotiation = true;
-
         if (_encryptionKey.isOutgoing) {
+            _didBeginNegotiation = true;
             sendLocalDescription();
         }
     }
@@ -1018,7 +1000,14 @@ public:
                 return;
             }
             std::string sdp = jsonSdp->second.string_value();
-            handleRemoteSdp(type, sdp);
+
+            bool offerCollision = (type == "offer") && (_isMakingOffer || _peerConnection->signaling_state() != webrtc::PeerConnectionInterface::SignalingState::kStable);
+            bool ignoreOffer = _encryptionKey.isOutgoing && offerCollision;
+            if (ignoreOffer) {
+                return;
+            } else {
+                applyRemoteSdp(type, sdp);
+            }
         } else if (type == "candidate") {
             auto jsonMid = json.object_items().find("mid");
             if (jsonMid == json.object_items().end()) {
@@ -1041,8 +1030,11 @@ public:
                 std::unique_ptr<webrtc::IceCandidateInterface> candidarePtr;
                 candidarePtr.reset(iceCandidate);
 
-                _pendingIceCandidates.push_back(std::move(candidarePtr));
-                maybeCommitPendingIceCandidates();
+                if (_handshakeCompleted) {
+                    _peerConnection->AddIceCandidate(candidarePtr.get());
+                } else {
+                    _pendingIceCandidates.push_back(std::move(candidarePtr));
+                }
             }
         } else {
             const auto message = signaling::Message::parse(data);
@@ -1115,59 +1107,45 @@ public:
         }
     }
 
-    void handleRemoteSdp(std::string const &type, std::string const &sdp) {
+    void applyRemoteSdp(std::string const &type, std::string const &sdp) {
         webrtc::SdpParseError sdpParseError;
         std::unique_ptr<webrtc::SessionDescriptionInterface> remoteDescription(webrtc::CreateSessionDescription(type, sdp, &sdpParseError));
-        if (!remoteDescription) {
-            RTC_LOG(LS_ERROR) << "Failed to parse remote SDP";
-            return;
-        }
-
-        bool isReadyForOffer = !_isMakingOffer && (_peerConnection->signaling_state() == webrtc::PeerConnectionInterface::SignalingState::kStable || _isSettingRemoteAnswerPending);
-        bool isOfferCollision = (type == "offer") && !isReadyForOffer;
-        bool ignoreOffer = !_encryptionKey.isOutgoing && isOfferCollision;
-        if (ignoreOffer) {
-            RTC_LOG(LS_INFO) << "Ingoring remote sdp";
-            return;
-        }
-
-        _isSettingRemoteAnswerPending = type == "answer";
-
         const auto weak = std::weak_ptr<InstanceV2ReferenceImplInternal>(shared_from_this());
-        webrtc::scoped_refptr<webrtc::SetRemoteDescriptionObserverInterface> observer(new rtc::RefCountedObject<SetSessionDescriptionObserver>([threads = _threads, weak, type](webrtc::RTCError error) {
+        rtc::scoped_refptr<webrtc::SetRemoteDescriptionObserverInterface> observer(new rtc::RefCountedObject<SetSessionDescriptionObserver>([threads = _threads, weak, type](webrtc::RTCError error) {
             threads->getMediaThread()->PostTask([weak, type]() {
                 const auto strong = weak.lock();
                 if (!strong) {
                     return;
                 }
 
-                strong->_isSettingRemoteAnswerPending = false;
-
-                strong->maybeCommitPendingIceCandidates();
-
                 if (type == "offer") {
+                    strong->_didBeginNegotiation = true;
                     strong->sendLocalDescription();
                 }
             });
         }));
         RTC_LOG(LS_INFO) << "Calling SetRemoteDescription";
         _peerConnection->SetRemoteDescription(std::move(remoteDescription), observer);
+
+        if (!_handshakeCompleted) {
+            _handshakeCompleted = true;
+
+            commitPendingIceCandidates();
+        }
     }
 
-    void maybeCommitPendingIceCandidates() {
+    void commitPendingIceCandidates() {
         if (_pendingIceCandidates.size() == 0) {
             return;
         }
 
-        if (_peerConnection->local_description() && _peerConnection->remote_description()) {
-            for (const auto &candidate : _pendingIceCandidates) {
-                if (candidate) {
-                    _peerConnection->AddIceCandidate(candidate.get());
-                }
+        for (const auto &candidate : _pendingIceCandidates) {
+            if (candidate) {
+                _peerConnection->AddIceCandidate(candidate.get());
             }
-
-            _pendingIceCandidates.clear();
         }
+
+        _pendingIceCandidates.clear();
     }
 
     void onNetworkStateUpdated() {
@@ -1192,7 +1170,7 @@ public:
         _stateUpdated(mappedState);
     }
 
-    void attachDataChannel(webrtc::scoped_refptr<webrtc::DataChannelInterface> dataChannel) {
+    void attachDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> dataChannel) {
         const auto weak = std::weak_ptr<InstanceV2ReferenceImplInternal>(shared_from_this());
 
         DataChannelObserverImpl::Parameters dataChannelObserverParams;
@@ -1330,12 +1308,12 @@ public:
             } else {
                 _videoCapture = videoCapture;
 
-                auto videoTrack = _peerConnectionFactory->CreateVideoTrack(videoCaptureImpl->source(), "1");
+                auto videoTrack = _peerConnectionFactory->CreateVideoTrack("1", videoCaptureImpl->source().get());
                 if (videoTrack) {
                     webrtc::RtpTransceiverInit transceiverInit;
                     transceiverInit.stream_ids = { "0" };
 
-                    webrtc::RTCErrorOr<webrtc::scoped_refptr<webrtc::RtpTransceiverInterface>> videoTransceiverOrError = _peerConnection->AddTransceiver(videoTrack, transceiverInit);
+                    webrtc::RTCErrorOr<rtc::scoped_refptr<webrtc::RtpTransceiverInterface>> videoTransceiverOrError = _peerConnection->AddTransceiver(videoTrack, transceiverInit);
                     if (videoTransceiverOrError.ok()) {
                         _outgoingVideoTrack = videoTrack;
                         _outgoingVideoTransceiver = videoTransceiverOrError.value();
@@ -1343,9 +1321,9 @@ public:
                         auto currentCapabilities = _peerConnectionFactory->GetRtpSenderCapabilities(cricket::MediaType::MEDIA_TYPE_VIDEO);
 
                         std::vector<std::string> codecPreferences = {
-                            #ifndef WEBRTC_DISABLE_H265
+                #ifndef WEBRTC_DISABLE_H265
                             cricket::kH265CodecName,
-                            #endif
+                #endif
                             cricket::kH264CodecName
                         };
 
@@ -1410,7 +1388,7 @@ public:
         }
     }
 
-    void connectIncomingVideoSink(webrtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) {
+    void connectIncomingVideoSink(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) {
         if (_currentStrongSink) {
             webrtc::VideoTrackInterface *videoTrack = (webrtc::VideoTrackInterface *)transceiver->receiver()->track().get();
             videoTrack->AddOrUpdateSink(_currentStrongSink.get(), rtc::VideoSinkWants());
@@ -1473,10 +1451,14 @@ public:
         for (const auto &record : _networkStateLogRecords) {
             json11::Json::object jsonRecord;
 
+            std::ostringstream timestampString;
+
             if (baseTimestamp == 0) {
                 baseTimestamp = record.timestamp;
             }
-            jsonRecord.insert(std::make_pair("t", json11::Json(std::to_string(record.timestamp - baseTimestamp))));
+            timestampString << (record.timestamp - baseTimestamp);
+
+            jsonRecord.insert(std::make_pair("t", json11::Json(timestampString.str())));
             jsonRecord.insert(std::make_pair("c", json11::Json(record.record.isConnected ? 1 : 0)));
             if (record.record.route) {
                 jsonRecord.insert(std::make_pair("local", json11::Json(record.record.route->localDescription)));
@@ -1485,7 +1467,7 @@ public:
             if (record.record.connection) {
                 json11::Json::object jsonConnection;
 
-                auto serializeCandidate = [](InstanceNetworking::ConnectionDescription::CandidateDescription const &candidate) -> json11::Json::object {
+                auto serializeCandidate = [](NativeNetworkingImpl::ConnectionDescription::CandidateDescription const &candidate) -> json11::Json::object {
                     json11::Json::object jsonCandidate;
 
                     jsonCandidate.insert(std::make_pair("type", json11::Json(candidate.type)));
@@ -1542,25 +1524,19 @@ public:
     }*/
 
 private:
-    webrtc::scoped_refptr<webrtc::AudioDeviceModule> createAudioDeviceModule() {
+    rtc::scoped_refptr<webrtc::AudioDeviceModule> createAudioDeviceModule() {
         const auto create = [&](webrtc::AudioDeviceModule::AudioLayer layer) {
 #ifdef WEBRTC_IOS
-            return rtc::make_ref_counted<webrtc::tgcalls_ios_adm::AudioDeviceModuleIOS>(false, false, false, 1);
+            return rtc::make_ref_counted<webrtc::tgcalls_ios_adm::AudioDeviceModuleIOS>(false, false, 1);
 #else
             return webrtc::AudioDeviceModule::Create(
                 layer,
                 _taskQueueFactory.get());
 #endif
         };
-        const auto check = [&](const webrtc::scoped_refptr<webrtc::AudioDeviceModule> &result) {
+        const auto check = [&](const rtc::scoped_refptr<webrtc::AudioDeviceModule> &result) {
             return (result && result->Init() == 0) ? result : nullptr;
         };
-        if (_createWrappedAudioDeviceModule) {
-            auto result = _createWrappedAudioDeviceModule(_taskQueueFactory.get());
-            if (result) {
-                return result;
-            }
-        }
         if (_createAudioDeviceModule) {
             if (const auto result = check(_createAudioDeviceModule(_taskQueueFactory.get()))) {
                 return result;
@@ -1583,8 +1559,7 @@ private:
     std::function<void(AudioState, VideoState)> _remoteMediaStateUpdated;
     std::function<void(float)> _remotePrefferedAspectRatioUpdated;
     std::function<void(const std::vector<uint8_t> &)> _signalingDataEmitted;
-    std::function<webrtc::scoped_refptr<webrtc::AudioDeviceModule>(webrtc::TaskQueueFactory*)> _createAudioDeviceModule;
-    std::function<webrtc::scoped_refptr<WrappedAudioDeviceModule>(webrtc::TaskQueueFactory*)> _createWrappedAudioDeviceModule;
+    std::function<rtc::scoped_refptr<webrtc::AudioDeviceModule>(webrtc::TaskQueueFactory*)> _createAudioDeviceModule;
     FilePath _statsLogPath;
 
     std::unique_ptr<SignalingConnection> _signalingConnection;
@@ -1592,7 +1567,7 @@ private:
 
     bool _isConnected = false;
     bool _isFailed = false;
-    absl::optional<InstanceNetworking::ConnectionDescription> _currentConnectionDescription;
+    absl::optional<NativeNetworkingImpl::ConnectionDescription> _currentConnectionDescription;
 
     absl::optional<NetworkStateLogRecord> _currentNetworkStateLogRecord;
     std::vector<StateLogRecord<NetworkStateLogRecord>> _networkStateLogRecords;
@@ -1600,39 +1575,34 @@ private:
 
     bool _didBeginNegotiation = false;
     bool _isMakingOffer = false;
-    bool _isSettingRemoteAnswerPending = false;
     bool _isPerformingConfiguration = false;
 
-    webrtc::scoped_refptr<webrtc::AudioTrackInterface> _outgoingAudioTrack;
-    webrtc::scoped_refptr<webrtc::RtpTransceiverInterface> _outgoingAudioTransceiver;
+    rtc::scoped_refptr<webrtc::AudioTrackInterface> _outgoingAudioTrack;
+    rtc::scoped_refptr<webrtc::RtpTransceiverInterface> _outgoingAudioTransceiver;
     bool _isMicrophoneMuted = false;
 
-    webrtc::scoped_refptr<webrtc::VideoTrackInterface> _outgoingVideoTrack;
-    webrtc::scoped_refptr<webrtc::RtpTransceiverInterface> _outgoingVideoTransceiver;
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> _outgoingVideoTrack;
+    rtc::scoped_refptr<webrtc::RtpTransceiverInterface> _outgoingVideoTransceiver;
 
-    std::map<std::string, webrtc::scoped_refptr<webrtc::RtpTransceiverInterface>> _incomingVideoTransceivers;
+    std::map<std::string, rtc::scoped_refptr<webrtc::RtpTransceiverInterface>> _incomingVideoTransceivers;
 
+    bool _handshakeCompleted = false;
     std::vector<std::unique_ptr<webrtc::IceCandidateInterface>> _pendingIceCandidates;
 
     std::unique_ptr<DataChannelObserverImpl> _dataChannelObserver;
-    webrtc::scoped_refptr<webrtc::DataChannelInterface> _dataChannel;
+    rtc::scoped_refptr<webrtc::DataChannelInterface> _dataChannel;
     bool _isDataChannelOpen = false;
 
     std::unique_ptr<webrtc::RtcEventLogNull> _eventLog;
     std::unique_ptr<webrtc::TaskQueueFactory> _taskQueueFactory;
-
-    std::unique_ptr<rtc::NetworkMonitorFactory> _networkMonitorFactory;
-    std::unique_ptr<rtc::BasicPacketSocketFactory> _socketFactory;
-    std::unique_ptr<rtc::BasicNetworkManager> _networkManager;
     std::unique_ptr<cricket::RelayPortFactoryInterface> _relayPortFactory;
-
-    webrtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _peerConnectionFactory;
+    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _peerConnectionFactory;
     std::unique_ptr<PeerConnectionDelegateAdapter> _peerConnectionObserver;
-    webrtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
+    rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
 
     webrtc::LocalAudioSinkAdapter _audioSource;
 
-    webrtc::scoped_refptr<webrtc::AudioDeviceModule> _audioDeviceModule;
+    rtc::scoped_refptr<webrtc::AudioDeviceModule> _audioDeviceModule;
 
     bool _isBatteryLow = false;
 
@@ -1654,7 +1624,7 @@ InstanceV2ReferenceImpl::InstanceV2ReferenceImpl(Descriptor &&descriptor) {
 
     _threads = StaticThreads::getThreads();
     _internal.reset(new ThreadLocalObject<InstanceV2ReferenceImplInternal>(_threads->getMediaThread(), [descriptor = std::move(descriptor), threads = _threads]() mutable {
-        return std::make_shared<InstanceV2ReferenceImplInternal>(std::move(descriptor), threads);
+        return new InstanceV2ReferenceImplInternal(std::move(descriptor), threads);
     }));
     _internal->perform([](InstanceV2ReferenceImplInternal *internal) {
         internal->start();
@@ -1695,7 +1665,7 @@ void InstanceV2ReferenceImpl::setMuteMicrophone(bool muteMicrophone) {
     });
 }
 
-void InstanceV2ReferenceImpl::setIncomingVideoOutput(std::weak_ptr<rtc::VideoSinkInterface<webrtc::VideoFrame>> sink) {
+void InstanceV2ReferenceImpl::setIncomingVideoOutput(std::shared_ptr<rtc::VideoSinkInterface<webrtc::VideoFrame>> sink) {
     _internal->perform([sink](InstanceV2ReferenceImplInternal *internal) {
         internal->setIncomingVideoOutput(sink);
     });

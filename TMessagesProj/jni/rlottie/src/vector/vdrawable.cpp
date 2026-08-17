@@ -26,7 +26,7 @@ void VDrawable::preprocess(const VRect &clip)
         if (mStroke.enable) {
             if (mStroke.mDash.size()) {
                 VDasher dasher(mStroke.mDash.data(), mStroke.mDash.size());
-                mPath.clone(dasher.dashed(mPath));
+                mPath = dasher.dashed(mPath);
             }
             mRasterizer.rasterize(std::move(mPath), mStroke.cap, mStroke.join,
                                   mStroke.width, mStroke.meterLimit, clip);

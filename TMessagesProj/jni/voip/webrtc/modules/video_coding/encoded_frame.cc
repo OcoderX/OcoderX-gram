@@ -36,7 +36,7 @@ VCMEncodedFrame::~VCMEncodedFrame() {
 }
 
 void VCMEncodedFrame::Reset() {
-  SetRtpTimestamp(0);
+  SetTimestamp(0);
   SetSpatialIndex(absl::nullopt);
   _renderTimeMs = -1;
   _payloadType = 0;
@@ -136,12 +136,14 @@ void VCMEncodedFrame::CopyCodecSpecific(const RTPVideoHeader* header) {
         _codecSpecificInfo.codecType = kVideoCodecH264;
         break;
       }
-      case kVideoCodecAV1: {
-        _codecSpecificInfo.codecType = kVideoCodecAV1;
-        break;
-      }
+#ifndef DISABLE_H265
       case kVideoCodecH265: {
         _codecSpecificInfo.codecType = kVideoCodecH265;
+        break;
+      }
+#endif
+      case kVideoCodecAV1: {
+        _codecSpecificInfo.codecType = kVideoCodecAV1;
         break;
       }
       default: {

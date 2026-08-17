@@ -113,9 +113,7 @@ class MockChannelSend : public voe::ChannelSendInterface {
  public:
   MOCK_METHOD(void,
               SetEncoder,
-              (int payload_type,
-               const SdpAudioFormat& encoder_format,
-               std::unique_ptr<AudioEncoder> encoder),
+              (int payload_type, std::unique_ptr<AudioEncoder> encoder),
               (override));
   MOCK_METHOD(
       void,
@@ -133,11 +131,11 @@ class MockChannelSend : public voe::ChannelSendInterface {
               (override));
   MOCK_METHOD(void,
               RegisterSenderCongestionControlObjects,
-              (RtpTransportControllerSendInterface*),
+              (RtpTransportControllerSendInterface*, RtcpBandwidthObserver*),
               (override));
   MOCK_METHOD(void, ResetSenderCongestionControlObjects, (), (override));
   MOCK_METHOD(CallSendStatistics, GetRTCPStatistics, (), (const, override));
-  MOCK_METHOD(std::vector<ReportBlockData>,
+  MOCK_METHOD(std::vector<ReportBlock>,
               GetRemoteRTCPReportBlocks,
               (),
               (const, override));

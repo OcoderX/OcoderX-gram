@@ -14,10 +14,9 @@
 #include <utility>
 #include <vector>
 
-#include "api/environment/environment.h"
+#include "api/transport/field_trial_based_config.h"
 #include "media/base/media_engine.h"
 #include "media/sctp/sctp_transport_factory.h"
-#include "pc/media_factory.h"
 #include "rtc_base/helpers.h"
 #include "rtc_base/internal/default_socket_server.h"
 #include "rtc_base/socket_server.h"
@@ -62,7 +61,8 @@ rtc::Thread* MaybeWrapThread(rtc::Thread* signaling_thread,
 
 std::unique_ptr<SctpTransportFactoryInterface> MaybeCreateSctpFactory(
     std::unique_ptr<SctpTransportFactoryInterface> factory,
-    rtc::Thread* network_thread) {
+    rtc::Thread* network_thread,
+    const FieldTrialsView& field_trials) {
   if (factory) {
     return factory;
   }
@@ -77,14 +77,12 @@ std::unique_ptr<SctpTransportFactoryInterface> MaybeCreateSctpFactory(
 
 // Static
 rtc::scoped_refptr<ConnectionContext> ConnectionContext::Create(
-    const Environment& env,
     PeerConnectionFactoryDependencies* dependencies) {
   return rtc::scoped_refptr<ConnectionContext>(
-      new ConnectionContext(env, dependencies));
+      new ConnectionContext(dependencies));
 }
 
 ConnectionContext::ConnectionContext(
-    const Environment& env,
     PeerConnectionFactoryDependencies* dependencies)
     : network_thread_(MaybeStartNetworkThread(dependencies->network_thread,
                                               owned_socket_factory_,
@@ -98,21 +96,18 @@ ConnectionContext::ConnectionContext(
                      }),
       signaling_thread_(MaybeWrapThread(dependencies->signaling_thread,
                                         wraps_current_thread_)),
-      env_(env),
-      media_engine_(
-          dependencies->media_factory != nullptr
-              ? dependencies->media_factory->CreateMediaEngine(env_,
-                                                               *dependencies)
-              : nullptr),
+      trials_(dependencies->trials ? std::move(dependencies->trials)
+                                   : std::make_unique<FieldTrialBasedConfig>()),
+      media_engine_(std::move(dependencies->media_engine)),
       network_monitor_factory_(
           std::move(dependencies->network_monitor_factory)),
       default_network_manager_(std::move(dependencies->network_manager)),
-      call_factory_(std::move(dependencies->media_factory)),
+      call_factory_(std::move(dependencies->call_factory)),
       default_socket_factory_(std::move(dependencies->packet_socket_factory)),
       sctp_factory_(
           MaybeCreateSctpFactory(std::move(dependencies->sctp_factory),
-                                 network_thread())),
-      use_rtx_(true) {
+                                 network_thread(),
+                                 *trials_.get())) {
   RTC_DCHECK_RUN_ON(signaling_thread_);
   RTC_DCHECK(!(default_network_manager_ && network_monitor_factory_))
       << "You can't set both network_manager and network_monitor_factory.";
@@ -154,7 +149,7 @@ ConnectionContext::ConnectionContext(
     // If network_monitor_factory_ is non-null, it will be used to create a
     // network monitor while on the network thread.
     default_network_manager_ = std::make_unique<rtc::BasicNetworkManager>(
-        network_monitor_factory_.get(), socket_factory, &env_.field_trials());
+        network_monitor_factory_.get(), socket_factory, &field_trials());
   }
   if (!default_socket_factory_) {
     default_socket_factory_ =
@@ -178,8 +173,15 @@ ConnectionContext::ConnectionContext(
 
 ConnectionContext::~ConnectionContext() {
   RTC_DCHECK_RUN_ON(signaling_thread_);
-  // `media_engine_` requires destruction to happen on the worker thread.
-  worker_thread_->PostTask([media_engine = std::move(media_engine_)] {});
+  worker_thread_->BlockingCall([&] {
+    RTC_DCHECK_RUN_ON(worker_thread());
+    // While `media_engine_` is const throughout the ConnectionContext's
+    // lifetime, it requires destruction to happen on the worker thread. Instead
+    // of marking the pointer as non-const, we live with this const_cast<> in
+    // the destructor.
+    const_cast<std::unique_ptr<cricket::MediaEngineInterface>&>(media_engine_)
+        .reset();
+  });
 
   // Make sure `worker_thread()` and `signaling_thread()` outlive
   // `default_socket_factory_` and `default_network_manager_`.

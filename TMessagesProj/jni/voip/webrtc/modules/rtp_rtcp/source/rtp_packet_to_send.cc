@@ -12,8 +12,6 @@
 
 #include <cstdint>
 
-#include "modules/rtp_rtcp/include/rtp_rtcp_defines.h"
-
 namespace webrtc {
 
 RtpPacketToSend::RtpPacketToSend(const ExtensionManager* extensions)
@@ -29,14 +27,5 @@ RtpPacketToSend& RtpPacketToSend::operator=(const RtpPacketToSend& packet) =
 RtpPacketToSend& RtpPacketToSend::operator=(RtpPacketToSend&& packet) = default;
 
 RtpPacketToSend::~RtpPacketToSend() = default;
-
-void RtpPacketToSend::set_packet_type(RtpPacketMediaType type) {
-  if (packet_type_ == RtpPacketMediaType::kAudio) {
-    original_packet_type_ = OriginalType::kAudio;
-  } else if (packet_type_ == RtpPacketMediaType::kVideo) {
-    original_packet_type_ = OriginalType::kVideo;
-  }
-  packet_type_ = type;
-}
 
 }  // namespace webrtc

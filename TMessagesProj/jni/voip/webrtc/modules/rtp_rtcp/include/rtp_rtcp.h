@@ -18,7 +18,8 @@
 
 namespace webrtc {
 
-class ABSL_DEPRECATED("") RtpRtcp : public RtpRtcpInterface {
+// DEPRECATED. Do not use.
+class RtpRtcp : public RtpRtcpInterface {
  public:
   // Instantiates a deprecated version of the RtpRtcp module.
   static std::unique_ptr<RtpRtcp> ABSL_DEPRECATED("")
@@ -28,6 +29,12 @@ class ABSL_DEPRECATED("") RtpRtcp : public RtpRtcpInterface {
 
   static std::unique_ptr<RtpRtcp> DEPRECATED_Create(
       const Configuration& configuration);
+
+  // Requests new key frame.
+  // using PLI, https://tools.ietf.org/html/rfc4585#section-6.3.1.1
+  void SendPictureLossIndication() { SendRTCP(kRtcpPli); }
+  // using FIR, https://tools.ietf.org/html/rfc5104#section-4.3.1.2
+  void SendFullIntraRequest() { SendRTCP(kRtcpFir); }
 
   // Process any pending tasks such as timeouts.
   virtual void Process() = 0;

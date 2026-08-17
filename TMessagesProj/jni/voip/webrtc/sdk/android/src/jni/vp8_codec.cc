@@ -10,7 +10,6 @@
 
 #include <jni.h>
 
-#include "api/environment/environment.h"
 #include "modules/video_coding/codecs/vp8/include/vp8.h"
 #include "sdk/android/generated_libvpx_vp8_jni/LibvpxVp8Decoder_jni.h"
 #include "sdk/android/generated_libvpx_vp8_jni/LibvpxVp8Encoder_jni.h"
@@ -23,11 +22,8 @@ static jlong JNI_LibvpxVp8Encoder_CreateEncoder(JNIEnv* jni) {
   return jlongFromPointer(VP8Encoder::Create().release());
 }
 
-static jlong JNI_LibvpxVp8Decoder_CreateDecoder(JNIEnv* jni,
-                                                jlong j_webrtc_env_ref) {
-  return NativeToJavaPointer(
-      CreateVp8Decoder(*reinterpret_cast<const Environment*>(j_webrtc_env_ref))
-          .release());
+static jlong JNI_LibvpxVp8Decoder_CreateDecoder(JNIEnv* jni) {
+  return jlongFromPointer(VP8Decoder::Create().release());
 }
 
 }  // namespace jni

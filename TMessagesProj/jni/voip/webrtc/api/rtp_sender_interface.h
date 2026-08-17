@@ -18,25 +18,22 @@
 #include <string>
 #include <vector>
 
-#include "absl/functional/any_invocable.h"
 #include "api/crypto/frame_encryptor_interface.h"
 #include "api/dtls_transport_interface.h"
 #include "api/dtmf_sender_interface.h"
 #include "api/frame_transformer_interface.h"
 #include "api/media_stream_interface.h"
 #include "api/media_types.h"
-#include "api/ref_count.h"
 #include "api/rtc_error.h"
 #include "api/rtp_parameters.h"
 #include "api/scoped_refptr.h"
 #include "api/video_codecs/video_encoder_factory.h"
+#include "rtc_base/ref_count.h"
 #include "rtc_base/system/rtc_export.h"
 
 namespace webrtc {
 
-using SetParametersCallback = absl::AnyInvocable<void(RTCError) &&>;
-
-class RTC_EXPORT RtpSenderInterface : public webrtc::RefCountInterface {
+class RTC_EXPORT RtpSenderInterface : public rtc::RefCountInterface {
  public:
   // Returns true if successful in setting the track.
   // Fails if an audio track is set on a video RtpSender, or vice-versa.
@@ -82,8 +79,6 @@ class RTC_EXPORT RtpSenderInterface : public webrtc::RefCountInterface {
   // rtpparameters.h
   // The encodings are in increasing quality order for simulcast.
   virtual RTCError SetParameters(const RtpParameters& parameters) = 0;
-  virtual void SetParametersAsync(const RtpParameters& parameters,
-                                  SetParametersCallback callback);
 
   // Returns null for a video sender.
   virtual rtc::scoped_refptr<DtmfSenderInterface> GetDtmfSender() const = 0;
@@ -108,6 +103,9 @@ class RTC_EXPORT RtpSenderInterface : public webrtc::RefCountInterface {
   virtual void SetEncoderSelector(
       std::unique_ptr<VideoEncoderFactory::EncoderSelectorInterface>
           encoder_selector) = 0;
+
+  // TODO(crbug.com/1354101): make pure virtual again after Chrome roll.
+  virtual RTCError GenerateKeyFrame() { return RTCError::OK(); }
 
  protected:
   ~RtpSenderInterface() override = default;

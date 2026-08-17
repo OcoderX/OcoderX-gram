@@ -14,49 +14,42 @@
 #include <utility>
 
 #include "absl/strings/string_view.h"
-#include "api/sequence_checker.h"
-#include "rtc_base/async_packet_socket.h"
 #include "rtc_base/byte_buffer.h"
 #include "rtc_base/logging.h"
-#include "rtc_base/network/received_packet.h"
 
 namespace cricket {
 
 StunServer::StunServer(rtc::AsyncUDPSocket* socket) : socket_(socket) {
-  socket_->RegisterReceivedPacketCallback(
-      [&](rtc::AsyncPacketSocket* socket, const rtc::ReceivedPacket& packet) {
-        OnPacket(socket, packet);
-      });
+  socket_->SignalReadPacket.connect(this, &StunServer::OnPacket);
 }
 
 StunServer::~StunServer() {
-  RTC_DCHECK_RUN_ON(&sequence_checker_);
-  socket_->DeregisterReceivedPacketCallback();
+  socket_->SignalReadPacket.disconnect(this);
 }
 
 void StunServer::OnPacket(rtc::AsyncPacketSocket* socket,
-                          const rtc::ReceivedPacket& packet) {
-  RTC_DCHECK_RUN_ON(&sequence_checker_);
+                          const char* buf,
+                          size_t size,
+                          const rtc::SocketAddress& remote_addr,
+                          const int64_t& /* packet_time_us */) {
   // Parse the STUN message; eat any messages that fail to parse.
-  rtc::ByteBufferReader bbuf(packet.payload());
+  rtc::ByteBufferReader bbuf(buf, size);
   StunMessage msg;
   if (!msg.Read(&bbuf)) {
     return;
   }
 
-  // TODO(?): If unknown non-optional (<= 0x7fff) attributes are found,
-  // send a
+  // TODO(?): If unknown non-optional (<= 0x7fff) attributes are found, send a
   //          420 "Unknown Attribute" response.
 
   // Send the message to the appropriate handler function.
   switch (msg.type()) {
     case STUN_BINDING_REQUEST:
-      OnBindingRequest(&msg, packet.source_address());
+      OnBindingRequest(&msg, remote_addr);
       break;
 
     default:
-      SendErrorResponse(msg, packet.source_address(), 600,
-                        "Operation Not Supported");
+      SendErrorResponse(msg, remote_addr, 600, "Operation Not Supported");
   }
 }
 

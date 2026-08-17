@@ -14,8 +14,8 @@
 #include <stdint.h>
 
 #include "api/array_view.h"
-#include "api/ref_count.h"
 #include "api/scoped_refptr.h"
+#include "rtc_base/ref_count.h"
 #include "rtc_base/system/rtc_export.h"
 
 namespace webrtc {
@@ -26,7 +26,6 @@ class I422BufferInterface;
 class I444BufferInterface;
 class I010BufferInterface;
 class I210BufferInterface;
-class I410BufferInterface;
 class NV12BufferInterface;
 
 // Base class for frame buffers of different types of pixel format and storage.
@@ -44,7 +43,7 @@ class NV12BufferInterface;
 // performance by providing an optimized path without intermediate conversions.
 // Frame metadata such as rotation and timestamp are stored in
 // webrtc::VideoFrame, and not here.
-class RTC_EXPORT VideoFrameBuffer : public webrtc::RefCountInterface {
+class RTC_EXPORT VideoFrameBuffer : public rtc::RefCountInterface {
  public:
   // New frame buffer types will be added conservatively when there is an
   // opportunity to optimize the path between some pair of video source and
@@ -59,7 +58,6 @@ class RTC_EXPORT VideoFrameBuffer : public webrtc::RefCountInterface {
     kI444,
     kI010,
     kI210,
-    kI410,
     kNV12,
   };
 
@@ -114,7 +112,6 @@ class RTC_EXPORT VideoFrameBuffer : public webrtc::RefCountInterface {
   const I444BufferInterface* GetI444() const;
   const I010BufferInterface* GetI010() const;
   const I210BufferInterface* GetI210() const;
-  const I410BufferInterface* GetI410() const;
   const NV12BufferInterface* GetNV12() const;
 
   // From a kNative frame, returns a VideoFrameBuffer with a pixel format in
@@ -262,19 +259,6 @@ class I210BufferInterface : public PlanarYuv16BBuffer {
 
  protected:
   ~I210BufferInterface() override {}
-};
-
-// Represents Type::kI410, allocates 16 bits per pixel and fills 10 least
-// significant bits with color information.
-class I410BufferInterface : public PlanarYuv16BBuffer {
- public:
-  Type type() const override;
-
-  int ChromaWidth() const final;
-  int ChromaHeight() const final;
-
- protected:
-  ~I410BufferInterface() override {}
 };
 
 class BiplanarYuvBuffer : public VideoFrameBuffer {

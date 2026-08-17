@@ -14,8 +14,6 @@
 #include <string.h>
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
 #include <memory>
 
 #include "api/array_view.h"
@@ -23,6 +21,7 @@
 #include "rtc_base/checks.h"
 #include "rtc_base/logging.h"
 #include "rtc_base/network/sent_packet.h"
+#include "rtc_base/third_party/sigslot/sigslot.h"
 #include "rtc_base/time_utils.h"  // for TimeMillis
 
 #if defined(WEBRTC_POSIX)
@@ -62,7 +61,8 @@ Socket* AsyncTCPSocketBase::ConnectSocket(
   return owned_socket.release();
 }
 
-AsyncTCPSocketBase::AsyncTCPSocketBase(Socket* socket, size_t max_packet_size)
+AsyncTCPSocketBase::AsyncTCPSocketBase(Socket* socket,
+                                       size_t max_packet_size)
     : socket_(socket),
       max_insize_(max_packet_size),
       max_outsize_(max_packet_size) {
@@ -211,17 +211,15 @@ void AsyncTCPSocketBase::OnReadEvent(Socket* socket) {
     return;
   }
 
-  size_t processed = ProcessInput(inbuf_);
-  size_t bytes_remaining = inbuf_.size() - processed;
-  if (processed > inbuf_.size()) {
+  size_t size = inbuf_.size();
+  ProcessInput(inbuf_.data<char>(), &size);
+
+  if (size > inbuf_.size()) {
     RTC_LOG(LS_ERROR) << "input buffer overflow";
     RTC_DCHECK_NOTREACHED();
     inbuf_.Clear();
   } else {
-    if (bytes_remaining > 0) {
-      memmove(inbuf_.data(), inbuf_.data() + processed, bytes_remaining);
-    }
-    inbuf_.SetSize(bytes_remaining);
+    inbuf_.SetSize(size);
   }
 }
 
@@ -287,24 +285,24 @@ int AsyncTCPSocket::Send(const void* pv,
   return static_cast<int>(cb);
 }
 
-size_t AsyncTCPSocket::ProcessInput(rtc::ArrayView<const uint8_t> data) {
+void AsyncTCPSocket::ProcessInput(char* data, size_t* len) {
   SocketAddress remote_addr(GetRemoteAddress());
 
-  size_t processed_bytes = 0;
   while (true) {
-    size_t bytes_left = data.size() - processed_bytes;
-    if (bytes_left < kPacketLenSize)
-      return processed_bytes;
+    if (*len < kPacketLenSize)
+      return;
 
-    PacketLength pkt_len = rtc::GetBE16(data.data() + processed_bytes);
-    if (bytes_left < kPacketLenSize + pkt_len)
-      return processed_bytes;
+    PacketLength pkt_len = rtc::GetBE16(data);
+    if (*len < kPacketLenSize + pkt_len)
+      return;
 
-    rtc::ReceivedPacket received_packet(
-        data.subview(processed_bytes + kPacketLenSize, pkt_len), remote_addr,
-        webrtc::Timestamp::Micros(rtc::TimeMicros()));
-    NotifyPacketReceived(received_packet);
-    processed_bytes += kPacketLenSize + pkt_len;
+    SignalReadPacket(this, data + kPacketLenSize, pkt_len, remote_addr,
+                     TimeMicros());
+
+    *len -= kPacketLenSize + pkt_len;
+    if (*len > 0) {
+      memmove(data, data + kPacketLenSize + pkt_len, *len);
+    }
   }
 }
 

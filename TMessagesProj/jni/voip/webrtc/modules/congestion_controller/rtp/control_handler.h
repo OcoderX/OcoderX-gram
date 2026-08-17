@@ -28,12 +28,11 @@ namespace webrtc {
 // destruction unless members are properly ordered.
 class CongestionControlHandler {
  public:
-  CongestionControlHandler() = default;
+  CongestionControlHandler();
+  ~CongestionControlHandler();
 
   CongestionControlHandler(const CongestionControlHandler&) = delete;
   CongestionControlHandler& operator=(const CongestionControlHandler&) = delete;
-
-  ~CongestionControlHandler() = default;
 
   void SetTargetRate(TargetTransferRate new_target_rate);
   void SetNetworkAvailability(bool network_available);
@@ -46,6 +45,7 @@ class CongestionControlHandler {
   bool network_available_ = true;
   bool encoder_paused_in_last_report_ = false;
 
+  const bool disable_pacer_emergency_stop_;
   int64_t pacer_expected_queue_ms_ = 0;
 
   RTC_NO_UNIQUE_ADDRESS SequenceChecker sequenced_checker_;

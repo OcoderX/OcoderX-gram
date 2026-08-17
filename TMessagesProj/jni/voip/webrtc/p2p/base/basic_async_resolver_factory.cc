@@ -15,30 +15,36 @@
 
 #include "absl/memory/memory.h"
 #include "api/async_dns_resolver.h"
-#include "rtc_base/async_dns_resolver.h"
+#include "api/wrapping_async_dns_resolver.h"
+#include "rtc_base/async_resolver.h"
 #include "rtc_base/logging.h"
 
 namespace webrtc {
 
+rtc::AsyncResolverInterface* BasicAsyncResolverFactory::Create() {
+  return new rtc::AsyncResolver();
+}
+
+
 std::unique_ptr<webrtc::AsyncDnsResolverInterface>
-BasicAsyncDnsResolverFactory::Create() {
-  return std::make_unique<AsyncDnsResolver>();
+WrappingAsyncDnsResolverFactory::Create() {
+  return std::make_unique<WrappingAsyncDnsResolver>(wrapped_factory_->Create());
 }
 
 std::unique_ptr<webrtc::AsyncDnsResolverInterface>
-BasicAsyncDnsResolverFactory::CreateAndResolve(
+WrappingAsyncDnsResolverFactory::CreateAndResolve(
     const rtc::SocketAddress& addr,
-    absl::AnyInvocable<void()> callback) {
+    std::function<void()> callback) {
   std::unique_ptr<webrtc::AsyncDnsResolverInterface> resolver = Create();
   resolver->Start(addr, std::move(callback));
   return resolver;
 }
 
 std::unique_ptr<webrtc::AsyncDnsResolverInterface>
-BasicAsyncDnsResolverFactory::CreateAndResolve(
+WrappingAsyncDnsResolverFactory::CreateAndResolve(
     const rtc::SocketAddress& addr,
     int family,
-    absl::AnyInvocable<void()> callback) {
+    std::function<void()> callback) {
   std::unique_ptr<webrtc::AsyncDnsResolverInterface> resolver = Create();
   resolver->Start(addr, family, std::move(callback));
   return resolver;

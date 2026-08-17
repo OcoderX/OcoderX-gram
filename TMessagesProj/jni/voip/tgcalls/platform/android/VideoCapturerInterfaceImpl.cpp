@@ -1,5 +1,7 @@
 #include "VideoCapturerInterfaceImpl.h"
 
+#include <memory>
+
 #include "VideoCameraCapturer.h"
 
 namespace tgcalls {

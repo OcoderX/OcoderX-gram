@@ -1,22 +1,17 @@
 #! /usr/bin/env perl
 # Copyright 2007-2016 The OpenSSL Project Authors. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Licensed under the OpenSSL license (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
 
 
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
-# project.
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
 # ====================================================================
 
 # January 2007.
@@ -69,7 +64,7 @@ if ($flavour && $flavour ne "void") {
     ( $xlate="${dir}../../../perlasm/arm-xlate.pl" and -f $xlate) or
     die "can't locate arm-xlate.pl";
 
-    open OUT,"| \"$^X\" \"$xlate\" $flavour \"$output\"";
+    open OUT,"| \"$^X\" $xlate $flavour $output";
     *STDOUT=*OUT;
 } else {
     open OUT,">$output";
@@ -102,6 +97,8 @@ $_n0="$num,#14*4";
 $_num="$num,#15*4";	$_bpend=$_num;
 
 $code=<<___;
+#include <openssl/arm_arch.h>
+
 @ Silence ARMv8 deprecated IT instruction warnings. This file is used by both
 @ ARMv7 and ARMv8 processors and does not use ARMv8 instructions.
 .arch  armv7-a
@@ -114,16 +111,45 @@ $code=<<___;
 .code	32
 #endif
 
-.global	bn_mul_mont_nohw
-.type	bn_mul_mont_nohw,%function
+#if __ARM_MAX_ARCH__>=7
+.align	5
+.LOPENSSL_armcap:
+.word	OPENSSL_armcap_P-.Lbn_mul_mont
+#endif
+
+.global	bn_mul_mont
+.type	bn_mul_mont,%function
 
 .align	5
-bn_mul_mont_nohw:
+bn_mul_mont:
+.Lbn_mul_mont:
 	ldr	ip,[sp,#4]		@ load num
 	stmdb	sp!,{r0,r2}		@ sp points at argument block
-	@ No return value. Instead, the caller must ensure num >= 2
+#if __ARM_MAX_ARCH__>=7
+	tst	ip,#7
+	bne	.Lialu
+	adr	r0,.Lbn_mul_mont
+	ldr	r2,.LOPENSSL_armcap
+	ldr	r0,[r0,r2]
+#ifdef	__APPLE__
+	ldr	r0,[r0]
+#endif
+	tst	r0,#ARMV7_NEON		@ NEON available?
+	ldmia	sp, {r0,r2}
+	beq	.Lialu
+	add	sp,sp,#8
+	b	bn_mul8x_mont_neon
+.align	4
+.Lialu:
+#endif
+	cmp	ip,#2
 	mov	$num,ip			@ load num
-	@ No return value
+#ifdef	__thumb2__
+	ittt	lt
+#endif
+	movlt	r0,#0
+	addlt	sp,sp,#2*4
+	blt	.Labrt
 
 	stmdb	sp!,{r4-r12,lr}		@ save 10 registers
 
@@ -257,15 +283,16 @@ bn_mul_mont_nohw:
 	add	sp,sp,#4		@ skip over tp[num+1]
 	ldmia	sp!,{r4-r12,lr}		@ restore registers
 	add	sp,sp,#2*4		@ skip over {r0,r2}
-	@ No return value
-#if __ARM_ARCH>=5
+	mov	r0,#1
+.Labrt:
+#if __ARM_ARCH__>=5
 	ret				@ bx lr
 #else
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
 	bx	lr			@ interoperable with Thumb ISA:-)
 #endif
-.size	bn_mul_mont_nohw,.-bn_mul_mont_nohw
+.size	bn_mul_mont,.-bn_mul_mont
 ___
 {
 my ($A0,$A1,$A2,$A3)=map("d$_",(0..3));
@@ -284,7 +311,6 @@ $code.=<<___;
 .arch	armv7-a
 .fpu	neon
 
-.global	bn_mul8x_mont_neon
 .type	bn_mul8x_mont_neon,%function
 .align	5
 bn_mul8x_mont_neon:
@@ -711,7 +737,6 @@ $code.=<<___;
 	mov	sp,ip
         vldmia  sp!,{d8-d15}
         ldmia   sp!,{r4-r11}
-	@ No return value
 	ret						@ bx lr
 .size	bn_mul8x_mont_neon,.-bn_mul8x_mont_neon
 #endif
@@ -719,6 +744,11 @@ ___
 }
 $code.=<<___;
 .asciz	"Montgomery multiplication for ARMv4/NEON, CRYPTOGAMS by <appro\@openssl.org>"
+.align	2
+#if __ARM_MAX_ARCH__>=7
+.comm	OPENSSL_armcap_P,4,4
+.hidden	OPENSSL_armcap_P
+#endif
 ___
 
 foreach (split("\n",$code)) {
@@ -731,4 +761,4 @@ foreach (split("\n",$code)) {
 	print $_,"\n";
 }
 
-close STDOUT or die "error closing STDOUT: $!";
+close STDOUT or die "error closing STDOUT";

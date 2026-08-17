@@ -11,13 +11,11 @@
 #ifndef RTC_BASE_ASYNC_PACKET_SOCKET_H_
 #define RTC_BASE_ASYNC_PACKET_SOCKET_H_
 
-#include <cstdint>
 #include <vector>
 
 #include "api/sequence_checker.h"
 #include "rtc_base/callback_list.h"
 #include "rtc_base/dscp.h"
-#include "rtc_base/network/received_packet.h"
 #include "rtc_base/network/sent_packet.h"
 #include "rtc_base/socket.h"
 #include "rtc_base/system/no_unique_address.h"
@@ -56,12 +54,6 @@ struct RTC_EXPORT PacketOptions {
   PacketTimeUpdateParams packet_time_params;
   // PacketInfo is passed to SentPacket when signaling this packet is sent.
   PacketInfo info_signaled_after_sent;
-  // True if this is a batchable packet. Batchable packets are collected at low
-  // levels and sent first when their AsyncPacketSocket receives a
-  // OnSendBatchComplete call.
-  bool batchable = false;
-  // True if this is the last packet of a batch.
-  bool last_packet_in_batch = false;
 };
 
 // Provides the ability to receive packets asynchronously. Sends are not
@@ -76,7 +68,7 @@ class RTC_EXPORT AsyncPacketSocket : public sigslot::has_slots<> {
     STATE_CONNECTED
   };
 
-  AsyncPacketSocket() = default;
+  AsyncPacketSocket();
   ~AsyncPacketSocket() override;
 
   AsyncPacketSocket(const AsyncPacketSocket&) = delete;
@@ -112,15 +104,20 @@ class RTC_EXPORT AsyncPacketSocket : public sigslot::has_slots<> {
   virtual void SetError(int error) = 0;
 
   // Register a callback to be called when the socket is closed.
-  void SubscribeCloseEvent(
-      const void* removal_tag,
-      std::function<void(AsyncPacketSocket*, int)> callback);
-  void UnsubscribeCloseEvent(const void* removal_tag);
+  void SubscribeClose(const void* removal_tag,
+                      std::function<void(AsyncPacketSocket*, int)> callback);
+  void UnsubscribeClose(const void* removal_tag);
 
-  void RegisterReceivedPacketCallback(
-      absl::AnyInvocable<void(AsyncPacketSocket*, const rtc::ReceivedPacket&)>
-          received_packet_callback);
-  void DeregisterReceivedPacketCallback();
+  // Emitted each time a packet is read. Used only for UDP and
+  // connected TCP sockets.
+  sigslot::signal5<AsyncPacketSocket*,
+                   const char*,
+                   size_t,
+                   const SocketAddress&,
+                   // TODO(bugs.webrtc.org/9584): Change to passing the int64_t
+                   // timestamp by value.
+                   const int64_t&>
+      SignalReadPacket;
 
   // Emitted each time a packet is sent.
   sigslot::signal2<AsyncPacketSocket*, const SentPacket&> SignalSentPacket;
@@ -151,26 +148,11 @@ class RTC_EXPORT AsyncPacketSocket : public sigslot::has_slots<> {
     on_close_.Send(this, err);
   }
 
-  // TODO(bugs.webrtc.org:15368): Deprecate and remove.
-  void NotifyPacketReceived(AsyncPacketSocket*,
-                            const char* data,
-                            size_t size,
-                            const SocketAddress& address,
-                            const int64_t& packet_time_us) {
-    NotifyPacketReceived(
-        ReceivedPacket::CreateFromLegacy(data, size, packet_time_us, address));
-  }
-
-  void NotifyPacketReceived(const rtc::ReceivedPacket& packet);
-
-  RTC_NO_UNIQUE_ADDRESS webrtc::SequenceChecker network_checker_{
-      webrtc::SequenceChecker::kDetached};
+  RTC_NO_UNIQUE_ADDRESS webrtc::SequenceChecker network_checker_;
 
  private:
   webrtc::CallbackList<AsyncPacketSocket*, int> on_close_
       RTC_GUARDED_BY(&network_checker_);
-  absl::AnyInvocable<void(AsyncPacketSocket*, const rtc::ReceivedPacket&)>
-      received_packet_callback_ RTC_GUARDED_BY(&network_checker_);
 };
 
 // Listen socket, producing an AsyncPacketSocket when a peer connects.

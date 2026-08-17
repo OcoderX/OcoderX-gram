@@ -15,7 +15,6 @@
 #define SDK_ANDROID_SRC_JNI_JNI_GENERATOR_HELPER_H_
 
 #include <jni.h>
-
 #include <atomic>
 
 #include "rtc_base/checks.h"
@@ -77,15 +76,20 @@ class MethodID {
 
 }  // namespace webrtc
 
-namespace jni_zero {
-
 // Re-export relevant classes into the namespaces the script expects.
+namespace base {
+namespace android {
+
 using webrtc::JavaParamRef;
 using webrtc::JavaRef;
+using webrtc::ScopedJavaLocalRef;
 using webrtc::LazyGetClass;
 using webrtc::MethodID;
-using webrtc::ScopedJavaLocalRef;
 
+}  // namespace android
+}  // namespace base
+
+namespace jni_generator {
 inline void CheckException(JNIEnv* env) {
   CHECK_EXCEPTION(env);
 }
@@ -107,7 +111,7 @@ struct BASE_EXPORT JniJavaCallContextUnchecked {
   }
 
   // Force no inline to reduce code size.
-  template <jni_zero::MethodID::Type type>
+  template <base::android::MethodID::Type type>
   void Init(JNIEnv* env,
             jclass clazz,
             const char* method_name,
@@ -120,7 +124,7 @@ struct BASE_EXPORT JniJavaCallContextUnchecked {
     // Gets PC of the calling function.
     pc = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
 
-    method_id = jni_zero::MethodID::LazyGet<type>(
+    method_id = base::android::MethodID::LazyGet<type>(
         env, clazz, method_name, jni_signature, atomic_method_id);
   }
 
@@ -140,7 +144,7 @@ struct BASE_EXPORT JniJavaCallContextUnchecked {
 // Context about the JNI call with exception unchecked to be stored in stack.
 struct BASE_EXPORT JniJavaCallContextChecked {
   // Force no inline to reduce code size.
-  template <jni_zero::MethodID::Type type>
+  template <base::android::MethodID::Type type>
   void Init(JNIEnv* env,
             jclass clazz,
             const char* method_name,
@@ -151,7 +155,7 @@ struct BASE_EXPORT JniJavaCallContextChecked {
     base.pc = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
   }
 
-  ~JniJavaCallContextChecked() { jni_zero::CheckException(base.env1); }
+  ~JniJavaCallContextChecked() { jni_generator::CheckException(base.env1); }
 
   JniJavaCallContextUnchecked base;
 };
@@ -159,27 +163,6 @@ struct BASE_EXPORT JniJavaCallContextChecked {
 static_assert(sizeof(JniJavaCallContextChecked) ==
                   sizeof(JniJavaCallContextUnchecked),
               "Stack unwinder cannot work with structs of different sizes.");
-}  // namespace jni_zero
-
-// Re-export helpers in the old jni_generator namespace.
-// TODO(b/319078685): Remove once all uses of the jni_generator has been
-// updated.
-namespace jni_generator {
-using jni_zero::JniJavaCallContextChecked;
-using jni_zero::JniJavaCallContextUnchecked;
 }  // namespace jni_generator
 
-// Re-export helpers in the namespaces that the old jni_generator script
-// expects.
-// TODO(b/319078685): Remove once all uses of the jni_generator has been
-// updated.
-namespace base {
-namespace android {
-using webrtc::JavaParamRef;
-using webrtc::JavaRef;
-using webrtc::LazyGetClass;
-using webrtc::MethodID;
-using webrtc::ScopedJavaLocalRef;
-}  // namespace android
-}  // namespace base
 #endif  // SDK_ANDROID_SRC_JNI_JNI_GENERATOR_HELPER_H_

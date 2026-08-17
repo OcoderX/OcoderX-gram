@@ -80,10 +80,12 @@
 #include "absl/types/optional.h"
 #include "api/adaptation/resource.h"
 #include "api/async_dns_resolver.h"
+#include "api/async_resolver_factory.h"
 #include "api/audio/audio_mixer.h"
 #include "api/audio_codecs/audio_decoder_factory.h"
 #include "api/audio_codecs/audio_encoder_factory.h"
 #include "api/audio_options.h"
+#include "api/call/call_factory_interface.h"
 #include "api/candidate.h"
 #include "api/crypto/crypto_options.h"
 #include "api/data_channel_interface.h"
@@ -92,7 +94,6 @@
 #include "api/field_trials_view.h"
 #include "api/ice_transport_interface.h"
 #include "api/jsep.h"
-#include "api/legacy_stats_types.h"
 #include "api/media_stream_interface.h"
 #include "api/media_types.h"
 #include "api/metronome/metronome.h"
@@ -111,27 +112,25 @@
 #include "api/set_local_description_observer_interface.h"
 #include "api/set_remote_description_observer_interface.h"
 #include "api/stats/rtc_stats_collector_callback.h"
+#include "api/stats_types.h"
 #include "api/task_queue/task_queue_factory.h"
-#include "api/transport/bandwidth_estimation_settings.h"
 #include "api/transport/bitrate_settings.h"
 #include "api/transport/enums.h"
 #include "api/transport/network_control.h"
 #include "api/transport/sctp_transport_factory_interface.h"
 #include "api/turn_customizer.h"
 #include "api/video/video_bitrate_allocator_factory.h"
-#include "api/video_codecs/video_decoder_factory.h"
-#include "api/video_codecs/video_encoder_factory.h"
 #include "call/rtp_transport_controller_send_factory_interface.h"
 #include "media/base/media_config.h"
 #include "media/base/media_engine.h"
 // TODO(bugs.webrtc.org/7447): We plan to provide a way to let applications
 // inject a PacketSocketFactory and/or NetworkManager, and not expose
 // PortAllocator in the PeerConnection api.
-#include "api/ref_count.h"
 #include "p2p/base/port_allocator.h"
 #include "rtc_base/network.h"
 #include "rtc_base/network_constants.h"
 #include "rtc_base/network_monitor_factory.h"
+#include "rtc_base/ref_count.h"
 #include "rtc_base/rtc_certificate.h"
 #include "rtc_base/rtc_certificate_generator.h"
 #include "rtc_base/socket_address.h"
@@ -146,11 +145,8 @@ class Thread;
 
 namespace webrtc {
 
-// MediaFactory class definition is not part of the api.
-class MediaFactory;
-
 // MediaStream container interface.
-class StreamCollectionInterface : public webrtc::RefCountInterface {
+class StreamCollectionInterface : public rtc::RefCountInterface {
  public:
   // TODO(ronghuawu): Update the function names to c++ style, e.g. find -> Find.
   virtual size_t count() = 0;
@@ -164,7 +160,7 @@ class StreamCollectionInterface : public webrtc::RefCountInterface {
   ~StreamCollectionInterface() override = default;
 };
 
-class StatsObserver : public webrtc::RefCountInterface {
+class StatsObserver : public rtc::RefCountInterface {
  public:
   virtual void OnComplete(const StatsReports& reports) = 0;
 
@@ -179,7 +175,7 @@ enum class SdpSemantics {
   kUnifiedPlan,
 };
 
-class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
+class RTC_EXPORT PeerConnectionInterface : public rtc::RefCountInterface {
  public:
   // See https://w3c.github.io/webrtc-pc/#dom-rtcsignalingstate
   enum SignalingState {
@@ -430,6 +426,10 @@ class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
     // default will be used.
     //////////////////////////////////////////////////////////////////////////
 
+    // If set to true, don't gather IPv6 ICE candidates.
+    // TODO(https://crbug.com/webrtc/14608): Delete this flag.
+    bool disable_ipv6 = false;
+
     // If set to true, don't gather IPv6 ICE candidates on Wi-Fi.
     // Only intended to be used on specific devices. Certain phones disable IPv6
     // when the screen is turned off and it would be better to just disable the
@@ -451,6 +451,18 @@ class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
     // This means adding padding bits up to this bitrate, which can help
     // when switching from a static scene to one with motion.
     absl::optional<int> screencast_min_bitrate;
+
+    // Use new combined audio/video bandwidth estimation?
+    absl::optional<bool> combined_audio_video_bwe;
+
+#if defined(WEBRTC_FUCHSIA)
+    // TODO(bugs.webrtc.org/11066): Remove entirely once Fuchsia does not use.
+    // TODO(bugs.webrtc.org/9891) - Move to crypto_options
+    // Can be used to disable DTLS-SRTP. This should never be done, but can be
+    // useful for testing purposes, for example in setting up a loopback call
+    // with a single PeerConnection.
+    absl::optional<bool> enable_dtls_srtp;
+#endif
 
     /////////////////////////////////////////////////
     // The below fields are not part of the standard.
@@ -656,6 +668,9 @@ class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
     // Added to be able to control rollout of this feature.
     bool enable_implicit_rollback = false;
 
+    // Whether network condition based codec switching is allowed.
+    absl::optional<bool> allow_codec_switching;
+
     // The delay before doing a usage histogram report for long-lived
     // PeerConnections. Used for testing only.
     absl::optional<int> report_usage_pattern_delay_ms;
@@ -676,9 +691,6 @@ class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
     std::vector<rtc::NetworkMask> vpn_list;
 
     PortAllocatorConfig port_allocator_config;
-
-    // The burst interval of the pacer, see TaskQueuePacedSender constructor.
-    absl::optional<TimeDelta> pacer_burst_interval;
 
     //
     // Don't forget to update operator== if adding something.
@@ -1134,13 +1146,6 @@ class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
   // to the provided value.
   virtual RTCError SetBitrate(const BitrateSettings& bitrate) = 0;
 
-  // Allows an application to reconfigure bandwidth estimation.
-  // The method can be called both before and after estimation has started.
-  // Estimation starts when the first RTP packet is sent.
-  // Estimation will be restarted if already started.
-  virtual void ReconfigureBandwidthEstimation(
-      const BandwidthEstimationSettings& settings) {}
-
   // Enable/disable playout of received audio streams. Enabled by default. Note
   // that even if playout is enabled, streams will only be played out if the
   // appropriate SDP is also applied. Setting `playout` to false will stop
@@ -1384,6 +1389,8 @@ struct RTC_EXPORT PeerConnectionDependencies final {
   // Factory for creating resolvers that look up hostnames in DNS
   std::unique_ptr<webrtc::AsyncDnsResolverFactoryInterface>
       async_dns_resolver_factory;
+  // Deprecated - use async_dns_resolver_factory
+  std::unique_ptr<webrtc::AsyncResolverFactory> async_resolver_factory;
   std::unique_ptr<webrtc::IceTransportFactory> ice_transport_factory;
   std::unique_ptr<rtc::RTCCertificateGeneratorInterface> cert_generator;
   std::unique_ptr<rtc::SSLCertificateVerifier> tls_cert_verifier;
@@ -1422,6 +1429,8 @@ struct RTC_EXPORT PeerConnectionFactoryDependencies final {
   // called without a `port_allocator`.
   std::unique_ptr<rtc::PacketSocketFactory> packet_socket_factory;
   std::unique_ptr<TaskQueueFactory> task_queue_factory;
+  std::unique_ptr<cricket::MediaEngineInterface> media_engine;
+  std::unique_ptr<CallFactoryInterface> call_factory;
   std::unique_ptr<RtcEventLogFactoryInterface> event_log_factory;
   std::unique_ptr<FecControllerFactoryInterface> fec_controller_factory;
   std::unique_ptr<NetworkStatePredictorFactoryInterface>
@@ -1439,29 +1448,7 @@ struct RTC_EXPORT PeerConnectionFactoryDependencies final {
   std::unique_ptr<FieldTrialsView> trials;
   std::unique_ptr<RtpTransportControllerSendFactoryInterface>
       transport_controller_send_factory;
-  // Metronome used for decoding, must be called on the worker thread.
-  std::unique_ptr<Metronome> decode_metronome;
-  // Metronome used for encoding, must be called on the worker thread.
-  // TODO(b/304158952): Consider merging into a single metronome for all codec
-  // usage.
-  std::unique_ptr<Metronome> encode_metronome;
-
-  // Media specific dependencies. Unused when `media_factory == nullptr`.
-  rtc::scoped_refptr<AudioDeviceModule> adm;
-  rtc::scoped_refptr<AudioEncoderFactory> audio_encoder_factory;
-  rtc::scoped_refptr<AudioDecoderFactory> audio_decoder_factory;
-  rtc::scoped_refptr<AudioMixer> audio_mixer;
-  rtc::scoped_refptr<AudioProcessing> audio_processing;
-  std::unique_ptr<AudioFrameProcessor> audio_frame_processor;
-  std::unique_ptr<VideoEncoderFactory> video_encoder_factory;
-  std::unique_ptr<VideoDecoderFactory> video_decoder_factory;
-
-  // The `media_factory` members allows webrtc to be optionally built without
-  // media support (i.e., if only being used for data channels).
-  // By default media is disabled. To enable media call
-  // `EnableMedia(PeerConnectionFactoryDependencies&)`. Definition of the
-  // `MediaFactory` interface is a webrtc implementation detail.
-  std::unique_ptr<MediaFactory> media_factory;
+  std::unique_ptr<Metronome> metronome;
 };
 
 // PeerConnectionFactoryInterface is the factory interface used for creating
@@ -1478,7 +1465,7 @@ struct RTC_EXPORT PeerConnectionFactoryDependencies final {
 // CreatePeerConnectionFactory method which accepts threads as input, and use
 // the CreatePeerConnection version that takes a PortAllocator as an argument.
 class RTC_EXPORT PeerConnectionFactoryInterface
-    : public webrtc::RefCountInterface {
+    : public rtc::RefCountInterface {
  public:
   class Options {
    public:
@@ -1507,7 +1494,7 @@ class RTC_EXPORT PeerConnectionFactoryInterface
     rtc::SSLProtocolVersion ssl_max_version = rtc::SSL_PROTOCOL_DTLS_12;
 
     // Sets crypto related options, e.g. enabled cipher suites.
-    CryptoOptions crypto_options = {};
+    CryptoOptions crypto_options = CryptoOptions::NoGcm();
   };
 
   // Set the options to be used for subsequently created PeerConnections.
@@ -1567,15 +1554,8 @@ class RTC_EXPORT PeerConnectionFactoryInterface
   // Creates a new local VideoTrack. The same `source` can be used in several
   // tracks.
   virtual rtc::scoped_refptr<VideoTrackInterface> CreateVideoTrack(
-      rtc::scoped_refptr<VideoTrackSourceInterface> source,
-      absl::string_view label) = 0;
-  ABSL_DEPRECATED("Use version with scoped_refptr")
-  virtual rtc::scoped_refptr<VideoTrackInterface> CreateVideoTrack(
       const std::string& label,
-      VideoTrackSourceInterface* source) {
-    return CreateVideoTrack(
-        rtc::scoped_refptr<VideoTrackSourceInterface>(source), label);
-  }
+      VideoTrackSourceInterface* source) = 0;
 
   // Creates an new AudioTrack. At the moment `source` can be null.
   virtual rtc::scoped_refptr<AudioTrackInterface> CreateAudioTrack(

@@ -19,14 +19,12 @@
 #include "p2p/base/connection.h"
 #include "p2p/base/ice_switch_reason.h"
 #include "p2p/base/ice_transport_internal.h"
-#include "rtc_base/checks.h"
-#include "rtc_base/system/rtc_export.h"
 
 namespace cricket {
 
 struct IceFieldTrials;  // Forward declaration to avoid circular dependency.
 
-struct RTC_EXPORT IceRecheckEvent {
+struct IceRecheckEvent {
   IceRecheckEvent(IceSwitchReason _reason, int _recheck_delay_ms)
       : reason(_reason), recheck_delay_ms(_recheck_delay_ms) {}
 
@@ -54,7 +52,7 @@ struct RTC_EXPORT IceRecheckEvent {
 // Connection::ForgetLearnedState - return in SwitchResult
 //
 // The IceController shall keep track of all connections added
-// (and not destroyed) and give them back using the GetConnections() function.
+// (and not destroyed) and give them back using the connections()-function-
 //
 // When a Connection gets destroyed
 // - signals on Connection::SignalDestroyed
@@ -102,17 +100,7 @@ class IceControllerInterface {
   virtual void OnConnectionDestroyed(const Connection* connection) = 0;
 
   // These are all connections that has been added and not destroyed.
-  virtual rtc::ArrayView<const Connection* const> GetConnections() const {
-    // Stub implementation to simplify downstream roll.
-    RTC_CHECK_NOTREACHED();
-    return {};
-  }
-  // TODO(bugs.webrtc.org/15702): Remove this after downstream is cleaned up.
-  virtual rtc::ArrayView<const Connection*> connections() const {
-    // Stub implementation to simplify downstream removal.
-    RTC_CHECK_NOTREACHED();
-    return {};
-  }
+  virtual rtc::ArrayView<const Connection*> connections() const = 0;
 
   // Is there a pingable connection ?
   // This function is used to boot-strap pinging, after this returns true

@@ -22,9 +22,11 @@
 namespace webrtc {
 // Trait to read/write the dependency descriptor extension as described in
 // https://aomediacodec.github.io/av1-rtp-spec/#dependency-descriptor-rtp-header-extension
+// While the format is still in design, the code might change without backward
+// compatibility.
 class RtpDependencyDescriptorExtension {
  public:
-  static constexpr RTPExtensionType kId = kRtpExtensionDependencyDescriptor;
+  static constexpr RTPExtensionType kId = kRtpExtensionGenericFrameDescriptor02;
   static constexpr absl::string_view Uri() {
     return RtpExtension::kDependencyDescriptorUri;
   }
@@ -52,16 +54,6 @@ class RtpDependencyDescriptorExtension {
 
  private:
   static constexpr std::bitset<32> kAllChainsAreActive = ~uint32_t{0};
-};
-
-// Trait to only read the mandatory part of the descriptor.
-class RtpDependencyDescriptorExtensionMandatory {
- public:
-  static constexpr webrtc::RTPExtensionType kId =
-      webrtc::RtpDependencyDescriptorExtension::kId;
-
-  static bool Parse(rtc::ArrayView<const uint8_t> data,
-                    DependencyDescriptorMandatory* descriptor);
 };
 
 }  // namespace webrtc

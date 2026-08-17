@@ -128,10 +128,13 @@ WebRtcSessionDescriptionFactory::WebRtcSessionDescriptionFactory(
   RTC_DCHECK(signaling_thread_);
 
   if (!dtls_enabled) {
-    RTC_LOG(LS_INFO) << "DTLS-SRTP disabled";
-    transport_desc_factory_.SetInsecureForTesting();
+    SetSdesPolicy(cricket::SEC_REQUIRED);
+    RTC_LOG(LS_VERBOSE) << "DTLS-SRTP disabled.";
     return;
   }
+
+  // SRTP-SDES is disabled if DTLS is on.
+  SetSdesPolicy(cricket::SEC_DISABLED);
   if (certificate) {
     // Use `certificate`.
     certificate_request_state_ = CERTIFICATE_WAITING;
@@ -139,32 +142,31 @@ WebRtcSessionDescriptionFactory::WebRtcSessionDescriptionFactory(
     RTC_LOG(LS_VERBOSE) << "DTLS-SRTP enabled; has certificate parameter.";
     RTC_LOG(LS_INFO) << "Using certificate supplied to the constructor.";
     SetCertificate(certificate);
-    return;
+  } else {
+    // Generate certificate.
+    certificate_request_state_ = CERTIFICATE_WAITING;
+
+    auto callback = [weak_ptr = weak_factory_.GetWeakPtr()](
+                        rtc::scoped_refptr<rtc::RTCCertificate> certificate) {
+      if (!weak_ptr) {
+        return;
+      }
+      if (certificate) {
+        weak_ptr->SetCertificate(std::move(certificate));
+      } else {
+        weak_ptr->OnCertificateRequestFailed();
+      }
+    };
+
+    rtc::KeyParams key_params = rtc::KeyParams();
+    RTC_LOG(LS_VERBOSE)
+        << "DTLS-SRTP enabled; sending DTLS identity request (key type: "
+        << key_params.type() << ").";
+
+    // Request certificate. This happens asynchronously on a different thread.
+    cert_generator_->GenerateCertificateAsync(key_params, absl::nullopt,
+                                              std::move(callback));
   }
-  // Generate certificate.
-  RTC_DCHECK(cert_generator_);
-  certificate_request_state_ = CERTIFICATE_WAITING;
-
-  auto callback = [weak_ptr = weak_factory_.GetWeakPtr()](
-                      rtc::scoped_refptr<rtc::RTCCertificate> certificate) {
-    if (!weak_ptr) {
-      return;
-    }
-    if (certificate) {
-      weak_ptr->SetCertificate(std::move(certificate));
-    } else {
-      weak_ptr->OnCertificateRequestFailed();
-    }
-  };
-
-  rtc::KeyParams key_params = rtc::KeyParams();
-  RTC_LOG(LS_VERBOSE)
-      << "DTLS-SRTP enabled; sending DTLS identity request (key type: "
-      << key_params.type() << ").";
-
-  // Request certificate. This happens asynchronously on a different thread.
-  cert_generator_->GenerateCertificateAsync(key_params, absl::nullopt,
-                                            std::move(callback));
 }
 
 WebRtcSessionDescriptionFactory::~WebRtcSessionDescriptionFactory() {
@@ -192,15 +194,15 @@ void WebRtcSessionDescriptionFactory::CreateOffer(
   std::string error = "CreateOffer";
   if (certificate_request_state_ == CERTIFICATE_FAILED) {
     error += kFailedDueToIdentityFailed;
-    PostCreateSessionDescriptionFailed(
-        observer, RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+    RTC_LOG(LS_ERROR) << error;
+    PostCreateSessionDescriptionFailed(observer, error);
     return;
   }
 
   if (!ValidMediaSessionOptions(session_options)) {
     error += " called with invalid session options";
-    PostCreateSessionDescriptionFailed(
-        observer, RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+    RTC_LOG(LS_ERROR) << error;
+    PostCreateSessionDescriptionFailed(observer, error);
     return;
   }
 
@@ -221,27 +223,27 @@ void WebRtcSessionDescriptionFactory::CreateAnswer(
   std::string error = "CreateAnswer";
   if (certificate_request_state_ == CERTIFICATE_FAILED) {
     error += kFailedDueToIdentityFailed;
-    PostCreateSessionDescriptionFailed(
-        observer, RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+    RTC_LOG(LS_ERROR) << error;
+    PostCreateSessionDescriptionFailed(observer, error);
     return;
   }
   if (!sdp_info_->remote_description()) {
     error += " can't be called before SetRemoteDescription.";
-    PostCreateSessionDescriptionFailed(
-        observer, RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+    RTC_LOG(LS_ERROR) << error;
+    PostCreateSessionDescriptionFailed(observer, error);
     return;
   }
   if (sdp_info_->remote_description()->GetType() != SdpType::kOffer) {
     error += " failed because remote_description is not an offer.";
-    PostCreateSessionDescriptionFailed(
-        observer, RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+    RTC_LOG(LS_ERROR) << error;
+    PostCreateSessionDescriptionFailed(observer, error);
     return;
   }
 
   if (!ValidMediaSessionOptions(session_options)) {
     error += " called with invalid session options.";
-    PostCreateSessionDescriptionFailed(
-        observer, RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+    RTC_LOG(LS_ERROR) << error;
+    PostCreateSessionDescriptionFailed(observer, error);
     return;
   }
 
@@ -254,6 +256,15 @@ void WebRtcSessionDescriptionFactory::CreateAnswer(
                certificate_request_state_ == CERTIFICATE_NOT_NEEDED);
     InternalCreateAnswer(request);
   }
+}
+
+void WebRtcSessionDescriptionFactory::SetSdesPolicy(
+    cricket::SecurePolicy secure_policy) {
+  session_desc_factory_.set_secure(secure_policy);
+}
+
+cricket::SecurePolicy WebRtcSessionDescriptionFactory::SdesPolicy() const {
+  return session_desc_factory_.secure();
 }
 
 void WebRtcSessionDescriptionFactory::InternalCreateOffer(
@@ -269,16 +280,16 @@ void WebRtcSessionDescriptionFactory::InternalCreateOffer(
     }
   }
 
-  auto result = session_desc_factory_.CreateOfferOrError(
-      request.options, sdp_info_->local_description()
-                           ? sdp_info_->local_description()->description()
-                           : nullptr);
-  if (!result.ok()) {
-    PostCreateSessionDescriptionFailed(request.observer.get(), result.error());
+  std::unique_ptr<cricket::SessionDescription> desc =
+      session_desc_factory_.CreateOffer(
+          request.options, sdp_info_->local_description()
+                               ? sdp_info_->local_description()->description()
+                               : nullptr);
+  if (!desc) {
+    PostCreateSessionDescriptionFailed(request.observer.get(),
+                                       "Failed to initialize the offer.");
     return;
   }
-  std::unique_ptr<cricket::SessionDescription> desc = std::move(result.value());
-  RTC_CHECK(desc);
 
   // RFC 3264
   // When issuing an offer that modifies the session,
@@ -327,20 +338,20 @@ void WebRtcSessionDescriptionFactory::InternalCreateAnswer(
     }
   }
 
-  auto result = session_desc_factory_.CreateAnswerOrError(
-      sdp_info_->remote_description()
-          ? sdp_info_->remote_description()->description()
-          : nullptr,
-      request.options,
-      sdp_info_->local_description()
-          ? sdp_info_->local_description()->description()
-          : nullptr);
-  if (!result.ok()) {
-    PostCreateSessionDescriptionFailed(request.observer.get(), result.error());
+  std::unique_ptr<cricket::SessionDescription> desc =
+      session_desc_factory_.CreateAnswer(
+          sdp_info_->remote_description()
+              ? sdp_info_->remote_description()->description()
+              : nullptr,
+          request.options,
+          sdp_info_->local_description()
+              ? sdp_info_->local_description()->description()
+              : nullptr);
+  if (!desc) {
+    PostCreateSessionDescriptionFailed(request.observer.get(),
+                                       "Failed to initialize the answer.");
     return;
   }
-  std::unique_ptr<cricket::SessionDescription> desc = std::move(result.value());
-  RTC_CHECK(desc);
 
   // RFC 3264
   // If the answer is different from the offer in any way (different IP
@@ -376,22 +387,24 @@ void WebRtcSessionDescriptionFactory::FailPendingRequests(
         create_session_description_requests_.front();
     PostCreateSessionDescriptionFailed(
         request.observer.get(),
-        RTCError(RTCErrorType::INTERNAL_ERROR,
-                 ((request.type == CreateSessionDescriptionRequest::kOffer)
-                      ? "CreateOffer"
-                      : "CreateAnswer") +
-                     reason));
+        ((request.type == CreateSessionDescriptionRequest::kOffer)
+             ? "CreateOffer"
+             : "CreateAnswer") +
+            reason);
     create_session_description_requests_.pop();
   }
 }
 
 void WebRtcSessionDescriptionFactory::PostCreateSessionDescriptionFailed(
     CreateSessionDescriptionObserver* observer,
-    RTCError error) {
+    const std::string& error) {
   Post([observer =
             rtc::scoped_refptr<CreateSessionDescriptionObserver>(observer),
-        error]() mutable { observer->OnFailure(error); });
-  RTC_LOG(LS_ERROR) << "CreateSessionDescription failed: " << error.message();
+        error]() mutable {
+    observer->OnFailure(
+        RTCError(RTCErrorType::INTERNAL_ERROR, std::move(error)));
+  });
+  RTC_LOG(LS_ERROR) << "Create SDP failed: " << error;
 }
 
 void WebRtcSessionDescriptionFactory::PostCreateSessionDescriptionSucceeded(
@@ -439,6 +452,7 @@ void WebRtcSessionDescriptionFactory::SetCertificate(
   on_certificate_ready_(certificate);
 
   transport_desc_factory_.set_certificate(std::move(certificate));
+  transport_desc_factory_.set_secure(cricket::SEC_ENABLED);
 
   while (!create_session_description_requests_.empty()) {
     if (create_session_description_requests_.front().type ==
@@ -450,5 +464,4 @@ void WebRtcSessionDescriptionFactory::SetCertificate(
     create_session_description_requests_.pop();
   }
 }
-
 }  // namespace webrtc

@@ -1,18 +1,16 @@
-// Copyright 2018 The BoringSSL Authors
+// Copyright (c) 2018, Google Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-//go:build ignore
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 // read_symbols scans one or more .a files and, for each object contained in
 // the .a files, reads the list of symbols in that object file.
@@ -30,7 +28,7 @@ import (
 	"sort"
 	"strings"
 
-	"boringssl.googlesource.com/boringssl.git/util/ar"
+	"boringssl.googlesource.com/boringssl/util/ar"
 )
 
 const (
@@ -61,7 +59,7 @@ func defaultObjFileFormat(goos string) string {
 	}
 }
 
-func printAndExit(format string, args ...any) {
+func printAndExit(format string, args ...interface{}) {
 	s := fmt.Sprintf(format, args...)
 	fmt.Fprintln(os.Stderr, s)
 	os.Exit(1)
@@ -121,8 +119,8 @@ func main() {
 			// should not be prefixed. It is a limitation of this
 			// symbol-prefixing strategy that we cannot distinguish
 			// our own inline symbols (which should be prefixed)
-			// from the system's (which should not), so we skip known
-			// system symbols.
+			// from the system's (which should not), so we blacklist
+			// known system symbols.
 			"__local_stdio_printf_options",
 			"__local_stdio_scanf_options",
 			"_vscprintf",
@@ -142,7 +140,7 @@ func main() {
 				break
 			}
 		}
-		if skip || isCXXSymbol(s) || strings.HasPrefix(s, "__real@") || strings.HasPrefix(s, "__x86.get_pc_thunk.") || strings.HasPrefix(s, "DW.") {
+		if skip || isCXXSymbol(s) || strings.HasPrefix(s, "__real@") || strings.HasPrefix(s, "__x86.get_pc_thunk.") {
 			continue
 		}
 		if _, err := fmt.Fprintln(out, s); err != nil {
@@ -178,9 +176,6 @@ func listSymbolsELF(contents []byte) ([]string, error) {
 		return nil, err
 	}
 	syms, err := f.Symbols()
-	if err == elf.ErrNoSymbols {
-		return nil, nil
-	}
 	if err != nil {
 		return nil, err
 	}

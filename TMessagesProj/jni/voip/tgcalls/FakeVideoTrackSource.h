@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <memory>
-#include <string>
 
 namespace webrtc {
 class VideoTrackSourceInterface;

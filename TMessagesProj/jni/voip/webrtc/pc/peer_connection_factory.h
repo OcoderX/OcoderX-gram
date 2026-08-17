@@ -29,10 +29,12 @@
 #include "api/network_state_predictor.h"
 #include "api/peer_connection_interface.h"
 #include "api/rtc_error.h"
+#include "api/rtc_event_log/rtc_event_log.h"
 #include "api/rtc_event_log/rtc_event_log_factory_interface.h"
 #include "api/rtp_parameters.h"
 #include "api/scoped_refptr.h"
 #include "api/sequence_checker.h"
+#include "api/task_queue/task_queue_factory.h"
 #include "api/transport/network_control.h"
 #include "api/transport/sctp_transport_factory_interface.h"
 #include "call/call.h"
@@ -44,12 +46,18 @@
 #include "rtc_base/thread.h"
 #include "rtc_base/thread_annotations.h"
 
+namespace cricket {
+class ChannelManager;
+}
+
 namespace rtc {
 class BasicNetworkManager;
 class BasicPacketSocketFactory;
 }  // namespace rtc
 
 namespace webrtc {
+
+class RtcEventLog;
 
 class PeerConnectionFactory : public PeerConnectionFactoryInterface {
  public:
@@ -81,8 +89,8 @@ class PeerConnectionFactory : public PeerConnectionFactoryInterface {
       const cricket::AudioOptions& options) override;
 
   rtc::scoped_refptr<VideoTrackInterface> CreateVideoTrack(
-      rtc::scoped_refptr<VideoTrackSourceInterface> video_source,
-      absl::string_view id) override;
+      const std::string& id,
+      VideoTrackSourceInterface* video_source) override;
 
   rtc::scoped_refptr<AudioTrackInterface> CreateAudioTrack(
       const std::string& id,
@@ -109,7 +117,7 @@ class PeerConnectionFactory : public PeerConnectionFactoryInterface {
   }
 
   const FieldTrialsView& field_trials() const {
-    return context_->env().field_trials();
+    return context_->field_trials();
   }
 
   cricket::MediaEngineInterface* media_engine() const;
@@ -131,13 +139,14 @@ class PeerConnectionFactory : public PeerConnectionFactoryInterface {
 
   bool IsTrialEnabled(absl::string_view key) const;
 
-  std::unique_ptr<Call> CreateCall_w(
-      const Environment& env,
-      const PeerConnectionInterface::RTCConfiguration& configuration);
+  std::unique_ptr<RtcEventLog> CreateRtcEventLog_w();
+  std::unique_ptr<Call> CreateCall_w(RtcEventLog* event_log,
+                                     const FieldTrialsView& field_trials);
 
   rtc::scoped_refptr<ConnectionContext> context_;
   PeerConnectionFactoryInterface::Options options_
       RTC_GUARDED_BY(signaling_thread());
+  std::unique_ptr<TaskQueueFactory> task_queue_factory_;
   std::unique_ptr<RtcEventLogFactoryInterface> event_log_factory_;
   std::unique_ptr<FecControllerFactoryInterface> fec_controller_factory_;
   std::unique_ptr<NetworkStatePredictorFactoryInterface>
@@ -147,8 +156,7 @@ class PeerConnectionFactory : public PeerConnectionFactoryInterface {
   std::unique_ptr<NetEqFactory> neteq_factory_;
   const std::unique_ptr<RtpTransportControllerSendFactoryInterface>
       transport_controller_send_factory_;
-  std::unique_ptr<Metronome> decode_metronome_ RTC_GUARDED_BY(worker_thread());
-  std::unique_ptr<Metronome> encode_metronome_ RTC_GUARDED_BY(worker_thread());
+  std::unique_ptr<Metronome> metronome_;
 };
 
 }  // namespace webrtc

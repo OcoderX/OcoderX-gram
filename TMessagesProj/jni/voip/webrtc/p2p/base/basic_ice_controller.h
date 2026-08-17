@@ -19,6 +19,7 @@
 
 #include "p2p/base/ice_controller_factory_interface.h"
 #include "p2p/base/ice_controller_interface.h"
+#include "p2p/base/p2p_transport_channel.h"
 
 namespace cricket {
 
@@ -31,9 +32,6 @@ class BasicIceController : public IceControllerInterface {
   void SetSelectedConnection(const Connection* selected_connection) override;
   void AddConnection(const Connection* connection) override;
   void OnConnectionDestroyed(const Connection* connection) override;
-  rtc::ArrayView<const Connection* const> GetConnections() const override {
-    return connections_;
-  }
   rtc::ArrayView<const Connection*> connections() const override {
     return rtc::ArrayView<const Connection*>(
         const_cast<const Connection**>(connections_.data()),

@@ -22,8 +22,6 @@
 #include "p2p/base/port.h"
 #include "p2p/base/stun_request.h"
 #include "rtc_base/async_packet_socket.h"
-#include "rtc_base/network/received_packet.h"
-#include "rtc_base/system/rtc_export.h"
 
 namespace cricket {
 
@@ -33,7 +31,7 @@ static const int INFINITE_LIFETIME = -1;
 static const int HIGH_COST_PORT_KEEPALIVE_LIFETIME = 2 * 60 * 1000;
 
 // Communicates using the address on the outside of a NAT.
-class RTC_EXPORT UDPPort : public Port {
+class UDPPort : public Port {
  public:
   static std::unique_ptr<UDPPort> Create(
       rtc::Thread* thread,
@@ -47,8 +45,8 @@ class RTC_EXPORT UDPPort : public Port {
       const webrtc::FieldTrialsView* field_trials = nullptr) {
     // Using `new` to access a non-public constructor.
     auto port = absl::WrapUnique(
-        new UDPPort(thread, LOCAL_PORT_TYPE, factory, network, socket, username,
-                    password, emit_local_for_anyaddress, field_trials));
+        new UDPPort(thread, factory, network, socket, username, password,
+                    emit_local_for_anyaddress, field_trials));
     port->set_stun_keepalive_delay(stun_keepalive_interval);
     if (!port->Init()) {
       return nullptr;
@@ -68,9 +66,9 @@ class RTC_EXPORT UDPPort : public Port {
       absl::optional<int> stun_keepalive_interval,
       const webrtc::FieldTrialsView* field_trials = nullptr) {
     // Using `new` to access a non-public constructor.
-    auto port = absl::WrapUnique(new UDPPort(
-        thread, LOCAL_PORT_TYPE, factory, network, min_port, max_port, username,
-        password, emit_local_for_anyaddress, field_trials));
+    auto port = absl::WrapUnique(
+        new UDPPort(thread, factory, network, min_port, max_port, username,
+                    password, emit_local_for_anyaddress, field_trials));
     port->set_stun_keepalive_delay(stun_keepalive_interval);
     if (!port->Init()) {
       return nullptr;
@@ -98,7 +96,10 @@ class RTC_EXPORT UDPPort : public Port {
   int GetError() override;
 
   bool HandleIncomingPacket(rtc::AsyncPacketSocket* socket,
-                            const rtc::ReceivedPacket& packet) override;
+                            const char* data,
+                            size_t size,
+                            const rtc::SocketAddress& remote_addr,
+                            int64_t packet_time_us) override;
 
   bool SupportsProtocol(absl::string_view protocol) const override;
   ProtocolType GetProtocol() const override;
@@ -118,7 +119,6 @@ class RTC_EXPORT UDPPort : public Port {
 
  protected:
   UDPPort(rtc::Thread* thread,
-          absl::string_view type,
           rtc::PacketSocketFactory* factory,
           const rtc::Network* network,
           uint16_t min_port,
@@ -129,7 +129,6 @@ class RTC_EXPORT UDPPort : public Port {
           const webrtc::FieldTrialsView* field_trials);
 
   UDPPort(rtc::Thread* thread,
-          absl::string_view type,
           rtc::PacketSocketFactory* factory,
           const rtc::Network* network,
           rtc::AsyncPacketSocket* socket,
@@ -156,7 +155,10 @@ class RTC_EXPORT UDPPort : public Port {
   void PostAddAddress(bool is_final) override;
 
   void OnReadPacket(rtc::AsyncPacketSocket* socket,
-                    const rtc::ReceivedPacket& packet);
+                    const char* data,
+                    size_t size,
+                    const rtc::SocketAddress& remote_addr,
+                    const int64_t& packet_time_us);
 
   void OnSentPacket(rtc::AsyncPacketSocket* socket,
                     const rtc::SentPacket& sent_packet) override;
@@ -232,7 +234,7 @@ class RTC_EXPORT UDPPort : public Port {
   // changed to SignalPortReady.
   void MaybeSetPortCompleteOrError();
 
-  bool HasStunCandidateWithAddress(const rtc::SocketAddress& addr) const;
+  bool HasCandidateWithAddress(const rtc::SocketAddress& addr) const;
 
   // If this is a low-cost network, it will keep on sending STUN binding
   // requests indefinitely to keep the NAT binding alive. Otherwise, stop

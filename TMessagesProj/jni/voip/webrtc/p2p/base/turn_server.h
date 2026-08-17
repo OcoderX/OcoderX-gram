@@ -26,7 +26,6 @@
 #include "api/units/time_delta.h"
 #include "p2p/base/port_interface.h"
 #include "rtc_base/async_packet_socket.h"
-#include "rtc_base/network/received_packet.h"
 #include "rtc_base/socket_address.h"
 #include "rtc_base/ssl_adapter.h"
 #include "rtc_base/third_party/sigslot/sigslot.h"
@@ -70,14 +69,14 @@ class TurnServerConnection {
 // handles TURN messages (via HandleTurnMessage) and channel data messages
 // (via HandleChannelData) for this allocation when received by the server.
 // The object informs the server when its lifetime timer expires.
-class TurnServerAllocation {
+class TurnServerAllocation : public sigslot::has_slots<> {
  public:
   TurnServerAllocation(TurnServer* server_,
                        webrtc::TaskQueueBase* thread,
                        const TurnServerConnection& conn,
                        rtc::AsyncPacketSocket* server_socket,
                        absl::string_view key);
-  virtual ~TurnServerAllocation();
+  ~TurnServerAllocation() override;
 
   TurnServerConnection* conn() { return &conn_; }
   const std::string& key() const { return key_; }
@@ -91,7 +90,7 @@ class TurnServerAllocation {
   std::string ToString() const;
 
   void HandleTurnMessage(const TurnMessage* msg);
-  void HandleChannelData(rtc::ArrayView<const uint8_t> payload);
+  void HandleChannelData(const char* data, size_t size);
 
  private:
   struct Channel {
@@ -115,7 +114,10 @@ class TurnServerAllocation {
   void HandleChannelBindRequest(const TurnMessage* msg);
 
   void OnExternalPacket(rtc::AsyncPacketSocket* socket,
-                        const rtc::ReceivedPacket& packet);
+                        const char* data,
+                        size_t size,
+                        const rtc::SocketAddress& addr,
+                        const int64_t& packet_time_us);
 
   static webrtc::TimeDelta ComputeLifetime(const TurnMessage& msg);
   bool HasPermission(const rtc::IPAddress& addr);
@@ -169,7 +171,7 @@ class TurnRedirectInterface {
 class StunMessageObserver {
  public:
   virtual void ReceivedMessage(const TurnMessage* msg) = 0;
-  virtual void ReceivedChannelData(rtc::ArrayView<const uint8_t> payload) = 0;
+  virtual void ReceivedChannelData(const char* data, size_t size) = 0;
   virtual ~StunMessageObserver() {}
 };
 
@@ -264,11 +266,14 @@ class TurnServer : public sigslot::has_slots<> {
  private:
   // All private member functions and variables should have access restricted to
   // thread_. But compile-time annotations are missing for members access from
-  // TurnServerAllocation (via friend declaration).
-
+  // TurnServerAllocation (via friend declaration), and the On* methods, which
+  // are called via sigslot.
   std::string GenerateNonce(int64_t now) const RTC_RUN_ON(thread_);
   void OnInternalPacket(rtc::AsyncPacketSocket* socket,
-                        const rtc::ReceivedPacket& packet) RTC_RUN_ON(thread_);
+                        const char* data,
+                        size_t size,
+                        const rtc::SocketAddress& address,
+                        const int64_t& packet_time_us);
 
   void OnNewInternalConnection(rtc::Socket* socket);
 
@@ -277,8 +282,8 @@ class TurnServer : public sigslot::has_slots<> {
   void OnInternalSocketClose(rtc::AsyncPacketSocket* socket, int err);
 
   void HandleStunMessage(TurnServerConnection* conn,
-                         rtc::ArrayView<const uint8_t> payload)
-      RTC_RUN_ON(thread_);
+                         const char* data,
+                         size_t size) RTC_RUN_ON(thread_);
   void HandleBindingRequest(TurnServerConnection* conn, const StunMessage* msg)
       RTC_RUN_ON(thread_);
   void HandleAllocateRequest(TurnServerConnection* conn,
@@ -288,6 +293,8 @@ class TurnServer : public sigslot::has_slots<> {
   bool GetKey(const StunMessage* msg, std::string* key) RTC_RUN_ON(thread_);
   bool CheckAuthorization(TurnServerConnection* conn,
                           StunMessage* msg,
+                          const char* data,
+                          size_t size,
                           absl::string_view key) RTC_RUN_ON(thread_);
   bool ValidateNonce(absl::string_view nonce) const RTC_RUN_ON(thread_);
 

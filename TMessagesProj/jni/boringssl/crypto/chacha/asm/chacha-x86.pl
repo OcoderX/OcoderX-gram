@@ -1,22 +1,17 @@
 #! /usr/bin/env perl
 # Copyright 2016 The OpenSSL Project Authors. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Licensed under the OpenSSL license (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
 
 #
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
-# project.
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
 # ====================================================================
 #
 # January 2015
@@ -50,7 +45,7 @@ require "x86asm.pl";
 $output=pop;
 open STDOUT,">$output";
 
-&asm_init($ARGV[0]);
+&asm_init($ARGV[0],$ARGV[$#ARGV] eq "386");
 
 $xmm=$ymm=1;
 $gasver=999;  # enable everything
@@ -119,10 +114,26 @@ my ($ap,$bp,$cp,$dp)=map(($_&~3)+(($_-1)&3),($ai,$bi,$ci,$di));	# previous
 	($d,$d_)=($d_,$d);
 }
 
+&static_label("ssse3_shortcut");
 &static_label("ssse3_data");
 &static_label("pic_point");
 
-&function_begin("ChaCha20_ctr32_nohw");
+&function_begin("ChaCha20_ctr32");
+	&xor	("eax","eax");
+	&cmp	("eax",&wparam(2));		# len==0?
+	&je	(&label("no_data"));
+if ($xmm) {
+	&call	(&label("pic_point"));
+&set_label("pic_point");
+	&blindpop("eax");
+	&picmeup("ebp","OPENSSL_ia32cap_P","eax",&label("pic_point"));
+	&test	(&DWP(0,"ebp"),1<<24);		# test FXSR bit
+	&jz	(&label("x86"));
+	&test	(&DWP(4,"ebp"),1<<9);		# test SSSE3 bit
+	&jz	(&label("x86"));
+	&jmp	(&label("ssse3_shortcut"));
+&set_label("x86");
+}
 	&mov	("esi",&wparam(3));		# key
 	&mov	("edi",&wparam(4));		# counter and nonce
 
@@ -344,7 +355,8 @@ my ($ap,$bp,$cp,$dp)=map(($_&~3)+(($_-1)&3),($ai,$bi,$ci,$di));	# previous
 
 &set_label("done");
 	&stack_pop(33);
-&function_end("ChaCha20_ctr32_nohw");
+&set_label("no_data");
+&function_end("ChaCha20_ctr32");
 
 if ($xmm) {
 my ($xa,$xa_,$xb,$xb_,$xc,$xc_,$xd,$xd_)=map("xmm$_",(0..7));
@@ -416,11 +428,8 @@ my ($ap,$bp,$cp,$dp)=map(($_&~3)+(($_-1)&3),($ai,$bi,$ci,$di));	# previous
 	($xd,$xd_)=($xd_,$xd);
 }
 
-&function_begin("ChaCha20_ctr32_ssse3");
-	&call	(&label("pic_point"));
-&set_label("pic_point");
-	&blindpop("eax");
-
+&function_begin("ChaCha20_ssse3");
+&set_label("ssse3_shortcut");
 	&mov		($out,&wparam(0));
 	&mov		($inp,&wparam(1));
 	&mov		($len,&wparam(2));
@@ -742,7 +751,7 @@ sub SSSE3ROUND {	# critical path is 20 "SIMD ticks" per round
 }
 &set_label("done");
 	&mov		("esp",&DWP(512,"esp"));
-&function_end("ChaCha20_ctr32_ssse3");
+&function_end("ChaCha20_ssse3");
 
 &align	(64);
 &set_label("ssse3_data");
@@ -760,4 +769,4 @@ sub SSSE3ROUND {	# critical path is 20 "SIMD ticks" per round
 
 &asm_finish();
 
-close STDOUT or die "error closing STDOUT: $!";
+close STDOUT or die "error closing STDOUT";

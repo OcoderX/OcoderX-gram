@@ -10,17 +10,12 @@
 
 #include "rtc_base/nat_server.h"
 
-#include <cstddef>
-#include <cstdint>
 #include <memory>
 
-#include "api/array_view.h"
 #include "rtc_base/checks.h"
 #include "rtc_base/logging.h"
 #include "rtc_base/nat_socket_factory.h"
-#include "rtc_base/network/received_packet.h"
 #include "rtc_base/socket_adapters.h"
-#include "rtc_base/socket_address.h"
 
 namespace rtc {
 
@@ -99,9 +94,8 @@ class NATProxyServerSocket : public AsyncProxyServerSocket {
     }
 
     SocketAddress dest_addr;
-    size_t address_length = UnpackAddressFromNAT(
-        MakeArrayView(reinterpret_cast<const uint8_t*>(data), *len),
-        &dest_addr);
+    size_t address_length = UnpackAddressFromNAT(data, *len, &dest_addr);
+
     *len -= address_length;
     if (*len > 0) {
       memmove(data, data + address_length, *len);
@@ -131,27 +125,17 @@ class NATProxyServer : public ProxyServer {
 };
 
 NATServer::NATServer(NATType type,
-                     rtc::Thread& internal_socket_thread,
                      SocketFactory* internal,
                      const SocketAddress& internal_udp_addr,
                      const SocketAddress& internal_tcp_addr,
-                     rtc::Thread& external_socket_thread,
                      SocketFactory* external,
                      const SocketAddress& external_ip)
-    : internal_socket_thread_(internal_socket_thread),
-      external_socket_thread_(external_socket_thread),
-      external_(external),
-      external_ip_(external_ip.ipaddr(), 0) {
+    : external_(external), external_ip_(external_ip.ipaddr(), 0) {
   nat_ = NAT::Create(type);
 
-  internal_socket_thread_.BlockingCall([&] {
-    udp_server_socket_ = AsyncUDPSocket::Create(internal, internal_udp_addr);
-    udp_server_socket_->RegisterReceivedPacketCallback(
-        [&](rtc::AsyncPacketSocket* socket, const rtc::ReceivedPacket& packet) {
-          OnInternalUDPPacket(socket, packet);
-        });
-  });
-
+  udp_server_socket_ = AsyncUDPSocket::Create(internal, internal_udp_addr);
+  udp_server_socket_->SignalReadPacket.connect(this,
+                                               &NATServer::OnInternalUDPPacket);
   tcp_proxy_server_ =
       new NATProxyServer(internal, internal_tcp_addr, external, external_ip);
 
@@ -172,14 +156,16 @@ NATServer::~NATServer() {
 }
 
 void NATServer::OnInternalUDPPacket(AsyncPacketSocket* socket,
-                                    const rtc::ReceivedPacket& packet) {
-  RTC_DCHECK(internal_socket_thread_.IsCurrent());
+                                    const char* buf,
+                                    size_t size,
+                                    const SocketAddress& addr,
+                                    const int64_t& /* packet_time_us */) {
   // Read the intended destination from the wire.
   SocketAddress dest_addr;
-  size_t length = UnpackAddressFromNAT(packet.payload(), &dest_addr);
+  size_t length = UnpackAddressFromNAT(buf, size, &dest_addr);
 
   // Find the translation for these addresses (allocating one if necessary).
-  SocketAddressPair route(packet.source_address(), dest_addr);
+  SocketAddressPair route(addr, dest_addr);
   InternalMap::iterator iter = int_map_->find(route);
   if (iter == int_map_->end()) {
     Translate(route);
@@ -192,14 +178,14 @@ void NATServer::OnInternalUDPPacket(AsyncPacketSocket* socket,
 
   // Send the packet to its intended destination.
   rtc::PacketOptions options;
-  const char* buf = reinterpret_cast<const char*>(packet.payload().data());
-  size_t size = packet.payload().size();
   iter->second->socket->SendTo(buf + length, size - length, dest_addr, options);
 }
 
 void NATServer::OnExternalUDPPacket(AsyncPacketSocket* socket,
-                                    const rtc::ReceivedPacket& packet) {
-  RTC_DCHECK(external_socket_thread_.IsCurrent());
+                                    const char* buf,
+                                    size_t size,
+                                    const SocketAddress& remote_addr,
+                                    const int64_t& /* packet_time_us */) {
   SocketAddress local_addr = socket->GetLocalAddress();
 
   // Find the translation for this addresses.
@@ -207,46 +193,36 @@ void NATServer::OnExternalUDPPacket(AsyncPacketSocket* socket,
   RTC_DCHECK(iter != ext_map_->end());
 
   // Allow the NAT to reject this packet.
-  if (ShouldFilterOut(iter->second, packet.source_address())) {
-    RTC_LOG(LS_INFO) << "Packet from "
-                     << packet.source_address().ToSensitiveString()
+  if (ShouldFilterOut(iter->second, remote_addr)) {
+    RTC_LOG(LS_INFO) << "Packet from " << remote_addr.ToSensitiveString()
                      << " was filtered out by the NAT.";
     return;
   }
 
   // Forward this packet to the internal address.
   // First prepend the address in a quasi-STUN format.
-  std::unique_ptr<char[]> real_buf(
-      new char[packet.payload().size() + kNATEncodedIPv6AddressSize]);
+  std::unique_ptr<char[]> real_buf(new char[size + kNATEncodedIPv6AddressSize]);
   size_t addrlength = PackAddressForNAT(
-      real_buf.get(), packet.payload().size() + kNATEncodedIPv6AddressSize,
-      packet.source_address());
+      real_buf.get(), size + kNATEncodedIPv6AddressSize, remote_addr);
   // Copy the data part after the address.
   rtc::PacketOptions options;
-  memcpy(real_buf.get() + addrlength, packet.payload().data(),
-         packet.payload().size());
-  udp_server_socket_->SendTo(real_buf.get(),
-                             packet.payload().size() + addrlength,
+  memcpy(real_buf.get() + addrlength, buf, size);
+  udp_server_socket_->SendTo(real_buf.get(), size + addrlength,
                              iter->second->route.source(), options);
 }
 
 void NATServer::Translate(const SocketAddressPair& route) {
-  external_socket_thread_.BlockingCall([&] {
-    AsyncUDPSocket* socket = AsyncUDPSocket::Create(external_, external_ip_);
+  AsyncUDPSocket* socket = AsyncUDPSocket::Create(external_, external_ip_);
 
-    if (!socket) {
-      RTC_LOG(LS_ERROR) << "Couldn't find a free port!";
-      return;
-    }
+  if (!socket) {
+    RTC_LOG(LS_ERROR) << "Couldn't find a free port!";
+    return;
+  }
 
-    TransEntry* entry = new TransEntry(route, socket, nat_);
-    (*int_map_)[route] = entry;
-    (*ext_map_)[socket->GetLocalAddress()] = entry;
-    socket->RegisterReceivedPacketCallback(
-        [&](rtc::AsyncPacketSocket* socket, const rtc::ReceivedPacket& packet) {
-          OnExternalUDPPacket(socket, packet);
-        });
-  });
+  TransEntry* entry = new TransEntry(route, socket, nat_);
+  (*int_map_)[route] = entry;
+  (*ext_map_)[socket->GetLocalAddress()] = entry;
+  socket->SignalReadPacket.connect(this, &NATServer::OnExternalUDPPacket);
 }
 
 bool NATServer::ShouldFilterOut(TransEntry* entry,

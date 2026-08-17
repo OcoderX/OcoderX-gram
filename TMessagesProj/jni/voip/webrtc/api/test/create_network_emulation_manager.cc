@@ -13,17 +13,13 @@
 
 #include <memory>
 
-#include "api/field_trials_view.h"
 #include "test/network/network_emulation_manager.h"
 
 namespace webrtc {
 
 std::unique_ptr<NetworkEmulationManager> CreateNetworkEmulationManager(
-    TimeMode time_mode,
-    EmulatedNetworkStatsGatheringMode stats_gathering_mode,
-    const FieldTrialsView* field_trials) {
-  return std::make_unique<test::NetworkEmulationManagerImpl>(
-      time_mode, stats_gathering_mode, field_trials);
+    TimeMode mode) {
+  return std::make_unique<test::NetworkEmulationManagerImpl>(mode);
 }
 
 }  // namespace webrtc

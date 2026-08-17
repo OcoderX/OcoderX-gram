@@ -12,6 +12,7 @@
 #define P2P_BASE_STUN_SERVER_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include <memory>
 
@@ -20,22 +21,26 @@
 #include "rtc_base/async_packet_socket.h"
 #include "rtc_base/async_udp_socket.h"
 #include "rtc_base/socket_address.h"
+#include "rtc_base/third_party/sigslot/sigslot.h"
 
 namespace cricket {
 
 const int STUN_SERVER_PORT = 3478;
 
-class StunServer {
+class StunServer : public sigslot::has_slots<> {
  public:
   // Creates a STUN server, which will listen on the given socket.
   explicit StunServer(rtc::AsyncUDPSocket* socket);
   // Removes the STUN server from the socket and deletes the socket.
-  virtual ~StunServer();
+  ~StunServer() override;
 
  protected:
-  // Callback for packets from socket.
+  // Slot for Socket.PacketRead:
   void OnPacket(rtc::AsyncPacketSocket* socket,
-                const rtc::ReceivedPacket& packet);
+                const char* buf,
+                size_t size,
+                const rtc::SocketAddress& remote_addr,
+                const int64_t& packet_time_us);
 
   // Handlers for the different types of STUN/TURN requests:
   virtual void OnBindingRequest(StunMessage* msg,
@@ -59,7 +64,6 @@ class StunServer {
                            StunMessage* response) const;
 
  private:
-  webrtc::SequenceChecker sequence_checker_;
   std::unique_ptr<rtc::AsyncUDPSocket> socket_;
 };
 

@@ -43,12 +43,15 @@ class TransportDescriptionFactory {
       const webrtc::FieldTrialsView& field_trials);
   ~TransportDescriptionFactory();
 
+  SecurePolicy secure() const { return secure_; }
   // The certificate to use when setting up DTLS.
   const rtc::scoped_refptr<rtc::RTCCertificate>& certificate() const {
     return certificate_;
   }
 
-  // Specifies the certificate to use
+  // Specifies the transport security policy to use.
+  void set_secure(SecurePolicy s) { secure_ = s; }
+  // Specifies the certificate to use (only used when secure != SEC_DISABLED).
   void set_certificate(rtc::scoped_refptr<rtc::RTCCertificate> certificate) {
     certificate_ = std::move(certificate);
   }
@@ -73,18 +76,12 @@ class TransportDescriptionFactory {
       IceCredentialsIterator* ice_credentials) const;
 
   const webrtc::FieldTrialsView& trials() const { return field_trials_; }
-  // Functions for disabling encryption - test only!
-  // In insecure mode, the connection will accept a description without
-  // fingerprint, and will generate SDP even if certificate is not set.
-  // If certificate is set, it will accept a description both with and
-  // without fingerprint, but will generate a description with fingerprint.
-  bool insecure() const { return insecure_; }
-  void SetInsecureForTesting() { insecure_ = true; }
 
  private:
   bool SetSecurityInfo(TransportDescription* description,
                        ConnectionRole role) const;
-  bool insecure_ = false;
+
+  SecurePolicy secure_;
   rtc::scoped_refptr<rtc::RTCCertificate> certificate_;
   const webrtc::FieldTrialsView& field_trials_;
 };

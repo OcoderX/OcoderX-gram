@@ -16,18 +16,26 @@ namespace rtc {
 
 ByteBufferWriter::ByteBufferWriter() : ByteBufferWriterT() {}
 
-ByteBufferWriter::ByteBufferWriter(const uint8_t* bytes, size_t len)
+ByteBufferWriter::ByteBufferWriter(const char* bytes, size_t len)
     : ByteBufferWriterT(bytes, len) {}
 
-ByteBufferReader::ByteBufferReader(rtc::ArrayView<const uint8_t> bytes) {
-  Construct(bytes.data(), bytes.size());
+ByteBufferReader::ByteBufferReader(const char* bytes, size_t len) {
+  Construct(bytes, len);
+}
+
+ByteBufferReader::ByteBufferReader(const char* bytes) {
+  Construct(bytes, strlen(bytes));
+}
+
+ByteBufferReader::ByteBufferReader(const Buffer& buf) {
+  Construct(buf.data<char>(), buf.size());
 }
 
 ByteBufferReader::ByteBufferReader(const ByteBufferWriter& buf) {
-  Construct(reinterpret_cast<const uint8_t*>(buf.Data()), buf.Length());
+  Construct(buf.Data(), buf.Length());
 }
 
-void ByteBufferReader::Construct(const uint8_t* bytes, size_t len) {
+void ByteBufferReader::Construct(const char* bytes, size_t len) {
   bytes_ = bytes;
   size_ = len;
   start_ = 0;
@@ -38,7 +46,7 @@ bool ByteBufferReader::ReadUInt8(uint8_t* val) {
   if (!val)
     return false;
 
-  return ReadBytes(val, 1);
+  return ReadBytes(reinterpret_cast<char*>(val), 1);
 }
 
 bool ByteBufferReader::ReadUInt16(uint16_t* val) {
@@ -46,7 +54,7 @@ bool ByteBufferReader::ReadUInt16(uint16_t* val) {
     return false;
 
   uint16_t v;
-  if (!ReadBytes(reinterpret_cast<uint8_t*>(&v), 2)) {
+  if (!ReadBytes(reinterpret_cast<char*>(&v), 2)) {
     return false;
   } else {
     *val = NetworkToHost16(v);
@@ -59,7 +67,7 @@ bool ByteBufferReader::ReadUInt24(uint32_t* val) {
     return false;
 
   uint32_t v = 0;
-  uint8_t* read_into = reinterpret_cast<uint8_t*>(&v);
+  char* read_into = reinterpret_cast<char*>(&v);
   ++read_into;
 
   if (!ReadBytes(read_into, 3)) {
@@ -75,7 +83,7 @@ bool ByteBufferReader::ReadUInt32(uint32_t* val) {
     return false;
 
   uint32_t v;
-  if (!ReadBytes(reinterpret_cast<uint8_t*>(&v), 4)) {
+  if (!ReadBytes(reinterpret_cast<char*>(&v), 4)) {
     return false;
   } else {
     *val = NetworkToHost32(v);
@@ -88,7 +96,7 @@ bool ByteBufferReader::ReadUInt64(uint64_t* val) {
     return false;
 
   uint64_t v;
-  if (!ReadBytes(reinterpret_cast<uint8_t*>(&v), 8)) {
+  if (!ReadBytes(reinterpret_cast<char*>(&v), 8)) {
     return false;
   } else {
     *val = NetworkToHost64(v);
@@ -104,14 +112,14 @@ bool ByteBufferReader::ReadUVarint(uint64_t* val) {
   // continuation byte (msb=1) if there are more bytes to be read.
   uint64_t v = 0;
   for (int i = 0; i < 64; i += 7) {
-    uint8_t byte;
+    char byte;
     if (!ReadBytes(&byte, 1)) {
       return false;
     }
     // Read the first 7 bits of the byte, then offset by bits read so far.
     v |= (static_cast<uint64_t>(byte) & 0x7F) << i;
-    // Return if the msb is not a continuation byte.
-    if (byte < 0x80) {
+    // True if the msb is not a continuation byte.
+    if (static_cast<uint64_t>(byte) < 0x80) {
       *val = v;
       return true;
     }
@@ -126,38 +134,20 @@ bool ByteBufferReader::ReadString(std::string* val, size_t len) {
   if (len > Length()) {
     return false;
   } else {
-    val->append(reinterpret_cast<const char*>(bytes_ + start_), len);
+    val->append(bytes_ + start_, len);
     start_ += len;
     return true;
   }
 }
 
-bool ByteBufferReader::ReadStringView(absl::string_view* val, size_t len) {
-  if (!val || len > Length())
-    return false;
-  *val = absl::string_view(reinterpret_cast<const char*>(bytes_ + start_), len);
-  start_ += len;
-  return true;
-}
-
-bool ByteBufferReader::ReadBytes(rtc::ArrayView<uint8_t> val) {
-  if (val.size() == 0) {
-    return true;
-  }
-  return ReadBytes(val.data(), val.size());
-}
-
-// Private function supporting the other Read* functions.
-bool ByteBufferReader::ReadBytes(uint8_t* val, size_t len) {
+bool ByteBufferReader::ReadBytes(char* val, size_t len) {
   if (len > Length()) {
     return false;
-  }
-  if (len == 0) {
+  } else {
+    memcpy(val, bytes_ + start_, len);
+    start_ += len;
     return true;
   }
-  memcpy(val, bytes_ + start_, len);
-  start_ += len;
-  return true;
 }
 
 bool ByteBufferReader::Consume(size_t size) {

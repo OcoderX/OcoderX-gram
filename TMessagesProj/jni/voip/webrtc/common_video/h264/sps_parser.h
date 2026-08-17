@@ -13,16 +13,15 @@
 
 #include "absl/types/optional.h"
 #include "rtc_base/bitstream_reader.h"
-#include "rtc_base/system/rtc_export.h"
 
 namespace webrtc {
 
 // A class for parsing out sequence parameter set (SPS) data from an H264 NALU.
-class RTC_EXPORT SpsParser {
+class SpsParser {
  public:
   // The parsed state of the SPS. Only some select values are stored.
   // Add more as they are actually needed.
-  struct RTC_EXPORT SpsState {
+  struct SpsState {
     SpsState();
     SpsState(const SpsState&);
     ~SpsState();

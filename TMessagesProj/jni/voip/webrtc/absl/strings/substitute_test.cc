@@ -15,13 +15,10 @@
 #include "absl/strings/substitute.h"
 
 #include <cstdint>
-#include <cstring>
-#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 
 namespace {
 
@@ -256,19 +253,7 @@ TEST(SubstituteTest, Enums) {
                                         ScopedEnumUInt16::kEnum1));
 }
 
-enum class EnumWithStringify { Many = 0, Choices = 1 };
-
-template <typename Sink>
-void AbslStringify(Sink& sink, EnumWithStringify e) {
-  sink.Append(e == EnumWithStringify::Many ? "Many" : "Choices");
-}
-
-TEST(SubstituteTest, AbslStringifyWithEnum) {
-  const auto e = EnumWithStringify::Choices;
-  EXPECT_EQ(absl::Substitute("$0", e), "Choices");
-}
-
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 
 TEST(SubstituteDeathTest, SubstituteDeath) {
   EXPECT_DEBUG_DEATH(

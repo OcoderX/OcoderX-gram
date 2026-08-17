@@ -11,7 +11,6 @@
 
 #include <stdint.h>
 #include "Defines.h"
-#include <openssl/bn.h>
 
 class Datacenter;
 class ByteArray;
@@ -28,9 +27,6 @@ public:
     void beginHandshake(bool reconnect);
     void cleanupHandshake();
     void processHandshakeResponse(TLObject *message, int64_t messageId);
-    void processHandshakeResponse_resPQ(TLObject *message, int64_t messageId);
-    void processHandshakeResponse_serverDHParams(TLObject *message, int64_t messageId);
-    void processHandshakeResponse_serverDHParamsAnswer(TLObject *message, int64_t messageId);
     void onHandshakeConnectionConnected();
     void onHandshakeConnectionClosed();
     static void cleanupServerKeys();
@@ -38,7 +34,6 @@ public:
     ByteArray *getPendingAuthKey();
     int64_t getPendingAuthKeyId();
     TLObject *getCurrentHandshakeRequest();
-    static bool isGoodPrime(BIGNUM *p, uint32_t g);
 
 private:
 

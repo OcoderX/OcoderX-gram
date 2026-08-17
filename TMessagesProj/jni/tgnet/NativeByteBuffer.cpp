@@ -77,7 +77,6 @@ NativeByteBuffer::~NativeByteBuffer() {
         delete[] buffer;
         buffer = nullptr;
     }
-    _limit = _capacity = 0;
 }
 
 uint32_t NativeByteBuffer::position() {
@@ -442,7 +441,7 @@ void NativeByteBuffer::writeDouble(double d) {
 }
 
 int32_t NativeByteBuffer::readInt32(bool *error) {
-    if (_position + 4 > _limit || calculateSizeOnly) {
+    if (_position + 4 > _limit) {
         if (error != nullptr) {
             *error = true;
         }
@@ -502,7 +501,7 @@ int64_t NativeByteBuffer::readInt64(bool *error) {
 }
 
 uint8_t NativeByteBuffer::readByte(bool *error) {
-    if (_position + 1 > _limit || calculateSizeOnly) {
+    if (_position + 1 > _limit) {
         if (error != nullptr) {
             *error = true;
         }
@@ -527,7 +526,7 @@ bool NativeByteBuffer::readBool(bool *error) {
 }
 
 void NativeByteBuffer::readBytes(uint8_t *b, uint32_t length, bool *error) {
-    if (length > _limit - _position || calculateSizeOnly) {
+    if (length > _limit - _position) {
         if (error != nullptr) {
             *error = true;
         }
@@ -539,7 +538,7 @@ void NativeByteBuffer::readBytes(uint8_t *b, uint32_t length, bool *error) {
 }
 
 ByteArray *NativeByteBuffer::readBytes(uint32_t length, bool *error) {
-    if (length > _limit - _position || calculateSizeOnly) {
+    if (length > _limit - _position) {
         if (error != nullptr) {
             *error = true;
         }
@@ -554,7 +553,7 @@ ByteArray *NativeByteBuffer::readBytes(uint32_t length, bool *error) {
 
 std::string NativeByteBuffer::readString(bool *error) {
     uint32_t sl = 1;
-    if (_position + 1 > _limit || calculateSizeOnly) {
+    if (_position + 1 > _limit) {
         if (error != nullptr) {
             *error = true;
         }
@@ -592,7 +591,7 @@ std::string NativeByteBuffer::readString(bool *error) {
 
 ByteArray *NativeByteBuffer::readByteArray(bool *error) {
     uint32_t sl = 1;
-    if (_position + 1 > _limit || calculateSizeOnly) {
+    if (_position + 1 > _limit) {
         if (error != nullptr) {
             *error = true;
         }
@@ -631,7 +630,7 @@ ByteArray *NativeByteBuffer::readByteArray(bool *error) {
 
 NativeByteBuffer *NativeByteBuffer::readByteBuffer(bool copy, bool *error) {
     uint32_t sl = 1;
-    if (_position + 1 > _limit || calculateSizeOnly) {
+    if (_position + 1 > _limit) {
         if (error != nullptr) {
             *error = true;
         }

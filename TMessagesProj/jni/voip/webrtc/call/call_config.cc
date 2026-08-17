@@ -10,27 +10,29 @@
 
 #include "call/call_config.h"
 
-#include "api/environment/environment.h"
-#include "api/task_queue/task_queue_base.h"
+#include "rtc_base/checks.h"
 
 namespace webrtc {
 
-CallConfig::CallConfig(const Environment& env,
-                       TaskQueueBase* network_task_queue)
-    : env(env),
-      network_task_queue_(network_task_queue) {}
+CallConfig::CallConfig(RtcEventLog* event_log,
+                       TaskQueueBase* network_task_queue /* = nullptr*/)
+    : event_log(event_log), network_task_queue_(network_task_queue) {
+  RTC_DCHECK(event_log);
+}
 
 CallConfig::CallConfig(const CallConfig& config) = default;
 
 RtpTransportConfig CallConfig::ExtractTransportConfig() const {
-  RtpTransportConfig transport_config = {.env = env};
-  transport_config.bitrate_config = bitrate_config;
-  transport_config.network_controller_factory = network_controller_factory;
-  transport_config.network_state_predictor_factory =
+  RtpTransportConfig transportConfig;
+  transportConfig.bitrate_config = bitrate_config;
+  transportConfig.event_log = event_log;
+  transportConfig.network_controller_factory = network_controller_factory;
+  transportConfig.network_state_predictor_factory =
       network_state_predictor_factory;
-  transport_config.pacer_burst_interval = pacer_burst_interval;
+  transportConfig.task_queue_factory = task_queue_factory;
+  transportConfig.trials = trials;
 
-  return transport_config;
+  return transportConfig;
 }
 
 CallConfig::~CallConfig() = default;

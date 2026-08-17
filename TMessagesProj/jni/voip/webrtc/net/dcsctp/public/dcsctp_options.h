@@ -193,16 +193,8 @@ struct DcSctpOptions {
   // If RTO should be added to heartbeat_interval
   bool heartbeat_interval_include_rtt = true;
 
-  // Disables SCTP packet crc32 verification. For fuzzers only!
+  // Disables SCTP packet crc32 verification. Useful when running with fuzzers.
   bool disable_checksum_verification = false;
-
-  // Controls the "zero checksum option" feature, as defined in
-  // https://www.ietf.org/archive/id/draft-ietf-tsvwg-sctp-zero-checksum-06.html.
-  // To have this feature enabled, both peers must be configured to use the
-  // same (defined, not "none") alternate error detection method.
-  ZeroChecksumAlternateErrorDetectionMethod
-      zero_checksum_alternate_error_detection_method =
-          ZeroChecksumAlternateErrorDetectionMethod::None();
 };
 }  // namespace dcsctp
 

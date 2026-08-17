@@ -16,13 +16,12 @@ div.title {
   margin-bottom: 2em;
 }
 
-ol.toc {
+ol {
   list-style: none;
-  padding-left: 0;
   margin-bottom: 4em;
 }
 
-ol.toc li a {
+li a {
   color: black;
 }
 
@@ -50,24 +49,10 @@ div.decl p:first-child .first-word {
   font-size: 1.5em;
 }
 
-pre.code {
+.section pre {
   background-color: #b2c9db;
   padding: 5px;
   border-radius: 5px;
-}
-
-p.warning {
-  background-color: #fef5d3;
-  padding: 5px;
-  border-radius: 5px;
-}
-
-p.warning .first-word {
-  font-weight: bold;
-}
-
-.comment pre {
-  margin-left: 2em;
 }
 
 td {

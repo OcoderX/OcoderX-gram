@@ -97,13 +97,12 @@ struct VideoCodecH264 {
   uint8_t numberOfTemporalLayers;
 };
 
-// H264 specific.
+#ifndef DISABLE_H265
 struct VideoCodecH265 {
   bool operator==(const VideoCodecH265& other) const;
   bool operator!=(const VideoCodecH265& other) const {
     return !(*this == other);
   }
-  
   bool frameDroppingOn;
   int keyFrameInterval;
   const uint8_t* vpsData;
@@ -113,16 +112,7 @@ struct VideoCodecH265 {
   const uint8_t* ppsData;
   size_t ppsLen;
 };
-
-struct VideoCodecAV1 {
-  bool operator==(const VideoCodecAV1& other) const {
-    return automatic_resize_on == other.automatic_resize_on;
-  }
-  bool operator!=(const VideoCodecAV1& other) const {
-    return !(*this == other);
-  }
-  bool automatic_resize_on;
-};
+#endif
 
 // Translates from name of codec to codec type and vice versa.
 RTC_EXPORT const char* CodecTypeToPayloadString(VideoCodecType type);
@@ -132,8 +122,9 @@ union VideoCodecUnion {
   VideoCodecVP8 VP8;
   VideoCodecVP9 VP9;
   VideoCodecH264 H264;
+#ifndef DISABLE_H265
   VideoCodecH265 H265;
-  VideoCodecAV1 AV1;
+#endif
 };
 
 enum class VideoCodecMode { kRealtimeVideo, kScreensharing };
@@ -159,9 +150,6 @@ class RTC_EXPORT VideoCodec {
   bool GetFrameDropEnabled() const;
   void SetFrameDropEnabled(bool enabled);
 
-  bool IsSinglecast() const { return numberOfSimulcastStreams <= 1; }
-  bool IsSimulcast() const { return !IsSinglecast(); }
-
   // Public variables. TODO(hta): Make them private with accessors.
   VideoCodecType codecType;
 
@@ -180,15 +168,6 @@ class RTC_EXPORT VideoCodec {
   bool active;
 
   unsigned int qpMax;
-  // The actual number of simulcast streams. This is <= 1 in singlecast (it can
-  // be 0 in old code paths), but it is also 1 in the {active,inactive,inactive}
-  // "single RTP simulcast" use case and the legacy kSVC use case. In all other
-  // cases this is the same as the number of encodings (which may include
-  // inactive encodings). In other words:
-  // - `numberOfSimulcastStreams <= 1` in singlecast and singlecast-like setups
-  //   including legacy kSVC (encodings interpreted as spatial layers) or
-  //   standard kSVC (1 active encoding).
-  // - `numberOfSimulcastStreams > 1` in simulcast of 2+ active encodings.
   unsigned char numberOfSimulcastStreams;
   SimulcastStream simulcastStream[kMaxSimulcastStreams];
   SpatialLayer spatialLayers[kMaxSpatialLayers];
@@ -214,7 +193,6 @@ class RTC_EXPORT VideoCodec {
 
   bool operator==(const VideoCodec& other) const = delete;
   bool operator!=(const VideoCodec& other) const = delete;
-  std::string ToString() const;
 
   // Accessors for codec specific information.
   // There is a const version of each that returns a reference,
@@ -228,8 +206,6 @@ class RTC_EXPORT VideoCodec {
   const VideoCodecH264& H264() const;
   VideoCodecH265* H265();
   const VideoCodecH265& H265() const;
-  VideoCodecAV1* AV1();
-  const VideoCodecAV1& AV1() const;
 
  private:
   // TODO(hta): Consider replacing the union with a pointer type.

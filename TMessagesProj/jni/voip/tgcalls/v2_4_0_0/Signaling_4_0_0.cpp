@@ -10,7 +10,9 @@ namespace tgcalls {
 namespace signaling_4_0_0 {
 
 static std::string uint32ToString(uint32_t value) {
-    return std::to_string(value);
+    std::ostringstream stringStream;
+    stringStream << value;
+    return stringStream.str();
 }
 
 static uint32_t stringToUInt32(std::string const &string) {

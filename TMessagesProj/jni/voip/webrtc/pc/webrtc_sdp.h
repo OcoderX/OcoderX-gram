@@ -49,6 +49,7 @@ struct SdpParseError;
 // Serialize SessionDescription including candidates if
 // JsepSessionDescription has candidates.
 // jdesc - The JsepSessionDescription object to be serialized.
+// unified_plan_sdp - If set to true, include "a=msid" lines where appropriate.
 // return - SDP string serialized from the arguments.
 std::string SdpSerialize(const JsepSessionDescription& jdesc);
 
@@ -109,7 +110,7 @@ RTC_EXPORT bool ParseCandidate(absl::string_view message,
 // parameters are not considered to be part of the FMTP line, see the function
 // IsFmtpParam(). Returns true if the set of FMTP parameters is nonempty, false
 // otherwise.
-bool WriteFmtpParameters(const webrtc::CodecParameterMap& parameters,
+bool WriteFmtpParameters(const cricket::CodecParameterMap& parameters,
                          rtc::StringBuilder* os);
 
 }  // namespace webrtc

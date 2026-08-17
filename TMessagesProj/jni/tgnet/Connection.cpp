@@ -57,7 +57,6 @@ void Connection::suspendConnection(bool idle) {
     connectionState = idle ? TcpConnectionStageIdle : TcpConnectionStageSuspended;
     dropConnection();
     ConnectionsManager::getInstance(currentDatacenter->instanceNum).onConnectionClosed(this, 0);
-    generation++;
     firstPacketSent = false;
     if (restOfTheData != nullptr) {
         restOfTheData->reuse();
@@ -115,7 +114,7 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
                 parseLaterBuffer = buffer->hasRemaining() ? buffer : nullptr;
                 buffer = restOfTheData;
             } else {
-//                if (LOGS_ENABLED) DEBUG_D("connection(%p, account%u, dc%u, type %d) received packet size less(%u) then message size(%u)", this, currentDatacenter->instanceNum, currentDatacenter->getDatacenterId(), connectionType, restOfTheData->position(), lastPacketLength);
+                if (LOGS_ENABLED) DEBUG_D("connection(%p, account%u, dc%u, type %d) received packet size less(%u) then message size(%u)", this, currentDatacenter->instanceNum, currentDatacenter->getDatacenterId(), connectionType, restOfTheData->position(), lastPacketLength);
                 return;
             }
         }
@@ -123,7 +122,6 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
 
     buffer->rewind();
 
-    NativeByteBuffer *reuseLater = nullptr;
     while (buffer->hasRemaining()) {
         if (!hasSomeDataSinceLastConnect) {
             currentDatacenter->storeCurrentAddressAndPortNum();
@@ -156,11 +154,14 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
             if ((fByte & (1 << 7)) != 0) {
                 buffer->position(mark);
                 if (buffer->remaining() < 4) {
-                    reuseLater = restOfTheData;
+                    NativeByteBuffer *reuseLater = restOfTheData;
                     restOfTheData = BuffersStorage::getInstance().getFreeBuffer(16384);
                     restOfTheData->writeBytes(buffer);
                     restOfTheData->limit(restOfTheData->position());
                     lastPacketLength = 0;
+                    if (reuseLater != nullptr) {
+                        reuseLater->reuse();
+                    }
                     break;
                 }
                 int32_t ackId = buffer->readBigInt32(nullptr) & (~(1 << 31));
@@ -174,11 +175,14 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
                 buffer->position(mark);
                 if (buffer->remaining() < 4) {
                     if (restOfTheData == nullptr || (restOfTheData != nullptr && restOfTheData->position() != 0)) {
-                        reuseLater = restOfTheData;
+                        NativeByteBuffer *reuseLater = restOfTheData;
                         restOfTheData = BuffersStorage::getInstance().getFreeBuffer(16384);
                         restOfTheData->writeBytes(buffer);
                         restOfTheData->limit(restOfTheData->position());
                         lastPacketLength = 0;
+                        if (reuseLater != nullptr) {
+                            reuseLater->reuse();
+                        }
                     } else {
                         restOfTheData->position(restOfTheData->limit());
                     }
@@ -191,11 +195,14 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
         } else {
             if (buffer->remaining() < 4) {
                 if (restOfTheData == nullptr || (restOfTheData != nullptr && restOfTheData->position() != 0)) {
-                    reuseLater = restOfTheData;
+                    NativeByteBuffer *reuseLater = restOfTheData;
                     restOfTheData = BuffersStorage::getInstance().getFreeBuffer(16384);
                     restOfTheData->writeBytes(buffer);
                     restOfTheData->limit(restOfTheData->position());
                     lastPacketLength = 0;
+                    if (reuseLater != nullptr) {
+                        reuseLater->reuse();
+                    }
                 } else {
                     restOfTheData->position(restOfTheData->limit());
                 }
@@ -216,7 +223,7 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
         if (currentProtocolType != ProtocolTypeDD && currentProtocolType != ProtocolTypeTLS && currentPacketLength % 4 != 0 || currentPacketLength > 2 * 1024 * 1024) {
             if (LOGS_ENABLED) DEBUG_D("connection(%p, account%u, dc%u, type %d) received invalid packet length", this, currentDatacenter->instanceNum, currentDatacenter->getDatacenterId(), connectionType);
             reconnect();
-            break;
+            return;
         }
 
         if (currentPacketLength < buffer->remaining()) {
@@ -225,6 +232,8 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
             if (LOGS_ENABLED) DEBUG_D("connection(%p, account%u, dc%u, type %d) received message len %u equal to packet size", this, currentDatacenter->instanceNum, currentDatacenter->getDatacenterId(), connectionType, currentPacketLength);
         } else {
             if (LOGS_ENABLED) DEBUG_D("connection(%p, account%u, dc%u, type %d) received packet size less(%u) then message size(%u)", this, currentDatacenter->instanceNum, currentDatacenter->getDatacenterId(), connectionType, buffer->remaining(), currentPacketLength);
+
+            NativeByteBuffer *reuseLater = nullptr;
 
             if (restOfTheData != nullptr && restOfTheData->capacity() < len) {
                 reuseLater = restOfTheData;
@@ -239,22 +248,21 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
                 restOfTheData->limit(len);
             }
             lastPacketLength = len;
-            break;
+            if (reuseLater != nullptr) {
+                reuseLater->reuse();
+            }
+            return;
         }
 
         uint32_t old = buffer->limit();
         buffer->limit(buffer->position() + currentPacketLength);
-        uint32_t current_generation = generation;
         ConnectionsManager::getInstance(currentDatacenter->instanceNum).onConnectionDataReceived(this, buffer, currentPacketLength);
-        if (current_generation != generation) {
-          break;
-        }
         buffer->position(buffer->limit());
         buffer->limit(old);
 
         if (restOfTheData != nullptr) {
             if ((lastPacketLength != 0 && restOfTheData->position() == lastPacketLength) || (lastPacketLength == 0 && !restOfTheData->hasRemaining())) {
-                reuseLater = restOfTheData;
+                restOfTheData->reuse();
                 restOfTheData = nullptr;
             } else {
                 restOfTheData->compact();
@@ -267,9 +275,6 @@ void Connection::onReceivedData(NativeByteBuffer *buffer) {
             buffer = parseLaterBuffer;
             parseLaterBuffer = nullptr;
         }
-    }
-    if (reuseLater != nullptr) {
-        reuseLater->reuse();
     }
 }
 
@@ -355,7 +360,6 @@ void Connection::connect() {
     reconnectTimer->stop();
 
     if (LOGS_ENABLED) DEBUG_D("connection(%p, account%u, dc%u, type %d) connecting (%s:%hu)", this, currentDatacenter->instanceNum, currentDatacenter->getDatacenterId(), connectionType, hostAddress.c_str(), hostPort);
-    generation++;
     firstPacketSent = false;
     if (restOfTheData != nullptr) {
         restOfTheData->reuse();
@@ -663,7 +667,6 @@ void Connection::onDisconnectedInternal(int32_t reason, int32_t error) {
             currentTimeout += 2;
         }
     }
-    generation++;
     firstPacketSent = false;
     if (restOfTheData != nullptr) {
         restOfTheData->reuse();

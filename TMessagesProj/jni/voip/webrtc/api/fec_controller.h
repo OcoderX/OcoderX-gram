@@ -14,7 +14,6 @@
 #include <memory>
 #include <vector>
 
-#include "api/environment/environment.h"
 #include "api/video/video_frame_type.h"
 #include "modules/include/module_fec_types.h"
 
@@ -32,9 +31,6 @@ class VCMProtectionCallback {
                                 uint32_t* sent_nack_rate_bps,
                                 uint32_t* sent_fec_rate_bps) = 0;
 
-  // 'retransmission_mode' is either a value of enum RetransmissionMode, or
-  // computed with bitwise operators on values of enum RetransmissionMode.
-  virtual void SetRetransmissionMode(int retransmission_mode) = 0;
  protected:
   virtual ~VCMProtectionCallback() {}
 };
@@ -88,10 +84,8 @@ class FecController {
 
 class FecControllerFactoryInterface {
  public:
+  virtual std::unique_ptr<FecController> CreateFecController() = 0;
   virtual ~FecControllerFactoryInterface() = default;
-
-  virtual std::unique_ptr<FecController> CreateFecController(
-      const Environment& env) = 0;
 };
 
 }  // namespace webrtc

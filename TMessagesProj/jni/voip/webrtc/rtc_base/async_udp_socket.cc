@@ -10,22 +10,19 @@
 
 #include "rtc_base/async_udp_socket.h"
 
-#include "absl/types/optional.h"
-#include "api/units/time_delta.h"
+#include <stdint.h>
+
+#include <string>
+
 #include "rtc_base/checks.h"
 #include "rtc_base/logging.h"
-#include "rtc_base/network/received_packet.h"
 #include "rtc_base/network/sent_packet.h"
+#include "rtc_base/third_party/sigslot/sigslot.h"
 #include "rtc_base/time_utils.h"
-#include "system_wrappers/include/field_trial.h"
 
 namespace rtc {
 
-// Returns true if the experiement "WebRTC-SCM-Timestamp" is explicitly
-// disabled.
-static bool IsScmTimeStampExperimentDisabled() {
-  return webrtc::field_trial::IsDisabled("WebRTC-SCM-Timestamp");
-}
+static const int BUF_SIZE = 64 * 1024;
 
 AsyncUDPSocket* AsyncUDPSocket::Create(Socket* socket,
                                        const SocketAddress& bind_address) {
@@ -46,10 +43,16 @@ AsyncUDPSocket* AsyncUDPSocket::Create(SocketFactory* factory,
 }
 
 AsyncUDPSocket::AsyncUDPSocket(Socket* socket) : socket_(socket) {
-  sequence_checker_.Detach();
+  size_ = BUF_SIZE;
+  buf_ = new char[size_];
+
   // The socket should start out readable but not writable.
   socket_->SignalReadEvent.connect(this, &AsyncUDPSocket::OnReadEvent);
   socket_->SignalWriteEvent.connect(this, &AsyncUDPSocket::OnWriteEvent);
+}
+
+AsyncUDPSocket::~AsyncUDPSocket() {
+  delete[] buf_;
 }
 
 SocketAddress AsyncUDPSocket::GetLocalAddress() const {
@@ -109,10 +112,10 @@ void AsyncUDPSocket::SetError(int error) {
 
 void AsyncUDPSocket::OnReadEvent(Socket* socket) {
   RTC_DCHECK(socket_.get() == socket);
-  RTC_DCHECK_RUN_ON(&sequence_checker_);
 
-  Socket::ReceiveBuffer receive_buffer(buffer_);
-  int len = socket_->RecvFrom(receive_buffer);
+  SocketAddress remote_addr;
+  int64_t timestamp;
+  int len = socket_->RecvFrom(buf_, size_, &remote_addr, &timestamp);
   if (len < 0) {
     // An error here typically means we got an ICMP error in response to our
     // send datagram, indicating the remote address was unreachable.
@@ -123,31 +126,11 @@ void AsyncUDPSocket::OnReadEvent(Socket* socket) {
                      << "] receive failed with error " << socket_->GetError();
     return;
   }
-  if (len == 0) {
-    // Spurios wakeup.
-    return;
-  }
 
-  if (!receive_buffer.arrival_time) {
-    // Timestamp from socket is not available.
-    receive_buffer.arrival_time = webrtc::Timestamp::Micros(rtc::TimeMicros());
-  } else {
-    if (!socket_time_offset_) {
-      // Estimate timestamp offset from first packet arrival time unless
-      // disabled
-      bool estimate_time_offset = !IsScmTimeStampExperimentDisabled();
-      if (estimate_time_offset) {
-        socket_time_offset_ = webrtc::Timestamp::Micros(rtc::TimeMicros()) -
-                              *receive_buffer.arrival_time;
-      } else {
-        socket_time_offset_ = webrtc::TimeDelta::Micros(0);
-      }
-    }
-    *receive_buffer.arrival_time += *socket_time_offset_;
-  }
-  NotifyPacketReceived(ReceivedPacket(receive_buffer.payload,
-                                      receive_buffer.source_address,
-                                      receive_buffer.arrival_time));
+  // TODO: Make sure that we got all of the packet.
+  // If we did not, then we should resize our buffer to be large enough.
+  SignalReadPacket(this, buf_, static_cast<size_t>(len), remote_addr,
+                   (timestamp > -1 ? timestamp : TimeMicros()));
 }
 
 void AsyncUDPSocket::OnWriteEvent(Socket* socket) {

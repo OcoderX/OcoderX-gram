@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "api/array_view.h"
-#include "api/field_trials_view.h"
 #include "logging/rtc_event_log/encoder/rtc_event_log_encoder.h"
 
 namespace webrtc {
@@ -40,7 +39,6 @@ class RtcEventDtlsTransportState;
 class RtcEventDtlsWritableState;
 class RtcEventLoggingStarted;
 class RtcEventLoggingStopped;
-class RtcEventNetEqSetMinimumDelay;
 class RtcEventProbeClusterCreated;
 class RtcEventProbeResultFailure;
 class RtcEventProbeResultSuccess;
@@ -60,7 +58,6 @@ class RtcEventGenericPacketSent;
 
 class RtcEventLogEncoderNewFormat final : public RtcEventLogEncoder {
  public:
-  explicit RtcEventLogEncoderNewFormat(const FieldTrialsView& field_trials);
   ~RtcEventLogEncoderNewFormat() override = default;
 
   std::string EncodeBatch(
@@ -120,9 +117,6 @@ class RtcEventLogEncoderNewFormat final : public RtcEventLogEncoder {
                             rtclog2::EventStream* event_stream);
   void EncodeLoggingStopped(rtc::ArrayView<const RtcEventLoggingStopped*> batch,
                             rtclog2::EventStream* event_stream);
-  void EncodeNetEqSetMinimumDelay(
-      rtc::ArrayView<const RtcEventNetEqSetMinimumDelay*> batch,
-      rtclog2::EventStream* event_stream);
   void EncodeProbeClusterCreated(
       rtc::ArrayView<const RtcEventProbeClusterCreated*> batch,
       rtclog2::EventStream* event_stream);
@@ -156,11 +150,6 @@ class RtcEventLogEncoderNewFormat final : public RtcEventLogEncoder {
   void EncodeVideoSendStreamConfig(
       rtc::ArrayView<const RtcEventVideoSendStreamConfig*> batch,
       rtclog2::EventStream* event_stream);
-  template <typename Batch, typename ProtoType>
-  void EncodeRtpPacket(const Batch& batch, ProtoType* proto_batch);
-
-  const bool encode_neteq_set_minimum_delay_kill_switch_;
-  const bool encode_dependency_descriptor_;
 };
 
 }  // namespace webrtc

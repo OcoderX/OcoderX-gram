@@ -102,11 +102,7 @@ void TurnServer::AddInternalSocket(rtc::AsyncPacketSocket* socket,
   RTC_DCHECK_RUN_ON(thread_);
   RTC_DCHECK(server_sockets_.end() == server_sockets_.find(socket));
   server_sockets_[socket] = proto;
-  socket->RegisterReceivedPacketCallback(
-      [&](rtc::AsyncPacketSocket* socket, const rtc::ReceivedPacket& packet) {
-        RTC_DCHECK_RUN_ON(thread_);
-        OnInternalPacket(socket, packet);
-      });
+  socket->SignalReadPacket.connect(this, &TurnServer::OnInternalPacket);
 }
 
 void TurnServer::AddInternalServerSocket(
@@ -151,10 +147,10 @@ void TurnServer::AcceptConnection(rtc::Socket* server_socket) {
     cricket::AsyncStunTCPSocket* tcp_socket =
         new cricket::AsyncStunTCPSocket(accepted_socket);
 
-    tcp_socket->SubscribeCloseEvent(this,
-                                    [this](rtc::AsyncPacketSocket* s, int err) {
-                                      OnInternalSocketClose(s, err);
-                                    });
+    tcp_socket->SubscribeClose(this,
+                               [this](rtc::AsyncPacketSocket* s, int err) {
+                                 OnInternalSocketClose(s, err);
+                               });
     // Finally add the socket so it can start communicating with the client.
     AddInternalSocket(tcp_socket, info.proto);
   }
@@ -167,35 +163,39 @@ void TurnServer::OnInternalSocketClose(rtc::AsyncPacketSocket* socket,
 }
 
 void TurnServer::OnInternalPacket(rtc::AsyncPacketSocket* socket,
-                                  const rtc::ReceivedPacket& packet) {
+                                  const char* data,
+                                  size_t size,
+                                  const rtc::SocketAddress& addr,
+                                  const int64_t& /* packet_time_us */) {
   RTC_DCHECK_RUN_ON(thread_);
   // Fail if the packet is too small to even contain a channel header.
-  if (packet.payload().size() < TURN_CHANNEL_HEADER_SIZE) {
+  if (size < TURN_CHANNEL_HEADER_SIZE) {
     return;
   }
   InternalSocketMap::iterator iter = server_sockets_.find(socket);
   RTC_DCHECK(iter != server_sockets_.end());
-  TurnServerConnection conn(packet.source_address(), iter->second, socket);
-  uint16_t msg_type = rtc::GetBE16(packet.payload().data());
+  TurnServerConnection conn(addr, iter->second, socket);
+  uint16_t msg_type = rtc::GetBE16(data);
   if (!IsTurnChannelData(msg_type)) {
     // This is a STUN message.
-    HandleStunMessage(&conn, packet.payload());
+    HandleStunMessage(&conn, data, size);
   } else {
     // This is a channel message; let the allocation handle it.
     TurnServerAllocation* allocation = FindAllocation(&conn);
     if (allocation) {
-      allocation->HandleChannelData(packet.payload());
+      allocation->HandleChannelData(data, size);
     }
     if (stun_message_observer_ != nullptr) {
-      stun_message_observer_->ReceivedChannelData(packet.payload());
+      stun_message_observer_->ReceivedChannelData(data, size);
     }
   }
 }
 
 void TurnServer::HandleStunMessage(TurnServerConnection* conn,
-                                   rtc::ArrayView<const uint8_t> payload) {
+                                   const char* data,
+                                   size_t size) {
   TurnMessage msg;
-  rtc::ByteBufferReader buf(payload);
+  rtc::ByteBufferReader buf(data, size);
   if (!msg.Read(&buf) || (buf.Length() > 0)) {
     RTC_LOG(LS_WARNING) << "Received invalid STUN message";
     return;
@@ -231,7 +231,7 @@ void TurnServer::HandleStunMessage(TurnServerConnection* conn,
 
   // Ensure the message is authorized; only needed for requests.
   if (IsStunRequestType(msg.type())) {
-    if (!CheckAuthorization(conn, &msg, key)) {
+    if (!CheckAuthorization(conn, &msg, data, size, key)) {
       return;
     }
   }
@@ -272,6 +272,8 @@ bool TurnServer::GetKey(const StunMessage* msg, std::string* key) {
 
 bool TurnServer::CheckAuthorization(TurnServerConnection* conn,
                                     StunMessage* msg,
+                                    const char* data,
+                                    size_t size,
                                     absl::string_view key) {
   // RFC 5389, 10.2.2.
   RTC_DCHECK(IsStunRequestType(msg->type()));
@@ -513,8 +515,8 @@ void TurnServer::DestroyInternalSocket(rtc::AsyncPacketSocket* socket) {
   InternalSocketMap::iterator iter = server_sockets_.find(socket);
   if (iter != server_sockets_.end()) {
     rtc::AsyncPacketSocket* socket = iter->first;
-    socket->UnsubscribeCloseEvent(this);
-    socket->DeregisterReceivedPacketCallback();
+    socket->UnsubscribeClose(this);
+    socket->SignalReadPacket.disconnect(this);
     server_sockets_.erase(iter);
     std::unique_ptr<rtc::AsyncPacketSocket> socket_to_delete =
         absl::WrapUnique(socket);
@@ -559,11 +561,8 @@ TurnServerAllocation::TurnServerAllocation(TurnServer* server,
       conn_(conn),
       external_socket_(socket),
       key_(key) {
-  external_socket_->RegisterReceivedPacketCallback(
-      [&](rtc::AsyncPacketSocket* socket, const rtc::ReceivedPacket& packet) {
-        RTC_DCHECK_RUN_ON(thread_);
-        OnExternalPacket(socket, packet);
-      });
+  external_socket_->SignalReadPacket.connect(
+      this, &TurnServerAllocation::OnExternalPacket);
 }
 
 TurnServerAllocation::~TurnServerAllocation() {
@@ -670,8 +669,8 @@ void TurnServerAllocation::HandleSendIndication(const TurnMessage* msg) {
 
   // If a permission exists, send the data on to the peer.
   if (HasPermission(peer_attr->GetAddress().ipaddr())) {
-    SendExternal(reinterpret_cast<char*>(data_attr->array_view().data()),
-                 data_attr->length(), peer_attr->GetAddress());
+    SendExternal(data_attr->bytes(), data_attr->length(),
+                 peer_attr->GetAddress());
   } else {
     RTC_LOG(LS_WARNING) << ToString()
                         << ": Received send indication without permission"
@@ -759,15 +758,14 @@ void TurnServerAllocation::HandleChannelBindRequest(const TurnMessage* msg) {
   SendResponse(&response);
 }
 
-void TurnServerAllocation::HandleChannelData(
-    rtc::ArrayView<const uint8_t> payload) {
+void TurnServerAllocation::HandleChannelData(const char* data, size_t size) {
   // Extract the channel number from the data.
-  uint16_t channel_id = rtc::GetBE16(payload.data());
+  uint16_t channel_id = rtc::GetBE16(data);
   auto channel = FindChannel(channel_id);
   if (channel != channels_.end()) {
     // Send the data to the peer address.
-    SendExternal(payload.data() + TURN_CHANNEL_HEADER_SIZE,
-                 payload.size() - TURN_CHANNEL_HEADER_SIZE, channel->peer);
+    SendExternal(data + TURN_CHANNEL_HEADER_SIZE,
+                 size - TURN_CHANNEL_HEADER_SIZE, channel->peer);
   } else {
     RTC_LOG(LS_WARNING) << ToString()
                         << ": Received channel data for invalid channel, id="
@@ -775,30 +773,34 @@ void TurnServerAllocation::HandleChannelData(
   }
 }
 
-void TurnServerAllocation::OnExternalPacket(rtc::AsyncPacketSocket* socket,
-                                            const rtc::ReceivedPacket& packet) {
+void TurnServerAllocation::OnExternalPacket(
+    rtc::AsyncPacketSocket* socket,
+    const char* data,
+    size_t size,
+    const rtc::SocketAddress& addr,
+    const int64_t& /* packet_time_us */) {
   RTC_DCHECK(external_socket_.get() == socket);
-  auto channel = FindChannel(packet.source_address());
+  auto channel = FindChannel(addr);
   if (channel != channels_.end()) {
     // There is a channel bound to this address. Send as a channel message.
     rtc::ByteBufferWriter buf;
     buf.WriteUInt16(channel->id);
-    buf.WriteUInt16(static_cast<uint16_t>(packet.payload().size()));
-    buf.WriteBytes(packet.payload().data(), packet.payload().size());
+    buf.WriteUInt16(static_cast<uint16_t>(size));
+    buf.WriteBytes(data, size);
     server_->Send(&conn_, buf);
   } else if (!server_->enable_permission_checks_ ||
-             HasPermission(packet.source_address().ipaddr())) {
+             HasPermission(addr.ipaddr())) {
     // No channel, but a permission exists. Send as a data indication.
     TurnMessage msg(TURN_DATA_INDICATION);
     msg.AddAttribute(std::make_unique<StunXorAddressAttribute>(
-        STUN_ATTR_XOR_PEER_ADDRESS, packet.source_address()));
-    msg.AddAttribute(std::make_unique<StunByteStringAttribute>(
-        STUN_ATTR_DATA, packet.payload().data(), packet.payload().size()));
+        STUN_ATTR_XOR_PEER_ADDRESS, addr));
+    msg.AddAttribute(
+        std::make_unique<StunByteStringAttribute>(STUN_ATTR_DATA, data, size));
     server_->SendStun(&conn_, &msg);
   } else {
     RTC_LOG(LS_WARNING)
         << ToString() << ": Received external packet without permission, peer="
-        << packet.source_address().ToSensitiveString();
+        << addr.ToSensitiveString();
   }
 }
 

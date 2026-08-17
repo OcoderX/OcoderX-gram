@@ -15,8 +15,6 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <thread>
 
 #include "api/sequence_checker.h"
 #include "modules/utility/include/helpers_android.h"
@@ -37,6 +35,7 @@ class JvmThreadConnector {
 
  private:
   SequenceChecker thread_checker_;
+  bool attached_;
 };
 
 // This class is created by the NativeRegistration class and is used to wrap
@@ -175,9 +174,6 @@ class JVM {
   // This method must be called on the construction thread.
   JavaClass GetClass(const char* name);
 
-  bool attachThread(std::thread::id id);
-  bool detachThread(std::thread::id id);
-
   // TODO(henrika): can we make these private?
   JavaVM* jvm() const { return jvm_; }
 
@@ -190,7 +186,6 @@ class JVM {
 
   SequenceChecker thread_checker_;
   JavaVM* const jvm_;
-  std::unordered_map<std::thread::id, int> threadAttachCounts;
 };
 
 }  // namespace webrtc

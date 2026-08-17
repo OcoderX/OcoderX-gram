@@ -1,18 +1,16 @@
-// Copyright 2016 The BoringSSL Authors
+// Copyright (c) 2016, Google Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-//go:build ignore
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 package main
 
@@ -137,7 +135,7 @@ func checkKeys(t test, keys ...string) bool {
 		}
 	}
 
-	for k := range t.Values {
+	for k, _ := range t.Values {
 		var found bool
 		for _, k2 := range keys {
 			if k == k2 {
@@ -230,8 +228,8 @@ func main() {
 				checkResult(test, "A ^ E", "Exp", r)
 			}
 		case "ModSqrt":
-			bigOne := big.NewInt(1)
-			bigTwo := big.NewInt(2)
+			bigOne := new(big.Int).SetInt64(1)
+			bigTwo := new(big.Int).SetInt64(2)
 
 			if checkKeys(test, "A", "P", "ModSqrt") {
 				test.Values["A"].Mod(test.Values["A"], test.Values["P"])
@@ -251,21 +249,8 @@ func main() {
 			}
 		case "ModInv":
 			if checkKeys(test, "A", "M", "ModInv") {
-				a := test.Values["A"]
-				m := test.Values["M"]
-				var r *big.Int
-				if a.Sign() == 0 && m.IsInt64() && m.Int64() == 1 {
-					// OpenSSL says 0^(-1) mod (1) is 0, while Go says the
-					// inverse does not exist.
-					r = big.NewInt(0)
-				} else {
-					r = new(big.Int).ModInverse(a, m)
-				}
-				if r == nil {
-					fmt.Fprintf(os.Stderr, "Line %d: A has no inverse mod M.\n", test.LineNumber)
-				} else {
-					checkResult(test, "A ^ -1 (mod M)", "ModInv", r)
-				}
+				r := new(big.Int).ModInverse(test.Values["A"], test.Values["M"])
+				checkResult(test, "A ^ -1 (mod M)", "ModInv", r)
 			}
 		case "ModSquare":
 			if checkKeys(test, "A", "M", "ModSquare") {

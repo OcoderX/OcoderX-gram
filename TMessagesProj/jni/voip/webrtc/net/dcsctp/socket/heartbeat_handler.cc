@@ -21,7 +21,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "api/array_view.h"
-#include "api/units/time_delta.h"
 #include "net/dcsctp/packet/bounded_byte_reader.h"
 #include "net/dcsctp/packet/bounded_byte_writer.h"
 #include "net/dcsctp/packet/chunk/heartbeat_ack_chunk.h"
@@ -36,8 +35,6 @@
 #include "rtc_base/logging.h"
 
 namespace dcsctp {
-using ::webrtc::TimeDelta;
-using ::webrtc::Timestamp;
 
 // This is stored (in serialized form) as HeartbeatInfoParameter sent in
 // HeartbeatRequestChunk and received back in HeartbeatAckChunk. It should be
@@ -52,11 +49,11 @@ class HeartbeatInfo {
   static constexpr size_t kBufferSize = sizeof(uint64_t);
   static_assert(kBufferSize == 8, "Unexpected buffer size");
 
-  explicit HeartbeatInfo(Timestamp created_at) : created_at_(created_at) {}
+  explicit HeartbeatInfo(TimeMs created_at) : created_at_(created_at) {}
 
   std::vector<uint8_t> Serialize() {
-    uint32_t high_bits = static_cast<uint32_t>(created_at_.ms() >> 32);
-    uint32_t low_bits = static_cast<uint32_t>(created_at_.ms());
+    uint32_t high_bits = static_cast<uint32_t>(*created_at_ >> 32);
+    uint32_t low_bits = static_cast<uint32_t>(*created_at_);
 
     std::vector<uint8_t> data(kBufferSize);
     BoundedByteWriter<kBufferSize> writer(data);
@@ -78,34 +75,33 @@ class HeartbeatInfo {
     uint32_t low_bits = reader.Load32<4>();
 
     uint64_t created_at = static_cast<uint64_t>(high_bits) << 32 | low_bits;
-    return HeartbeatInfo(Timestamp::Millis(created_at));
+    return HeartbeatInfo(TimeMs(created_at));
   }
 
-  Timestamp created_at() const { return created_at_; }
+  TimeMs created_at() const { return created_at_; }
 
  private:
-  const Timestamp created_at_;
+  const TimeMs created_at_;
 };
 
 HeartbeatHandler::HeartbeatHandler(absl::string_view log_prefix,
                                    const DcSctpOptions& options,
                                    Context* context,
                                    TimerManager* timer_manager)
-    : log_prefix_(log_prefix),
+    : log_prefix_(std::string(log_prefix) + "heartbeat: "),
       ctx_(context),
       timer_manager_(timer_manager),
-      interval_duration_(options.heartbeat_interval.ToTimeDelta()),
+      interval_duration_(options.heartbeat_interval),
       interval_duration_should_include_rtt_(
           options.heartbeat_interval_include_rtt),
       interval_timer_(timer_manager_->CreateTimer(
           "heartbeat-interval",
           absl::bind_front(&HeartbeatHandler::OnIntervalTimerExpiry, this),
-          TimerOptions(interval_duration_,
-                       TimerBackoffAlgorithm::kFixed))),
+          TimerOptions(interval_duration_, TimerBackoffAlgorithm::kFixed))),
       timeout_timer_(timer_manager_->CreateTimer(
           "heartbeat-timeout",
           absl::bind_front(&HeartbeatHandler::OnTimeoutTimerExpiry, this),
-          TimerOptions(options.rto_initial.ToTimeDelta(),
+          TimerOptions(options.rto_initial,
                        TimerBackoffAlgorithm::kExponential,
                        /*max_restarts=*/0))) {
   // The interval timer must always be running as long as the association is up.
@@ -113,7 +109,7 @@ HeartbeatHandler::HeartbeatHandler(absl::string_view log_prefix,
 }
 
 void HeartbeatHandler::RestartTimer() {
-  if (interval_duration_.IsZero()) {
+  if (interval_duration_ == DurationMs(0)) {
     // Heartbeating has been disabled.
     return;
   }
@@ -121,8 +117,7 @@ void HeartbeatHandler::RestartTimer() {
   if (interval_duration_should_include_rtt_) {
     // The RTT should be used, but it's not easy accessible. The RTO will
     // suffice.
-    interval_timer_->set_duration(
-        interval_duration_ + ctx_->current_rto());
+    interval_timer_->set_duration(interval_duration_ + ctx_->current_rto());
   } else {
     interval_timer_->set_duration(interval_duration_);
   }
@@ -158,8 +153,8 @@ void HeartbeatHandler::HandleHeartbeatAck(HeartbeatAckChunk chunk) {
     return;
   }
 
-  Timestamp now = ctx_->callbacks().Now();
-  if (info->created_at() > Timestamp::Zero() && info->created_at() <= now) {
+  TimeMs now = ctx_->callbacks().TimeMillis();
+  if (info->created_at() > TimeMs(0) && info->created_at() <= now) {
     ctx_->ObserveRTT(now - info->created_at());
   }
 
@@ -169,13 +164,13 @@ void HeartbeatHandler::HandleHeartbeatAck(HeartbeatAckChunk chunk) {
   ctx_->ClearTxErrorCounter();
 }
 
-TimeDelta HeartbeatHandler::OnIntervalTimerExpiry() {
+absl::optional<DurationMs> HeartbeatHandler::OnIntervalTimerExpiry() {
   if (ctx_->is_connection_established()) {
-    HeartbeatInfo info(ctx_->callbacks().Now());
+    HeartbeatInfo info(ctx_->callbacks().TimeMillis());
     timeout_timer_->set_duration(ctx_->current_rto());
     timeout_timer_->Start();
     RTC_DLOG(LS_INFO) << log_prefix_ << "Sending HEARTBEAT with timeout "
-                      << webrtc::ToString(timeout_timer_->duration());
+                      << *timeout_timer_->duration();
 
     Parameters parameters = Parameters::Builder()
                                 .Add(HeartbeatInfoParameter(info.Serialize()))
@@ -188,14 +183,14 @@ TimeDelta HeartbeatHandler::OnIntervalTimerExpiry() {
         << log_prefix_
         << "Will not send HEARTBEAT when connection not established";
   }
-  return TimeDelta::Zero();
+  return absl::nullopt;
 }
 
-TimeDelta HeartbeatHandler::OnTimeoutTimerExpiry() {
+absl::optional<DurationMs> HeartbeatHandler::OnTimeoutTimerExpiry() {
   // Note that the timeout timer is not restarted. It will be started again when
   // the interval timer expires.
   RTC_DCHECK(!timeout_timer_->is_running());
   ctx_->IncrementTxErrorCounter("HEARTBEAT timeout");
-  return TimeDelta::Zero();
+  return absl::nullopt;
 }
 }  // namespace dcsctp

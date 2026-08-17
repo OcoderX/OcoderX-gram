@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "api/candidate.h"
 #include "api/rtc_event_log/rtc_event.h"
 #include "api/units/timestamp.h"
 #include "logging/rtc_event_log/events/rtc_event_field_encoding_parser.h"
@@ -30,6 +29,17 @@ enum class IceCandidatePairConfigType {
   kUpdated,
   kDestroyed,
   kSelected,
+  kNumValues,
+};
+
+// TODO(qingsi): Change the names of candidate types to "host", "srflx", "prflx"
+// and "relay" after the naming is spec-compliant in the signaling part
+enum class IceCandidateType {
+  kUnknown,
+  kLocal,
+  kStun,
+  kPrflx,
+  kRelay,
   kNumValues,
 };
 
@@ -78,8 +88,7 @@ struct LoggedIceCandidatePairConfig {
 
 class IceCandidatePairDescription {
  public:
-  IceCandidatePairDescription(IceCandidateType local_candidate_type,
-                              IceCandidateType remote_candidate_type);
+  IceCandidatePairDescription();
   explicit IceCandidatePairDescription(
       const IceCandidatePairDescription& other);
 

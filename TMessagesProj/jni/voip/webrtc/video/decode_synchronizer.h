@@ -53,12 +53,12 @@ namespace webrtc {
 //
 // DecodeSynchronizer is single threaded - all method calls must run on the
 // `worker_queue_`.
-class DecodeSynchronizer {
+class DecodeSynchronizer : private Metronome::TickListener {
  public:
   DecodeSynchronizer(Clock* clock,
                      Metronome* metronome,
                      TaskQueueBase* worker_queue);
-  ~DecodeSynchronizer();
+  ~DecodeSynchronizer() override;
   DecodeSynchronizer(const DecodeSynchronizer&) = delete;
   DecodeSynchronizer& operator=(const DecodeSynchronizer&) = delete;
 
@@ -119,8 +119,9 @@ class DecodeSynchronizer {
   void OnFrameScheduled(SynchronizedFrameDecodeScheduler* scheduler);
   void RemoveFrameScheduler(SynchronizedFrameDecodeScheduler* scheduler);
 
-  void ScheduleNextTick();
-  void OnTick();
+  // Metronome::TickListener implementation.
+  void OnTick() override;
+  TaskQueueBase* OnTickTaskQueue() override;
 
   Clock* const clock_;
   TaskQueueBase* const worker_queue_;
@@ -129,8 +130,6 @@ class DecodeSynchronizer {
   Timestamp expected_next_tick_ = Timestamp::PlusInfinity();
   std::set<SynchronizedFrameDecodeScheduler*> schedulers_
       RTC_GUARDED_BY(worker_queue_);
-  bool tick_scheduled_ = false;
-  ScopedTaskSafetyDetached safety_;
 };
 
 }  // namespace webrtc

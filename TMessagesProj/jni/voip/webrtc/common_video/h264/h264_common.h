@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "rtc_base/buffer.h"
-#include "rtc_base/system/rtc_export.h"
 
 namespace webrtc {
 
@@ -60,11 +59,11 @@ struct NaluIndex {
 };
 
 // Returns a vector of the NALU indices in the given buffer.
-RTC_EXPORT std::vector<NaluIndex> FindNaluIndices(const uint8_t* buffer,
-                                                  size_t buffer_size);
+std::vector<NaluIndex> FindNaluIndices(const uint8_t* buffer,
+                                       size_t buffer_size);
 
 // Get the NAL type from the header byte immediately following start sequence.
-RTC_EXPORT NaluType ParseNaluType(uint8_t data);
+NaluType ParseNaluType(uint8_t data);
 
 // Methods for parsing and writing RBSP. See section 7.4.1 of the H264 spec.
 //

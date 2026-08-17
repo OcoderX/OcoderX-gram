@@ -46,12 +46,13 @@
 
 /* Supplementary macro for setting function attributes */
 .macro pixman_asm_function fname
-.global \fname
+.func fname
+.global fname
 #ifdef __ELF__
-.hidden \fname
-.type \fname, %function
+.hidden fname
+.type fname, %function
 #endif
-\fname:
+fname:
 .endm
 
 #include "pixman-arma64-neon-asm.h"

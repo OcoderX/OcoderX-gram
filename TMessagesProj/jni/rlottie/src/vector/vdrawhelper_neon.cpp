@@ -1,4 +1,4 @@
-#if defined(USE_ARM_NEON) && (defined(__ARM_NEON__) || defined(__ARM64_NEON__))
+#if defined(__ARM_NEON__) || defined(__ARM64_NEON__)
 
 #include "vdrawhelper.h"
 

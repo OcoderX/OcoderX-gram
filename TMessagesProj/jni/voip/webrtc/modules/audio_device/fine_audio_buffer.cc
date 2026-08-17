@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <cstring>
 
-#include "api/array_view.h"
 #include "modules/audio_device/audio_device_buffer.h"
 #include "rtc_base/checks.h"
 #include "rtc_base/logging.h"
@@ -108,8 +107,7 @@ void FineAudioBuffer::GetPlayoutData(rtc::ArrayView<int16_t> audio_buffer,
 
 void FineAudioBuffer::DeliverRecordedData(
     rtc::ArrayView<const int16_t> audio_buffer,
-    int record_delay_ms,
-    absl::optional<int64_t> capture_time_ns) {
+    int record_delay_ms) {
   RTC_DCHECK(IsReadyForRecord());
   // Always append new data and grow the buffer when needed.
   record_buffer_.AppendData(audio_buffer.data(), audio_buffer.size());
@@ -120,8 +118,7 @@ void FineAudioBuffer::DeliverRecordedData(
       record_channels_ * record_samples_per_channel_10ms_;
   while (record_buffer_.size() >= num_elements_10ms) {
     audio_device_buffer_->SetRecordedBuffer(record_buffer_.data(),
-                                            record_samples_per_channel_10ms_,
-                                            capture_time_ns);
+                                            record_samples_per_channel_10ms_);
     audio_device_buffer_->SetVQEData(playout_delay_ms_, record_delay_ms);
     audio_device_buffer_->DeliverRecordedData();
     memmove(record_buffer_.data(), record_buffer_.data() + num_elements_10ms,
