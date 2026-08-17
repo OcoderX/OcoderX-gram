@@ -144,4 +144,24 @@
         </aapt:attr>
     </target>
 
+    <!-- Outer Ring: keeps a slow, infinite breathing glow so the icon stays
+         alive instead of freezing into a static picture while the app
+         finishes loading in the background. -->
+    <target android:name="splash_ring">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="600"
+                    android:duration="1100"
+                    android:valueFrom="0.35"
+                    android:valueTo="0.75"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+            </set>
+        </aapt:attr>
+    </target>
+
 </animated-vector>
