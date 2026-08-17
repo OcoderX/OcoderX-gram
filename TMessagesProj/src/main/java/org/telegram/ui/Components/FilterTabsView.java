@@ -22,6 +22,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.SystemClock;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
@@ -324,6 +325,11 @@ public class FilterTabsView extends FrameLayout {
                 } else {
                     textPaint.setColor(ColorUtils.blendARGB(color1, color2, animationValue));
                 }
+            }
+            if (ExteraConfig.tabStyle == 4 && currentTab.id == id1) {
+                // The neon pill background is a fixed bright gradient, independent of the
+                // current theme, so the active label must stay a fixed high-contrast color too.
+                textPaint.setColor(0xFFFFFFFF);
             }
 
             float counterWidth;
@@ -899,6 +905,34 @@ public class FilterTabsView extends FrameLayout {
         }
     };
 
+    private static final int NEON_PILL_COLOR_START = 0xFF00E5FF;
+    private static final int NEON_PILL_COLOR_END = 0xFF2979FF;
+    // GradientDrawable.setColors()/setOrientation() require API 24+; below that we
+    // fall back to a flat blended color so tabStyle 4 never crashes on old devices.
+    private boolean selectorUsingGradient;
+
+    private void applyNeonPillGradient(GradientDrawable drawable) {
+        selectorUsingGradient = true;
+        if (Build.VERSION.SDK_INT >= 24) {
+            drawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+            drawable.setColors(new int[]{NEON_PILL_COLOR_START, NEON_PILL_COLOR_END});
+        } else {
+            drawable.setColor(ColorUtils.blendARGB(NEON_PILL_COLOR_START, NEON_PILL_COLOR_END, 0.5f));
+        }
+    }
+
+    private void applySelectorColor(GradientDrawable drawable, int color) {
+        if (selectorUsingGradient && Build.VERSION.SDK_INT >= 24) {
+            // One-time collapse of the leftover gradient stops back to a solid fill
+            // right after switching away from the neon pill style; setColor() alone
+            // isn't guaranteed to undo a previously applied setColors() gradient.
+            drawable.setColors(new int[]{color, color});
+        } else {
+            drawable.setColor(color);
+        }
+        selectorUsingGradient = false;
+    }
+
     private float animationValue;
     private final Property<FilterTabsView, Float> COLORS = new AnimationProperties.FloatProperty<FilterTabsView>("animationValue") {
         @Override
@@ -906,12 +940,11 @@ public class FilterTabsView extends FrameLayout {
             animationValue = value;
 
             if (ExteraConfig.tabStyle == 4) {
-                selectorDrawable.setColors(new int[]{0xFF00E5FF, 0xFF2979FF});
-                selectorDrawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+                applyNeonPillGradient(selectorDrawable);
             } else {
                 int color1 = Theme.getColor(tabLineColorKey);
                 int color2 = Theme.getColor(aTabLineColorKey);
-                selectorDrawable.setColor(ColorUtils.setAlphaComponent(ColorUtils.blendARGB(color1, color2, value), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
+                applySelectorColor(selectorDrawable, ColorUtils.setAlphaComponent(ColorUtils.blendARGB(color1, color2, value), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
             }
 
             listView.invalidateViews();
@@ -1957,10 +1990,9 @@ public class FilterTabsView extends FrameLayout {
 
     public void updateSelector() {
         if (ExteraConfig.tabStyle == 4) {
-            selectorDrawable.setColors(new int[]{0xFF00E5FF, 0xFF2979FF});
-            selectorDrawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+            applyNeonPillGradient(selectorDrawable);
         } else {
-            selectorDrawable.setColor(ColorUtils.setAlphaComponent(Theme.getColor(tabLineColorKey), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
+            applySelectorColor(selectorDrawable, ColorUtils.setAlphaComponent(Theme.getColor(tabLineColorKey), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
         }
         float rad = AndroidUtilities.dpf2(ExteraConfig.tabStyle == 3 ? 8 : ExteraConfig.tabStyle == 4 ? 20 : 3);
         if (ExteraConfig.tabStyle == 1 || ExteraConfig.tabStyle >= 3) {

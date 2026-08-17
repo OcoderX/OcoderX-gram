@@ -112,6 +112,7 @@ public class ActionBar extends FrameLayout {
     private int titleRightMargin;
 
     private boolean allowOverlayTitle;
+    private boolean titleTextViewHidden;
     private CharSequence lastTitle;
     private Drawable lastRightDrawable;
     private OnClickListener rightDrawableOnClickListener;
@@ -435,6 +436,17 @@ public class ActionBar extends FrameLayout {
         titleRightMargin = value;
     }
 
+    public void setTitleTextViewHidden(boolean hidden) {
+        titleTextViewHidden = hidden;
+        if (titleTextView[0] != null) {
+            titleTextView[0].setVisibility(!titleTextViewHidden && lastTitle != null && !isSearchFieldVisible ? VISIBLE : INVISIBLE);
+        }
+    }
+
+    public boolean isTitleTextViewHidden() {
+        return titleTextViewHidden;
+    }
+
     public void setTitle(CharSequence value) {
         setTitle(value, null);
     }
@@ -444,7 +456,7 @@ public class ActionBar extends FrameLayout {
             createTitleTextView(0);
         }
         if (titleTextView[0] != null) {
-            titleTextView[0].setVisibility(value != null && !isSearchFieldVisible ? VISIBLE : INVISIBLE);
+            titleTextView[0].setVisibility(!titleTextViewHidden && value != null && !isSearchFieldVisible ? VISIBLE : INVISIBLE);
             titleTextView[0].setText(lastTitle = value);
             if (!ExteraConfig.hideActionBarStatus && UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
                 if (attached && lastRightDrawable instanceof AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable) {
@@ -914,7 +926,7 @@ public class ActionBar extends FrameLayout {
         });
         actionModeAnimation.start();
         if (!isSearchFieldVisible) {
-            if (titleTextView[0] != null) {
+            if (titleTextView[0] != null && !titleTextViewHidden) {
                 titleTextView[0].setVisibility(VISIBLE);
             }
             if (subtitleTextView != null && !TextUtils.isEmpty(subtitle)) {
@@ -1692,7 +1704,7 @@ public class ActionBar extends FrameLayout {
 
     // TODO: rework with gesture progress
     public void setTitleAnimatedX(CharSequence title, Drawable rightDrawable, boolean forward, int duration) {
-        if (titleTextView[0] == null || title == null) {
+        if (titleTextViewHidden || titleTextView[0] == null || title == null) {
             setTitle(title, rightDrawable);
             return;
         }

@@ -23,19 +23,19 @@ import com.radolyn.ayugram.AyuConfig;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.Theme;
 
-public class DynamicIslandView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
+public class DynamicIslandView extends FrameLayout {
 
     private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
+    private int shaderWidth = -1;
 
     private final TextView brandTextView;
     private final ImageView ghostImageView;
     private final TextView telemetryTextView;
+    private AnimatorSet bounceAnim;
 
     public DynamicIslandView(Context context) {
         super(context);
@@ -67,7 +67,12 @@ public class DynamicIslandView extends FrameLayout implements NotificationCenter
             updateGhostState();
 
             // Spring bounce animation on click
-            AnimatorSet bounceAnim = new AnimatorSet();
+            if (bounceAnim != null) {
+                bounceAnim.cancel();
+            }
+            v.setScaleX(1.0f);
+            v.setScaleY(1.0f);
+            bounceAnim = new AnimatorSet();
             bounceAnim.playTogether(
                     ObjectAnimator.ofFloat(v, View.SCALE_X, 1.0f, 1.35f, 1.0f),
                     ObjectAnimator.ofFloat(v, View.SCALE_Y, 1.0f, 1.35f, 1.0f)
@@ -111,10 +116,13 @@ public class DynamicIslandView extends FrameLayout implements NotificationCenter
         canvas.drawRoundRect(rect, radius, radius, bgPaint);
 
         // Neon gradient border
+        if (getWidth() != shaderWidth && getWidth() > 0) {
+            shaderWidth = getWidth();
+            strokePaint.setShader(new LinearGradient(0, 0, shaderWidth, 0,
+                    new int[]{0x8000E5FF, 0x807C4DFF, 0x8000E5FF}, null, Shader.TileMode.CLAMP));
+        }
         strokePaint.setStyle(Paint.Style.STROKE);
         strokePaint.setStrokeWidth(AndroidUtilities.dp(1.2f));
-        strokePaint.setShader(new LinearGradient(0, 0, getWidth(), 0,
-                new int[]{0x8000E5FF, 0x807C4DFF, 0x8000E5FF}, null, Shader.TileMode.CLAMP));
         canvas.drawRoundRect(rect, radius, radius, strokePaint);
 
         super.onDraw(canvas);
@@ -129,11 +137,6 @@ public class DynamicIslandView extends FrameLayout implements NotificationCenter
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateGhostState();
-    }
-
-    @Override
-    public void didReceivedNotification(int id, int account, Object... args) {
         updateGhostState();
     }
 }

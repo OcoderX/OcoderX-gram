@@ -171,6 +171,7 @@ import org.telegram.ui.Components.ChatAvatarContainer;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.DialogsItemAnimator;
+import org.telegram.ui.Components.DynamicIslandView;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.FilterTabsView;
 import org.telegram.ui.Components.FiltersListBottomSheet;
@@ -2778,10 +2779,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
 
                 dynamicIslandView = new DynamicIslandView(context);
-                actionBar.addView(dynamicIslandView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 32, Gravity.CENTER));
-                if (actionBar.getTitleTextView() != null) {
-                    actionBar.getTitleTextView().setVisibility(View.GONE);
-                }
+                actionBar.addView(dynamicIslandView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 30, Gravity.CENTER));
+                actionBar.setTitleTextViewHidden(true);
             }
             if (folderId == 0) {
                 actionBar.setSupportsHolidayImage(true);
@@ -5655,6 +5654,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public void onResume() {
         super.onResume();
+        if (dynamicIslandView != null) {
+            dynamicIslandView.updateGhostState();
+        }
         if (rightSlidingDialogContainer != null) {
             rightSlidingDialogContainer.onResume();
         }
