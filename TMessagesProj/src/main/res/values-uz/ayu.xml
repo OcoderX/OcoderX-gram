@@ -68,7 +68,7 @@
   <string name="RegexFiltersFilterGifs">GIF larni yashirish</string>
   <string name="RegexFiltersFilterVoice">Ovozli xabarlarni yashirish</string>
   <string name="RegexFiltersFilterRoundVideos">Video xabarlarni yashirish</string>
-  <string name="AyuSyncHeader">OcderXSync</string>
+  <string name="AyuSyncHeader">OcoderXSync</string>
   <string name="AyuSyncStatusTitle">Sinxronlash holati</string>
   <string name="AyuSyncStatusOk">ulangan</string>
   <string name="AyuSyncStatusErrorDisconnected">uzilgan</string>
@@ -149,7 +149,7 @@
   <string name="ExportAsTxt">Matn sifatida eksport qilish (.txt)</string>
   <string name="ExportAsJson">JSON sifatida eksport qilish (.json)</string>
   <string name="ExportingChatHistory">Chat tarixi eksport qilinmoqda…</string>
-  <string name="SettingsWatermark">Ox-gram</string>
+  <string name="SettingsWatermark">OcoderX-gram</string>
   <string name="SettingsDescription">ToS qoidalarini chetlab o\'tuvchi funksiyalarga ega exteraGram asosidagi oddiy mijoz.</string>
   <string name="SecretMessageTecno">Tecno telefonlari eng zo\'ri.</string>
   <string name="SecretMessageXiaomiSuccess">Sizda yaxshi telefon bor.</string>

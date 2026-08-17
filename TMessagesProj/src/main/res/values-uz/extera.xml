@@ -13,7 +13,7 @@
 
 <resources>
     <string name="Preferences">Ox-gram sozlamalari</string>
-    <string name="OcoderXPreferences">Ox-gram sozlamalari</string>
+    <string name="OcoderXPreferences">OcoderX sozlamalari</string>
     <string name="DeletedMessages">O\'chirilgan xabarlar</string>
     <string name="RestartApp">Ilovani qayta ishga tushirish</string>
 

@@ -45,6 +45,7 @@ import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.LaunchActivity;
+import com.radolyn.ayugram.ui.preferences.AyuGramPreferencesActivity;
 
 public class AppearancePreferencesActivity extends BasePreferencesActivity {
 
@@ -125,6 +126,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
     private int drawerOptionsDividerRow;
 
     private int drawerHeaderRow;
+    private int ocoderXMenuRow;
     private int statusRow;
     private int newGroupRow;
     private int newSecretChatRow;
@@ -184,6 +186,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
         drawerOptionsDividerRow = newRow();
 
         drawerHeaderRow = newRow();
+        ocoderXMenuRow = newRow();
         statusRow = getUserConfig().isPremium() ? newRow() : -1;
         archivedChatsRow = ChatUtils.hasArchivedChats() ? newRow() : -1;
         newGroupRow = newRow();
@@ -274,6 +277,8 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                 recyclerViewState = getListView().getLayoutManager().onSaveInstanceState();
             parentLayout.rebuildAllFragmentViews(true, true);
             getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
+        } else if (position == ocoderXMenuRow) {
+            presentFragment(new AyuGramPreferencesActivity());
         } else if (position == statusRow) {
             ExteraConfig.toggleDrawerElements(10);
             ((TextCell) view).setChecked(ExteraConfig.changeStatus);
@@ -498,7 +503,9 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
                     TextCell textCell = (TextCell) holder.itemView;
                     textCell.setEnabled(true);
                     int[] icons = AppUtils.getDrawerIconPack();
-                    if (position == statusRow) {
+                    if (position == ocoderXMenuRow) {
+                        textCell.setTextAndIcon(LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences), R.drawable.msg_customize, true);
+                    } else if (position == statusRow) {
                         textCell.setTextAndCheckAndIcon(LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), ExteraConfig.changeStatus, R.drawable.msg_status_set, true);
                     } else if (position == newGroupRow) {
                         textCell.setTextAndCheckAndIcon(LocaleController.getString("NewGroup", R.string.NewGroup), ExteraConfig.newGroup, icons[0], true);
@@ -553,7 +560,7 @@ public class AppearancePreferencesActivity extends BasePreferencesActivity {
         public int getItemViewType(int position) {
             if (position == drawerDividerRow || position == drawerOptionsDividerRow || position == avatarCornersDividerRow) {
                 return 1;
-            } else if (position == statusRow || position == archivedChatsRow || position >= newGroupRow && position <= scanQrRow) {
+            } else if (position == statusRow || position == archivedChatsRow || position == ocoderXMenuRow || position >= newGroupRow && position <= scanQrRow) {
                 return 2;
             } else if (position == appearanceHeaderRow || position == drawerHeaderRow || position == drawerOptionsHeaderRow || position == solarIconsHeaderRow || position == foldersHeaderRow || position == chatListHeaderRow) {
                 return 3;
