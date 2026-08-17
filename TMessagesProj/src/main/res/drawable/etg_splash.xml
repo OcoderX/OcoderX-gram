@@ -8,63 +8,138 @@
             android:height="320dp"
             android:viewportWidth="320"
             android:viewportHeight="320">
-            <path
-                android:name="splash_background"
-                android:pathData="M 160 85 C 140.116 85 121.027 92.907 106.967 106.967 C 92.907 121.027 85 140.116 85 160 C 85 179.884 92.907 198.973 106.967 213.033 C 121.027 227.093 140.116 235 160 235 C 179.884 235 198.973 227.093 213.033 213.033 C 227.093 198.973 235 179.884 235 160 C 235 140.116 227.093 121.027 213.033 106.967 C 198.973 92.907 179.884 85 160 85 Z"
-                android:fillColor="@color/ic_background_monet"
-                android:fillAlpha="0"
-                android:strokeWidth="1"/>
-            <path
-                android:name="splash_icon"
-                android:pathData="M 171.295 145.34 C 174.131 144.404 175.813 145.922 174.911 148.77 C 172.645 155.926 168.198 168.983 165.369 177.226 C 164.63 179.381 161.202 179.297 160.342 177.187 C 158.867 173.568 156.693 169.355 153.727 166.285 C 150.891 163.349 146.921 161.226 143.395 159.775 C 141.247 158.892 141.172 155.283 143.377 154.555 L 171.295 145.34 Z"
-                android:fillColor="@color/ic_foreground_monet"
-                android:fillAlpha="0"
-                android:strokeWidth="1"/>
-        </vector>
 
+            <!-- Cyber Hexagon Outer Glow Ring -->
+            <path
+                android:name="splash_ring"
+                android:pathData="M 160,40 L 260,98 L 260,214 L 160,272 L 60,214 L 60,98 Z"
+                android:strokeColor="#1E3A8A"
+                android:strokeWidth="1.5"
+                android:strokeAlpha="0.6"
+                android:fillAlpha="0" />
+
+            <!-- Main Cyber Hexagon Badge -->
+            <path
+                android:name="splash_hexagon"
+                android:pathData="M 160,55 L 245,104 L 245,208 L 160,257 L 75,208 L 75,104 Z"
+                android:fillColor="#0D1527"
+                android:strokeColor="#00E5FF"
+                android:strokeWidth="3.5"
+                android:strokeLineJoin="round"
+                android:fillAlpha="0" />
+
+            <!-- Inner Accent Frame -->
+            <path
+                android:name="splash_inner_frame"
+                android:pathData="M 160,70 L 230,111 L 230,201 L 160,242 L 90,201 L 90,111 Z"
+                android:fillColor="#0A0F1D"
+                android:strokeColor="#2979FF"
+                android:strokeWidth="1.5"
+                android:strokeLineJoin="round"
+                android:fillAlpha="0" />
+
+            <!-- Monogram O -->
+            <path
+                android:name="splash_letter_o"
+                android:pathData="M 128,124 L 146,134 L 146,178 L 128,188 L 110,178 L 110,134 Z M 128,138 L 119,143 L 119,169 L 128,174 L 137,169 L 137,143 Z"
+                android:fillColor="#00E5FF"
+                android:fillAlpha="0" />
+
+            <!-- Monogram X -->
+            <path
+                android:name="splash_letter_x"
+                android:pathData="M 158,126 L 170,126 L 183,153 L 196,126 L 208,126 L 190,157 L 210,192 L 198,192 L 183,163 L 168,192 L 156,192 L 176,157 Z"
+                android:fillColor="#00E5FF"
+                android:fillAlpha="0" />
+
+            <!-- Core White Neon Accent Lines -->
+            <path
+                android:name="splash_neon_accent"
+                android:pathData="M 128,130 L 141,137 L 141,175 L 128,182 L 115,175 L 115,137 Z"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="1"
+                android:strokeAlpha="0.7"
+                android:fillAlpha="0" />
+
+        </vector>
     </aapt:attr>
-    <target android:name="splash_background">
+
+    <!-- Background Hexagon Animation -->
+    <target android:name="splash_hexagon">
         <aapt:attr name="android:animation">
             <set>
                 <objectAnimator
-                    android:propertyName="pathData"
-                    android:startOffset="200"
-                    android:duration="400"
-                    android:valueFrom="M 160 85 C 140.116 85 121.027 92.907 106.967 106.967 C 92.907 121.027 85 140.116 85 160 C 85 179.884 92.907 198.973 106.967 213.033 C 121.027 227.093 140.116 235 160 235 C 179.884 235 198.973 227.093 213.033 213.033 C 227.093 198.973 235 179.884 235 160 C 235 140.116 227.093 121.027 213.033 106.967 C 198.973 92.907 179.884 85 160 85 Z"
-                    android:valueTo="M 160 60 C 133.489 60 108.036 70.543 89.289 89.289 C 70.543 108.036 60 133.489 60 160 C 60 186.511 70.543 211.964 89.289 230.711 C 108.036 249.457 133.489 260 160 260 C 186.511 260 211.964 249.457 230.711 230.711 C 249.457 211.964 260 186.511 260 160 C 260 133.489 249.457 108.036 230.711 89.289 C 211.964 70.543 186.511 60 160 60 Z"
-                    android:valueType="pathType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
-                <objectAnimator
                     android:propertyName="fillAlpha"
-                    android:startOffset="200"
+                    android:startOffset="50"
                     android:duration="400"
                     android:valueFrom="0"
                     android:valueTo="1"
                     android:valueType="floatType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                    android:interpolator="@android:interpolator/fast_out_slow_in" />
             </set>
         </aapt:attr>
     </target>
 
-    <target android:name="splash_icon">
+    <!-- Inner Frame Animation -->
+    <target android:name="splash_inner_frame">
         <aapt:attr name="android:animation">
             <set>
                 <objectAnimator
-                    android:propertyName="pathData"
-                    android:startOffset="200"
-                    android:duration="400"
-                    android:valueFrom="M 171.295 145.34 C 174.131 144.404 175.813 145.922 174.911 148.77 C 172.645 155.926 168.198 168.983 165.369 177.226 C 164.63 179.381 161.202 179.297 160.342 177.187 C 158.867 173.568 156.693 169.355 153.727 166.285 C 150.891 163.349 146.921 161.226 143.395 159.775 C 141.247 158.892 141.172 155.283 143.377 154.555 L 171.295 145.34 Z"
-                    android:valueTo="M 191.117 119.613 C 198.931 117.034 203.565 121.216 201.08 129.062 C 194.836 148.778 182.584 184.747 174.792 207.456 C 172.755 213.393 163.311 213.162 160.942 207.35 C 156.878 197.378 150.889 185.773 142.719 177.315 C 134.906 169.226 123.969 163.377 114.254 159.381 C 108.338 156.948 108.131 147.004 114.205 145 L 191.117 119.613 Z"
-                    android:valueType="pathType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
-                <objectAnimator
                     android:propertyName="fillAlpha"
-                    android:startOffset="200"
+                    android:startOffset="100"
                     android:duration="400"
                     android:valueFrom="0"
                     android:valueTo="1"
                     android:valueType="floatType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                    android:interpolator="@android:interpolator/fast_out_slow_in" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Letter O Animation -->
+    <target android:name="splash_letter_o">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="150"
+                    android:duration="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Letter X Animation -->
+    <target android:name="splash_letter_x">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="200"
+                    android:duration="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Neon Accent Animation -->
+    <target android:name="splash_neon_accent">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="250"
+                    android:duration="350"
+                    android:valueFrom="0"
+                    android:valueTo="0.85"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in" />
             </set>
         </aapt:attr>
     </target>

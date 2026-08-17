@@ -13,16 +13,17 @@
 
     <style name="Theme.TMessages.Start" parent="@android:style/Theme.Material">
         <item name="android:actionBarStyle">@style/ActionBar.Transparent.TMessages.Start</item>
-        <item name="android:colorBackground">#1f2732</item>
-        <item name="android:windowBackground">#1f2732</item>
+        <item name="android:colorBackground">#0A0F1D</item>
+        <item name="android:windowBackground">#0A0F1D</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorPrimaryDark">#1c242e</item>
-        <item name="android:colorPrimary">#232d3a</item>
-        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:colorPrimaryDark">#0A0F1D</item>
+        <item name="android:colorPrimary">#0A0F1D</item>
+        <item name="android:navigationBarColor">#0A0F1D</item>
+        <item name="android:statusBarColor">#0A0F1D</item>
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/etg_splash</item>
         <item name="android:windowSplashScreenAnimationDuration">@integer/splash_screen_duration</item>
-        <item name="android:windowSplashScreenBackground">?android:windowBackground</item>
+        <item name="android:windowSplashScreenBackground">#0A0F1D</item>
     </style>
 
     <style name="ActionBar.Transparent.TMessages.Start" parent="android:style/Widget.Material.Light.ActionBar">
