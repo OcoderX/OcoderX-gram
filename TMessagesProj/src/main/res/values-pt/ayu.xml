@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">Preferências do Ox-gram</string>
+  <string name="AyuPreferences">OcoderX configurações</string>
   <string name="GhostEssentialsHeader">Essenciais do fantasma</string>
   <string name="SendReadPackets">Enviar status de leitura</string>
   <string name="SendOnlinePackets">Enviar status online</string>

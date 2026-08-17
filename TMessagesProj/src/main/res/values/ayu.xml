@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">Ox-gram Preferences</string>
+  <string name="AyuPreferences">OcoderX Settings</string>
   <string name="GhostEssentialsHeader">Ghost essentials</string>
   <string name="DontSendReadPackets">Don\'t read messages</string>
   <string name="DontSendOnlinePackets">Don\'t send online</string>

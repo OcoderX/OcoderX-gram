@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">Ox-gram sozlamalari</string>
+  <string name="AyuPreferences">OcoderX sozlamalari</string>
   <string name="GhostEssentialsHeader">Arvoh rejimi asoslari</string>
   <string name="DontSendReadPackets">Xabarlarni \"o\'qilgan\" deb belgilamaslik</string>
   <string name="DontSendOnlinePackets">Onlayn holatini yubormaslik</string>
@@ -68,7 +68,7 @@
   <string name="RegexFiltersFilterGifs">GIF larni yashirish</string>
   <string name="RegexFiltersFilterVoice">Ovozli xabarlarni yashirish</string>
   <string name="RegexFiltersFilterRoundVideos">Video xabarlarni yashirish</string>
-  <string name="AyuSyncHeader">AyuSync</string>
+  <string name="AyuSyncHeader">OcderXSync</string>
   <string name="AyuSyncStatusTitle">Sinxronlash holati</string>
   <string name="AyuSyncStatusOk">ulangan</string>
   <string name="AyuSyncStatusErrorDisconnected">uzilgan</string>

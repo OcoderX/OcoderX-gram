@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">Налады Ox-gram</string>
+  <string name="AyuPreferences">OcoderX налады</string>
   <string name="GhostEssentialsHeader">Налады рэжыму Прывіду</string>
   <string name="SendReadPackets">Адпраўляць статус "прачытана"</string>
   <string name="SendOnlinePackets">Адпраўляць статус "анлайн"</string>

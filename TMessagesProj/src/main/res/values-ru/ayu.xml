@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="AyuPreferences">Настройки Ox-gram</string>
+  <string name="AyuPreferences">OcoderX настройки</string>
   <string name="GhostEssentialsHeader">Режим призрака</string>
   <string name="SendReadPackets">Отправлять «прочитано»</string>
   <string name="SendOnlinePackets">Отправлять «онлайн»</string>
