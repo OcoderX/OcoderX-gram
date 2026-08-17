@@ -91,15 +91,15 @@ public class AyuConfig {
             editor = preferences.edit();
 
             // ~ Ghost essentials
-            sendReadPackets = preferences.getBoolean("sendReadPackets", true);
-            sendOnlinePackets = preferences.getBoolean("sendOnlinePackets", true);
-            sendUploadProgress = preferences.getBoolean("sendUploadProgress", true);
-            sendOfflinePacketAfterOnline = preferences.getBoolean("sendOfflinePacketAfterOnline", false);
-            hideTypingStatus = preferences.getBoolean("hideTypingStatus", false);
-            frozenLastSeen = preferences.getBoolean("frozenLastSeen", false);
-            ghostVoiceChat = preferences.getBoolean("ghostVoiceChat", false);
+            sendReadPackets = preferences.getBoolean("sendReadPackets", false);
+            sendOnlinePackets = preferences.getBoolean("sendOnlinePackets", false);
+            sendUploadProgress = preferences.getBoolean("sendUploadProgress", false);
+            sendOfflinePacketAfterOnline = preferences.getBoolean("sendOfflinePacketAfterOnline", true);
+            hideTypingStatus = preferences.getBoolean("hideTypingStatus", true);
+            frozenLastSeen = preferences.getBoolean("frozenLastSeen", true);
+            ghostVoiceChat = preferences.getBoolean("ghostVoiceChat", true);
 
-            markReadAfterSend = preferences.getBoolean("markReadAfterSend", true);
+            markReadAfterSend = preferences.getBoolean("markReadAfterSend", false);
             useScheduledMessages = preferences.getBoolean("useScheduledMessages", false);
 
             // ~ Message edits & deletion history
@@ -121,8 +121,8 @@ public class AyuConfig {
             // ~ Useful features
             keepAliveService = preferences.getBoolean("keepAliveService", true);
             disableAds = preferences.getBoolean("disableAds", true);
-            localPremium = preferences.getBoolean("localPremium", false);
-            regexFiltersEnabled = preferences.getBoolean("regexFiltersEnabled", false);
+            localPremium = preferences.getBoolean("localPremium", true);
+            regexFiltersEnabled = preferences.getBoolean("regexFiltersEnabled", true);
             regexFiltersInChats = preferences.getBoolean("regexFiltersInChats", false);
             regexFiltersCaseInsensitive = preferences.getBoolean("regexFiltersCaseInsensitive", true);
             // regexFilters
@@ -219,7 +219,7 @@ public class AyuConfig {
     }
 
     public static String getEditedMark() {
-        return AyuConfig.preferences.getString("editedMarkText", LocaleController.getString("EditedMessage", R.string.EditedMessage));
+        return AyuConfig.preferences.getString("editedMarkText", "🟡");
     }
 
     public static String getWALMode() {

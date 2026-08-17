@@ -176,6 +176,10 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                 item.bind(drawerActionCell);
                 drawerActionCell.setAdapterPosition(position); // --- OcoderX: stagger anim
                 drawerActionCell.setPadding(0, 0, 0, 0);
+                // --- OcoderX: group contiguous rows into a rounded "card" block
+                boolean isFirstInBlock = position == 0 || items.get(position - 1) == null || items.get(position - 1).isSection;
+                boolean isLastInBlock = position == items.size() - 1 || items.get(position + 1) == null || items.get(position + 1).isSection;
+                drawerActionCell.setCardGrouping(isFirstInBlock, isLastInBlock);
                 break;
             }
             case 6: { // --- OcoderX: section header
@@ -332,14 +336,14 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             var msg = AyuConfig.isGhostModeActive()
                     ? LocaleController.getString("DisableGhostMode", R.string.DisableGhostMode)
                     : LocaleController.getString("EnableGhostMode", R.string.EnableGhostMode);
-            items.add(new Item(AyuConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.ayu_ghost));
+            items.add(new Item(AyuConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.ayu_ghost, 0xFF7C4DFF, 0xFF536DFE));
         }
         // OcoderX section
         items.add(Item.section(LocaleController.getString("OcoderXFeatures", R.string.OcoderXFeatures)));
-        items.add(new Item(AyuConstants.DRAWER_OCODER_PREFS, LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences), R.drawable.msg_customize));
-        items.add(new Item(AyuConstants.DRAWER_DELETED_MESSAGES, LocaleController.getString("GhostAndMessagesSettings", R.string.GhostAndMessagesSettings), R.drawable.msg_delete));
+        items.add(new Item(AyuConstants.DRAWER_OCODER_PREFS, LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences), R.drawable.msg_customize, 0xFFFFD700, 0xFF00E5FF));
+        items.add(new Item(AyuConstants.DRAWER_DELETED_MESSAGES, LocaleController.getString("GhostAndMessagesSettings", R.string.GhostAndMessagesSettings), R.drawable.msg_delete, 0xFF8E24AA, 0xFF3949AB));
         if (AyuConfig.showKillButtonInDrawer) {
-            items.add(new Item(AyuConstants.DRAWER_KILL_APP, LocaleController.getString("RestartApp", R.string.RestartApp), R.drawable.msg_retry));
+            items.add(new Item(AyuConstants.DRAWER_KILL_APP, LocaleController.getString("RestartApp", R.string.RestartApp), R.drawable.msg_retry, 0xFFFF5252, 0xFFFF9800));
         }
         items.add(null);
         // --- OcoderX / AyuGram hook
@@ -347,37 +351,37 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
         if (me != null && me.isPremium() && ExteraConfig.changeStatus) {
             if (me.getEmojiStatus() != null) {
-                items.add(new Item(15, LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), R.drawable.msg_status_edit));
+                items.add(new Item(15, LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), R.drawable.msg_status_edit, 0xFFFF4FD8, 0xFF7C4DFF));
             } else {
-                items.add(new Item(15, LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set));
+                items.add(new Item(15, LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set, 0xFFFF4FD8, 0xFF7C4DFF));
             }
             items.add(null);
         }
         if (ExteraConfig.archivedChats && ChatUtils.hasArchivedChats()) {
-            items.add(new Item(14, LocaleController.getString("ArchivedChats", R.string.ArchivedChats), archiveIcon));
+            items.add(new Item(14, LocaleController.getString("ArchivedChats", R.string.ArchivedChats), archiveIcon, 0xFF78909C, 0xFF455A64));
             items.add(null);
         }
         // Navigation section
         items.add(Item.section(LocaleController.getString("Navigation", R.string.Navigation)));
-        if (ExteraConfig.newGroup) items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon));
-        if (ExteraConfig.newSecretChat) items.add(new Item(3, LocaleController.getString("NewSecretChat", R.string.NewSecretChat), newSecretIcon));
-        if (ExteraConfig.newChannel) items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon));
-        if (ExteraConfig.contacts) items.add(new Item(6, LocaleController.getString("Contacts", R.string.Contacts), contactsIcon));
-        if (ExteraConfig.calls) items.add(new Item(10, LocaleController.getString("Calls", R.string.Calls), callsIcon));
-        if (ExteraConfig.peopleNearby && hasGps) items.add(new Item(12, LocaleController.getString("PeopleNearby", R.string.PeopleNearby), peopleNearbyIcon));
-        if (ExteraConfig.savedMessages) items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon));
-        items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
+        if (ExteraConfig.newGroup) items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon, 0xFF2979FF, 0xFF3949AB));
+        if (ExteraConfig.newSecretChat) items.add(new Item(3, LocaleController.getString("NewSecretChat", R.string.NewSecretChat), newSecretIcon, 0xFF00ACC1, 0xFF00695C));
+        if (ExteraConfig.newChannel) items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon, 0xFF29B6F6, 0xFF0277BD));
+        if (ExteraConfig.contacts) items.add(new Item(6, LocaleController.getString("Contacts", R.string.Contacts), contactsIcon, 0xFF66BB6A, 0xFF2E7D32));
+        if (ExteraConfig.calls) items.add(new Item(10, LocaleController.getString("Calls", R.string.Calls), callsIcon, 0xFF00E676, 0xFF00BFA5));
+        if (ExteraConfig.peopleNearby && hasGps) items.add(new Item(12, LocaleController.getString("PeopleNearby", R.string.PeopleNearby), peopleNearbyIcon, 0xFFFFA726, 0xFFFF7043));
+        if (ExteraConfig.savedMessages) items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon, 0xFF448AFF, 0xFF2962FF));
+        items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon, 0xFF5C6BC0, 0xFF3949AB));
         if (ExteraConfig.scanQr) {
             items.add(null);
-            items.add(new Item(16, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), scanQrIcon));
+            items.add(new Item(16, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), scanQrIcon, 0xFF7C4DFF, 0xFFFF4FD8));
         }
         items.add(null);
         // OcoderX channel section
         items.add(Item.section(LocaleController.getString("OcoderXCommunity", R.string.OcoderXCommunity)));
-        items.add(new Item(AyuConstants.DRAWER_CHANNEL, LocaleController.getString("Channel", R.string.Channel) + " (@OcoderXs)", R.drawable.msg_channel));
-        items.add(new Item(AyuConstants.DRAWER_ADMIN, LocaleController.getString("ContactAdmin", R.string.ContactAdmin) + " (@OcoderX)", R.drawable.msg_admins));
-//      items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
-//      items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon));
+        items.add(new Item(AyuConstants.DRAWER_CHANNEL, LocaleController.getString("Channel", R.string.Channel) + " (@OcoderXs)", R.drawable.msg_channel, 0xFF00B0FF, 0xFF2979FF));
+        items.add(new Item(AyuConstants.DRAWER_ADMIN, LocaleController.getString("ContactAdmin", R.string.ContactAdmin) + " (@OcoderX)", R.drawable.msg_admins, 0xFFFF5252, 0xFFFF4FD8));
+//      items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon, 0xFF448AFF, 0xFF2962FF));
+//      items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon, 0xFF448AFF, 0xFF2962FF));
     }
 
     public int getId(int position) {
@@ -411,23 +415,26 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         public String text;
         public int id;
         public boolean isSection; // --- OcoderX: section header flag
+        public int gradientColorStart, gradientColorEnd; // --- OcoderX: gradient squircle icon badge colors
 
-        public Item(int id, String text, int icon) {
+        public Item(int id, String text, int icon, int gradientColorStart, int gradientColorEnd) {
             this.icon = icon;
             this.id = id;
             this.text = text;
             this.isSection = false;
+            this.gradientColorStart = gradientColorStart;
+            this.gradientColorEnd = gradientColorEnd;
         }
 
         // --- OcoderX: section header factory
         public static Item section(String title) {
-            Item item = new Item(-1, title, 0);
+            Item item = new Item(-1, title, 0, 0, 0);
             item.isSection = true;
             return item;
         }
 
         public void bind(DrawerActionCell actionCell) {
-            actionCell.setTextAndIcon(id, text, icon);
+            actionCell.setTextAndGradientIcon(id, text, icon, gradientColorStart, gradientColorEnd);
         }
     }
 }

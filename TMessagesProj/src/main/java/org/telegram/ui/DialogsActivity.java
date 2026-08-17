@@ -311,6 +311,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private int undoViewIndex;
     private UndoView[] undoView = new UndoView[2];
     private FilterTabsView filterTabsView;
+    private DynamicIslandView dynamicIslandView;
     private boolean askingForPermissions;
     private RLottieDrawable passcodeDrawable;
     private SearchViewPager searchViewPager;
@@ -2621,6 +2622,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             @Override
             public void onSearchExpand() {
                 searching = true;
+                if (dynamicIslandView != null) {
+                    dynamicIslandView.setVisibility(View.GONE);
+                }
                 if (switchItem != null) {
                     switchItem.setVisibility(View.GONE);
                 }
@@ -2671,6 +2675,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             public void onSearchCollapse() {
                 searching = false;
                 searchWas = false;
+                if (dynamicIslandView != null) {
+                    dynamicIslandView.setVisibility(View.VISIBLE);
+                }
                 if (viewPages[0] != null) {
                     viewPages[0].listView.setEmptyView(folderId == 0 ? viewPages[0].progressView : null);
                     if (!onlySelect) {
@@ -2769,6 +2776,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 statusDrawable.center = true;
                 actionBar.setTitle(actionBarDefaultTitle = LocaleUtils.getActionBarTitle(), statusDrawable);
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
+
+                dynamicIslandView = new DynamicIslandView(context);
+                actionBar.addView(dynamicIslandView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 32, Gravity.CENTER));
+                if (actionBar.getTitleTextView() != null) {
+                    actionBar.getTitleTextView().setVisibility(View.GONE);
+                }
             }
             if (folderId == 0) {
                 actionBar.setSupportsHolidayImage(true);
@@ -8536,7 +8549,13 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         doneItemAnimator.setDuration(180);
         if (show) {
             doneItem.setVisibility(View.VISIBLE);
+            if (dynamicIslandView != null) {
+                dynamicIslandView.setVisibility(View.GONE);
+            }
         } else {
+            if (dynamicIslandView != null) {
+                dynamicIslandView.setVisibility(View.VISIBLE);
+            }
             doneItem.setSelected(false);
             Drawable background = doneItem.getBackground();
             if (background != null) {

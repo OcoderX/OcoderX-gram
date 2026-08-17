@@ -905,9 +905,14 @@ public class FilterTabsView extends FrameLayout {
         public void setValue(FilterTabsView object, float value) {
             animationValue = value;
 
-            int color1 = Theme.getColor(tabLineColorKey);
-            int color2 = Theme.getColor(aTabLineColorKey);
-            selectorDrawable.setColor(ColorUtils.setAlphaComponent(ColorUtils.blendARGB(color1, color2, value), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
+            if (ExteraConfig.tabStyle == 4) {
+                selectorDrawable.setColors(new int[]{0xFF00E5FF, 0xFF2979FF});
+                selectorDrawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+            } else {
+                int color1 = Theme.getColor(tabLineColorKey);
+                int color2 = Theme.getColor(aTabLineColorKey);
+                selectorDrawable.setColor(ColorUtils.setAlphaComponent(ColorUtils.blendARGB(color1, color2, value), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
+            }
 
             listView.invalidateViews();
             listView.invalidate();
@@ -1951,8 +1956,13 @@ public class FilterTabsView extends FrameLayout {
     }
 
     public void updateSelector() {
-        selectorDrawable.setColor(ColorUtils.setAlphaComponent(Theme.getColor(tabLineColorKey), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
-        float rad = AndroidUtilities.dpf2(ExteraConfig.tabStyle == 3 ? 8 : ExteraConfig.tabStyle == 4 ? 30 : 3);
+        if (ExteraConfig.tabStyle == 4) {
+            selectorDrawable.setColors(new int[]{0xFF00E5FF, 0xFF2979FF});
+            selectorDrawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+        } else {
+            selectorDrawable.setColor(ColorUtils.setAlphaComponent(Theme.getColor(tabLineColorKey), ExteraConfig.tabStyle >= 3 ? 0x2F : 0xFF));
+        }
+        float rad = AndroidUtilities.dpf2(ExteraConfig.tabStyle == 3 ? 8 : ExteraConfig.tabStyle == 4 ? 20 : 3);
         if (ExteraConfig.tabStyle == 1 || ExteraConfig.tabStyle >= 3) {
             selectorDrawable.setCornerRadii(new float[]{rad, rad, rad, rad, rad, rad, rad, rad});
         } else {

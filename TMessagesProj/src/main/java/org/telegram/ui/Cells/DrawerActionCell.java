@@ -11,10 +11,13 @@ package org.telegram.ui.Cells;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
+import android.graphics.drawable.GradientDrawable;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -67,6 +70,17 @@ public class DrawerActionCell extends FrameLayout {
         this.adapterPosition = pos;
     }
 
+    // --- OcoderX: gradient squircle icon badge
+    private boolean hasGradientIcon;
+
+    // --- OcoderX: grouped "card block" background (rounded top/bottom at block edges)
+    private boolean showCard;
+    private boolean cardTop, cardBottom;
+    private final RectF cardRect = new RectF();
+    private final Path cardPath = new Path();
+    private final Paint cardPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private boolean cardRectDirty = true;
+
     private boolean wasRTL;
 
     public void toggleRTL(boolean force) {
@@ -80,6 +94,21 @@ public class DrawerActionCell extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (showCard) {
+            if (cardRectDirty && getMeasuredWidth() > 0) {
+                cardRect.set(AndroidUtilities.dp(8), 0, getMeasuredWidth() - AndroidUtilities.dp(8), getMeasuredHeight());
+                cardPaint.setColor((Theme.getColor(Theme.key_chats_menuItemIcon) & 0x00FFFFFF) | 0x14000000);
+                float topRad = cardTop ? AndroidUtilities.dp(14) : 0;
+                float bottomRad = cardBottom ? AndroidUtilities.dp(14) : 0;
+                cardPath.reset();
+                cardPath.addRoundRect(cardRect, new float[]{topRad, topRad, topRad, topRad, bottomRad, bottomRad, bottomRad, bottomRad}, Path.Direction.CW);
+                cardRectDirty = false;
+            }
+            if (!cardRect.isEmpty()) {
+                canvas.drawPath(cardPath, cardPaint);
+            }
+        }
+
         super.onDraw(canvas);
 
         if (currentId == 8) {
@@ -141,6 +170,30 @@ public class DrawerActionCell extends FrameLayout {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        cardRectDirty = true;
+    }
+
+    // --- OcoderX: block/card grouping (first/last row in a visual block gets rounded corners)
+    public void setCardGrouping(boolean isFirst, boolean isLast) {
+        showCard = true;
+        cardTop = isFirst;
+        cardBottom = isLast;
+        cardRectDirty = true;
+        setWillNotDraw(false);
+        invalidate();
+    }
+
+    public void clearCardGrouping() {
+        if (!showCard) {
+            return;
+        }
+        showCard = false;
+        invalidate();
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         textView.setTextColor(Theme.getColor(Theme.key_chats_menuItemText));
@@ -163,11 +216,60 @@ public class DrawerActionCell extends FrameLayout {
         toggleRTL(false);
         currentId = id;
         try {
+            resetIconStyle();
             textView.setText(text);
             imageView.setImageResource(resId);
         } catch (Throwable e) {
             FileLog.e(e);
         }
+    }
+
+    // --- OcoderX: featured row with a gradient squircle icon badge + soft tinted background
+    public void setTextAndGradientIcon(int id, String text, int resId, int colorStart, int colorEnd) {
+        toggleRTL(false);
+        currentId = id;
+        try {
+            textView.setText(text);
+            imageView.setImageResource(resId);
+            imageView.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+            imageView.setPadding(AndroidUtilities.dp(4), AndroidUtilities.dp(4), AndroidUtilities.dp(4), AndroidUtilities.dp(4));
+            GradientDrawable gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{colorStart, colorEnd});
+            gradientDrawable.setCornerRadius(AndroidUtilities.dp(9));
+            imageView.setBackground(gradientDrawable);
+            android.view.ViewGroup.LayoutParams lp = imageView.getLayoutParams();
+            if (lp instanceof android.view.ViewGroup.MarginLayoutParams) {
+                android.view.ViewGroup.MarginLayoutParams mlp = (android.view.ViewGroup.MarginLayoutParams) lp;
+                mlp.width = mlp.height = AndroidUtilities.dp(28);
+                mlp.topMargin = AndroidUtilities.dp(10);
+                mlp.leftMargin = LocaleController.isRTL ? 0 : AndroidUtilities.dp(17);
+                mlp.rightMargin = LocaleController.isRTL ? AndroidUtilities.dp(17) : 0;
+                imageView.setLayoutParams(mlp);
+            }
+            hasGradientIcon = true;
+            invalidate();
+        } catch (Throwable e) {
+            FileLog.e(e);
+        }
+    }
+
+    private void resetIconStyle() {
+        if (!hasGradientIcon) {
+            return;
+        }
+        hasGradientIcon = false;
+        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_menuItemIcon), PorterDuff.Mode.SRC_IN));
+        imageView.setPadding(0, 0, 0, 0);
+        imageView.setBackground(null);
+        android.view.ViewGroup.LayoutParams lp = imageView.getLayoutParams();
+        if (lp instanceof android.view.ViewGroup.MarginLayoutParams) {
+            android.view.ViewGroup.MarginLayoutParams mlp = (android.view.ViewGroup.MarginLayoutParams) lp;
+            mlp.width = mlp.height = AndroidUtilities.dp(24);
+            mlp.topMargin = AndroidUtilities.dp(12);
+            mlp.leftMargin = LocaleController.isRTL ? 0 : AndroidUtilities.dp(19);
+            mlp.rightMargin = LocaleController.isRTL ? AndroidUtilities.dp(19) : 0;
+            imageView.setLayoutParams(mlp);
+        }
+        invalidate();
     }
 
     public void updateTextAndIcon(String text, int resId) {

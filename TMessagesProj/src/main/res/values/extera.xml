@@ -24,6 +24,7 @@
     <string name="FilterPeopleDefault">People</string>
     <string name="LoginViaQrCode">Login via QR Code</string>
     <string name="LoginViaQrCodeSoon">QR code login is coming soon.</string>
+    <string name="Groups">Groups</string>
 
     <!-- Main Menu -->
     <string name="Links">Links</string>

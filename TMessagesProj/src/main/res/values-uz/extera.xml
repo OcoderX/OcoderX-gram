@@ -23,6 +23,7 @@
     <string name="FilterPeopleDefault">Odamlar</string>
     <string name="LoginViaQrCode">QR-kod orqali kirish</string>
     <string name="LoginViaQrCodeSoon">QR-kod orqali kirish tez orada qo\'shiladi.</string>
+    <string name="Groups">Guruhlar</string>
 
     <!-- Main Menu -->
     <string name="Links">Havolalar</string>
