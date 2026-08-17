@@ -131,7 +131,7 @@ public class AyuConfig {
             // deletedMarkText
             // editedMarkText
             showGhostToggleInDrawer = preferences.getBoolean("showGhostToggleInDrawer", true);
-            showKillButtonInDrawer = preferences.getBoolean("showKillButtonInDrawer", false);
+            showKillButtonInDrawer = preferences.getBoolean("showKillButtonInDrawer", true);
             showUserHistoryButton = preferences.getBoolean("showUserHistoryButton", true);
 
             // ~ AyuSync

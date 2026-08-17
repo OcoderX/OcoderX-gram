@@ -182,8 +182,8 @@ public class ExteraConfig {
             touchUserPicture = preferences.getInt("touchUserPicture", 0);
             touchGroupPicture = preferences.getInt("touchGroupPicture", 0);
 
-            downloadSpeedBoost = preferences.getInt("downloadSpeedBoost", 0);
-            uploadSpeedBoost = preferences.getBoolean("uploadSpeedBoost", false);
+            downloadSpeedBoost = preferences.getInt("downloadSpeedBoost", 2);
+            uploadSpeedBoost = preferences.getBoolean("uploadSpeedBoost", true);
 
             hidePhoneNumber = preferences.getBoolean("hidePhoneNumber", false);
             showIdAndDc = preferences.getInt("showIdAndDc", 2);

@@ -335,9 +335,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             items.add(new Item(AyuConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.ayu_ghost));
         }
         // OcoderX section
-        items.add(Item.section(LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences)));
+        items.add(Item.section(LocaleController.getString("OcoderXFeatures", R.string.OcoderXFeatures)));
         items.add(new Item(AyuConstants.DRAWER_OCODER_PREFS, LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences), R.drawable.msg_customize));
-        items.add(new Item(AyuConstants.DRAWER_DELETED_MESSAGES, LocaleController.getString("DeletedMessages", R.string.DeletedMessages), R.drawable.msg_delete));
+        items.add(new Item(AyuConstants.DRAWER_DELETED_MESSAGES, LocaleController.getString("GhostAndMessagesSettings", R.string.GhostAndMessagesSettings), R.drawable.msg_delete));
         if (AyuConfig.showKillButtonInDrawer) {
             items.add(new Item(AyuConstants.DRAWER_KILL_APP, LocaleController.getString("RestartApp", R.string.RestartApp), R.drawable.msg_retry));
         }
@@ -358,7 +358,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             items.add(null);
         }
         // Navigation section
-        items.add(Item.section("Navigatsiya"));
+        items.add(Item.section(LocaleController.getString("Navigation", R.string.Navigation)));
         if (ExteraConfig.newGroup) items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon));
         if (ExteraConfig.newSecretChat) items.add(new Item(3, LocaleController.getString("NewSecretChat", R.string.NewSecretChat), newSecretIcon));
         if (ExteraConfig.newChannel) items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon));
@@ -373,7 +373,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         }
         items.add(null);
         // OcoderX channel section
-        items.add(Item.section("OcoderX"));
+        items.add(Item.section(LocaleController.getString("OcoderXCommunity", R.string.OcoderXCommunity)));
         items.add(new Item(AyuConstants.DRAWER_CHANNEL, LocaleController.getString("Channel", R.string.Channel) + " (@OcoderXs)", R.drawable.msg_channel));
         items.add(new Item(AyuConstants.DRAWER_ADMIN, LocaleController.getString("ContactAdmin", R.string.ContactAdmin) + " (@OcoderX)", R.drawable.msg_admins));
 //      items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));

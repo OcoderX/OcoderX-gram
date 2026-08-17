@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
   <string name="AyuPreferences">OcoderX Settings</string>
+  <string name="VipBannerTitle">OcoderX VIP</string>
+  <string name="VipBannerSubtitle">Ghost Mode, deleted messages &amp; more</string>
   <string name="GhostEssentialsHeader">Ghost essentials</string>
   <string name="DontSendReadPackets">Don\'t read messages</string>
   <string name="DontSendOnlinePackets">Don\'t send online</string>

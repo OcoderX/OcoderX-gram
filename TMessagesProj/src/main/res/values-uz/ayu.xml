@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
   <string name="AyuPreferences">OcoderX sozlamalari</string>
+  <string name="VipBannerTitle">OcoderX VIP</string>
+  <string name="VipBannerSubtitle">Ghost Mode, o\'chirilgan xabarlar va yana ko\'plab imkoniyatlar</string>
   <string name="GhostEssentialsHeader">Arvoh rejimi asoslari</string>
   <string name="DontSendReadPackets">Xabarlarni \"o\'qilgan\" deb belgilamaslik</string>
   <string name="DontSendOnlinePackets">Onlayn holatini yubormaslik</string>

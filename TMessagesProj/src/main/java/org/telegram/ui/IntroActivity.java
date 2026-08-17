@@ -32,6 +32,7 @@ import android.os.Parcelable;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +68,7 @@ import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.DrawerProfileCell;
 import org.telegram.ui.Components.BottomPagesView;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.SimpleThemeDescription;
@@ -97,6 +99,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
     private FrameLayout frameContainerView;
 
     private RLottieDrawable darkThemeDrawable;
+    private MotionBackgroundDrawable introBackgroundDrawable;
 
     private int lastPage = 0;
     private boolean justCreated = false;
@@ -145,6 +148,11 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
 
         ScrollView scrollView = new ScrollView(context);
         scrollView.setFillViewport(true);
+
+        introBackgroundDrawable = new MotionBackgroundDrawable();
+        introBackgroundDrawable.setParentView(scrollView);
+        introBackgroundDrawable.setIndeterminateAnimation(true);
+        scrollView.setBackground(introBackgroundDrawable);
 
         RLottieImageView themeIconView = new RLottieImageView(context);
         FrameLayout themeFrameLayout = new FrameLayout(context);
@@ -351,6 +359,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 return;
             }
             startPressed = true;
+            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
 
             presentFragment(new LoginActivity().setIntroView(frameContainerView, startMessagingButton), true);
             destroyed = true;
@@ -452,6 +461,9 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.suggestedLangpack);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.configLoaded);
         MessagesController.getGlobalMainSettings().edit().putLong("intro_crashed_time", 0).apply();
+        if (introBackgroundDrawable != null) {
+            introBackgroundDrawable.setIndeterminateAnimation(false);
+        }
     }
 
     private void checkContinueText() {
@@ -945,7 +957,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
     }
 
     private void updateColors(boolean fromTheme) {
-        fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        updateIntroBackgroundColors();
         switchLanguageTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4));
         startMessagingButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         startMessagingButton.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_changephoneinfo_image2), Theme.getColor(Theme.key_chats_actionPressedBackground)));
@@ -971,6 +983,20 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 messageTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText3));
             }
         } else Intro.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+    }
+
+    private void updateIntroBackgroundColors() {
+        int base = Theme.getColor(Theme.key_windowBackgroundWhite);
+        if (introBackgroundDrawable == null) {
+            return;
+        }
+        int accent1 = Theme.getColor(Theme.key_chats_actionBackground);
+        int accent2 = Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4);
+        int c1 = ColorUtils.blendARGB(base, accent1, 0.10f);
+        int c2 = ColorUtils.blendARGB(base, accent2, 0.10f);
+        int c3 = ColorUtils.blendARGB(base, accent1, 0.05f);
+        int c4 = ColorUtils.blendARGB(base, accent2, 0.05f);
+        introBackgroundDrawable.setColors(c1, c2, c3, c4);
     }
 
     @Override

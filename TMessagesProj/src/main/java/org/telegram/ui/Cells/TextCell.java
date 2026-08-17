@@ -15,6 +15,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
@@ -437,6 +438,54 @@ public class TextCell extends FrameLayout {
         imageView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(9), Theme.getActiveTheme().isMonet() ? Theme.getColor(Theme.key_chats_actionBackground) : color));
     }
 
+    /**
+     * Gradient "squircle" icon badge variant of {@link #setColorfulIcon(int, int)}.
+     * Monet (Material You) themes still fall back to the flat action color to stay consistent with system theming.
+     */
+    public void setGradientIcon(int colorStart, int colorEnd, int resId) {
+        offsetFromImage = getOffsetFromImage(true);
+        imageView.setVisibility(VISIBLE);
+        imageView.setPadding(AndroidUtilities.dp(2), AndroidUtilities.dp(2), AndroidUtilities.dp(2), AndroidUtilities.dp(2));
+        imageView.setTranslationX(AndroidUtilities.dp(LocaleController.isRTL ? 0 : -3));
+        imageView.setImageResource(resId);
+        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getActiveTheme().isMonet() ? Theme.getColor(Theme.key_chats_actionIcon) : Color.WHITE, PorterDuff.Mode.SRC_IN));
+        if (Theme.getActiveTheme().isMonet()) {
+            imageView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(9), Theme.getColor(Theme.key_chats_actionBackground)));
+        } else {
+            GradientDrawable gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{colorStart, colorEnd});
+            gradientDrawable.setCornerRadius(AndroidUtilities.dp(9));
+            imageView.setBackground(gradientDrawable);
+        }
+    }
+
+    public void setTextAndCheckAndGradientIcon(CharSequence text, boolean checked, int resId, int colorStart, int colorEnd, boolean divider) {
+        imageLeft = 21;
+        offsetFromImage = getOffsetFromImage(true);
+        textView.setText(text);
+        valueTextView.setVisibility(GONE);
+        valueSpoilersTextView.setVisibility(GONE);
+        valueImageView.setVisibility(GONE);
+        if (checkBox != null) {
+            checkBox.setVisibility(VISIBLE);
+            checkBox.setChecked(checked, false);
+        }
+        setGradientIcon(colorStart, colorEnd, resId);
+        needDivider = divider;
+        setWillNotDraw(!needDivider);
+    }
+
+    public void setTextAndGradientIcon(String text, int resId, int colorStart, int colorEnd, boolean divider) {
+        imageLeft = 21;
+        offsetFromImage = 71;
+        textView.setText(text);
+        valueTextView.setText(valueText = null, false);
+        setGradientIcon(colorStart, colorEnd, resId);
+        valueTextView.setVisibility(GONE);
+        valueImageView.setVisibility(GONE);
+        needDivider = divider;
+        setWillNotDraw(!needDivider);
+    }
+
     public void setTextAndCheck(CharSequence text, boolean checked, boolean divider) {
         imageLeft = 21;
         offsetFromImage = getOffsetFromImage(false);
@@ -590,16 +639,40 @@ public class TextCell extends FrameLayout {
         }
     }
 
+    private int staggerPosition = -1;
+
+    /**
+     * Opt-in staggered slide+fade entrance animation, replayed each time the cell is attached
+     * (e.g. on recycle-into-view). Pass a value &lt; 0 to disable (default).
+     */
+    public void setStaggerPosition(int position) {
+        staggerPosition = position;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         attached = true;
+        if (staggerPosition >= 0) {
+            animate().cancel();
+            setAlpha(0f);
+            setTranslationX(AndroidUtilities.dp(LocaleController.isRTL ? 24 : -24));
+            long delay = Math.min(staggerPosition * 25L, 200L);
+            animate().alpha(1f).translationX(0f).setStartDelay(delay).setDuration(220)
+                    .setInterpolator(org.telegram.ui.Components.CubicBezierInterpolator.EASE_OUT)
+                    .start();
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         attached = false;
+        if (staggerPosition >= 0) {
+            animate().cancel();
+            setAlpha(1f);
+            setTranslationX(0f);
+        }
     }
 
     public void setDrawLoading(boolean drawLoading, int size, boolean animated) {

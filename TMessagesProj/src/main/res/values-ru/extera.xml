@@ -14,8 +14,12 @@
 <resources>
     <string name="Preferences">Настройки Ox-gram</string>
     <string name="OcoderXPreferences">Настройки Ox-gram</string>
+    <string name="OcoderXFeatures">Возможности OcoderX</string>
+    <string name="GhostAndMessagesSettings">Призрак и удалённые сообщения</string>
     <string name="DeletedMessages">Удалённые сообщения</string>
     <string name="RestartApp">Перезапустить приложение</string>
+    <string name="Navigation">Навигация</string>
+    <string name="OcoderXCommunity">OcoderX</string>
 
     <!-- Main Menu -->
     <string name="Links">Ссылки</string>

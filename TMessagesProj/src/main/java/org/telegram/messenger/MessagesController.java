@@ -962,11 +962,12 @@ public class MessagesController extends BaseController implements NotificationCe
         public ArrayList<TLRPC.Dialog> dialogsForward = new ArrayList<>();
 
         public ArrayList<TLRPC.TL_exportedChatlistInvite> invites = null;
-        
+
         public String emoticon;
 
         private static int dialogFilterPointer = 10;
         public int localId = dialogFilterPointer++;
+        public boolean synthetic;
         public boolean locked;
 
         public boolean includesDialog(AccountInstance accountInstance, long dialogId) {

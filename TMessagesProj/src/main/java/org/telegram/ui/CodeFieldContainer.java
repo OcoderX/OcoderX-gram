@@ -40,7 +40,7 @@ public class CodeFieldContainer extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        paint.setStrokeWidth(strokeWidth = AndroidUtilities.dp(1.5f));
+        paint.setStrokeWidth(strokeWidth = AndroidUtilities.dp(1.75f));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class CodeFieldContainer extends LinearLayout {
                     AndroidUtilities.rectTmp.inset(offset, offset);
                 }
 
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(4), AndroidUtilities.dp(4), paint);
+                canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(10), AndroidUtilities.dp(10), paint);
             }
         }
         super.dispatchDraw(canvas);

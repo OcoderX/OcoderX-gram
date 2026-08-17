@@ -16541,6 +16541,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 }
                 if (currentMessageObject.shouldDrawWithoutBackground()) {
                     drawable = getThemedDrawable(Theme.key_drawable_msgStickerCheck);
+                    Theme.setDrawableColor(drawable, drawCheck1 ? 0xFF00E676 : 0xFFFF3B30);
                     if (drawCheck1) {
                         if (moveCheck) {
                             canvas.translate(AndroidUtilities.dp(4.8f) * (1f - progress), 0);
@@ -16551,6 +16552,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     }
                     drawable.setAlpha((int) (255 * timeAlpha * alpha));
                 } else {
+                    Theme.setDrawableColor(Theme.chat_msgMediaCheckDrawable, drawCheck1 ? 0xFF00E676 : 0xFFFF3B30);
                     if (drawCheck1) {
                         if (moveCheck) {
                             canvas.translate(AndroidUtilities.dp(4.8f) * (1f - progress), 0);
@@ -16607,6 +16609,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (drawCheck1) {
             if (shouldDrawTimeOnMedia()) {
                 Drawable drawable = currentMessageObject.shouldDrawWithoutBackground() ? getThemedDrawable(Theme.key_drawable_msgStickerHalfCheck) : Theme.chat_msgMediaHalfCheckDrawable;
+                Theme.setDrawableColor(drawable, 0xFF00E676);
                 setDrawableBounds(drawable, layoutWidth - AndroidUtilities.dp(bigRadius ? 23.5f : 21.5f) - drawable.getIntrinsicWidth(), timeY - drawable.getIntrinsicHeight() + timeYOffset);
                 drawable.setAlpha((int) (255 * timeAlpha * alpha));
                 if (useScale || moveCheck) {

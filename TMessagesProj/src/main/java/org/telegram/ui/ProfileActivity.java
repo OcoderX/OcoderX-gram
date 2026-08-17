@@ -165,6 +165,7 @@ import org.telegram.ui.Cells.SettingsSearchCell;
 import org.telegram.ui.Cells.SettingsSuggestionCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCell;
+import org.telegram.ui.Cells.VipBannerCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextDetailCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
@@ -468,6 +469,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int passwordSuggestionRow;
     private int settingsSectionRow;
     private int settingsSectionRow2;
+    private int vipBannerRow;
+    private int ghostModeQuickToggleRow;
     private int exteraRow;
     private int ayuRow;
     private int notificationRow;
@@ -3307,6 +3310,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 ChatUsersActivity fragment = new ChatUsersActivity(args);
                 fragment.setInfo(chatInfo);
                 presentFragment(fragment);
+            } else if (position == vipBannerRow) {
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                presentFragment(new AyuGramPreferencesActivity());
+            } else if (position == ghostModeQuickToggleRow) {
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                AyuConfig.toggleGhostMode();
+                ((TextCell) view).setChecked(AyuConfig.isGhostModeActive());
             } else if (position == exteraRow) {
                 presentFragment(new MainPreferencesActivity());
             } else if (position == ayuRow) {
@@ -7034,6 +7044,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         passwordSuggestionRow = -1;
         settingsSectionRow = -1;
         settingsSectionRow2 = -1;
+        vipBannerRow = -1;
+        ghostModeQuickToggleRow = -1;
         exteraRow = -1;
         ayuRow = -1;
         notificationRow = -1;
@@ -7140,6 +7152,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
 
                 settingsSectionRow2 = rowCount++;
+                vipBannerRow = rowCount++;
+                ghostModeQuickToggleRow = rowCount++;
                 exteraRow = rowCount++;
                 ayuRow = rowCount++;
                 chatRow = rowCount++;
@@ -8863,7 +8877,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 VIEW_TYPE_ADDTOGROUP_INFO = 17,
                 VIEW_TYPE_PREMIUM_TEXT_CELL = 18,
                 VIEW_TYPE_TEXT_DETAIL_MULTILINE = 19,
-                VIEW_TYPE_NOTIFICATIONS_CHECK_SIMPLE = 20;
+                VIEW_TYPE_NOTIFICATIONS_CHECK_SIMPLE = 20,
+                VIEW_TYPE_VIP_BANNER = 21;
 
         private Context mContext;
 
@@ -9029,6 +9044,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 case VIEW_TYPE_PREMIUM_TEXT_CELL:
                     view = new ProfilePremiumCell(mContext, resourcesProvider);
                     break;
+                case VIEW_TYPE_VIP_BANNER: {
+                    view = new VipBannerCell(mContext);
+                    break;
+                }
             }
             if (viewType != VIEW_TYPE_SHARED_MEDIA) {
                 view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
@@ -9332,24 +9351,26 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setTextAndValueAndIcon(LocaleController.getString("Language", R.string.Language), LocaleController.getCurrentLanguageName(), false, R.drawable.msg2_language, false);
                         if (!ExteraConfig.useSolarIcons)
                             textCell.setImageLeft(23);
+                    } else if (position == ghostModeQuickToggleRow) {
+                        textCell.setTextAndCheckAndGradientIcon(LocaleController.getString("GhostModeToggle", R.string.GhostModeToggle), AyuConfig.isGhostModeActive(), R.drawable.msg2_secret, 0xFF8E24AA, 0xFF3949AB, true);
                     } else if (position == exteraRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("Preferences", R.string.Preferences), R.drawable.etg_settings, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("Preferences", R.string.Preferences), R.drawable.etg_settings, 0xFF7C4DFF, 0xFFFF4FD8, true);
                     } else if (position == ayuRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("AyuPreferences", R.string.AyuPreferences), R.drawable.msg2_reactions2, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("AyuPreferences", R.string.AyuPreferences), R.drawable.msg2_reactions2, 0xFFFFD700, 0xFF00E5FF, true);
                     } else if (position == notificationRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("NotificationsAndSounds", R.string.NotificationsAndSounds), R.drawable.msg2_notifications, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("NotificationsAndSounds", R.string.NotificationsAndSounds), R.drawable.msg2_notifications, 0xFFFF5252, 0xFFFF9800, true);
                     } else if (position == privacyRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("PrivacySettings", R.string.PrivacySettings), R.drawable.msg2_secret, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("PrivacySettings", R.string.PrivacySettings), R.drawable.msg2_secret, 0xFF7C4DFF, 0xFF448AFF, true);
                     } else if (position == dataRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("DataSettings", R.string.DataSettings), R.drawable.msg2_data, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("DataSettings", R.string.DataSettings), R.drawable.msg2_data, 0xFF00C853, 0xFF1DE9B6, true);
                     } else if (position == chatRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("ChatSettings", R.string.ChatSettings), R.drawable.msg2_discussion, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("ChatSettings", R.string.ChatSettings), R.drawable.msg2_discussion, 0xFF2979FF, 0xFF00E5FF, true);
                     } else if (position == filtersRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("Filters", R.string.Filters), R.drawable.msg2_folder, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("Filters", R.string.Filters), R.drawable.msg2_folder, 0xFF00BFA5, 0xFF64DD17, true);
                     } else if (position == stickersRow) {
-                        textCell.setTextAndIcon(LocaleController.getString(R.string.StickersName), R.drawable.msg2_sticker, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString(R.string.StickersName), R.drawable.msg2_sticker, 0xFFFF4FD8, 0xFF7C4DFF, true);
                     } else if (position == liteModeRow) {
-                        textCell.setTextAndIcon(LocaleController.getString(R.string.PowerUsage), R.drawable.msg2_battery, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString(R.string.PowerUsage), R.drawable.msg2_battery, 0xFFFFC107, 0xFFFF6F00, true);
                     } else if (position == questionRow) {
                         textCell.setTextAndIcon(LocaleController.getString("AskAQuestion", R.string.AskAQuestion), R.drawable.msg2_ask_question, true);
                     } else if (position == policyRow) {
@@ -9363,7 +9384,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == switchBackendRow) {
                         textCell.setText("Switch Backend", true);
                     } else if (position == devicesRow) {
-                        textCell.setTextAndIcon(LocaleController.getString("Devices", R.string.Devices), R.drawable.msg2_devices, true);
+                        textCell.setTextAndGradientIcon(LocaleController.getString("Devices", R.string.Devices), R.drawable.msg2_devices, 0xFF5C6BC0, 0xFF3949AB, true);
                     } else if (position == setAvatarRow) {
                         cellCameraDrawable.setCustomEndFrame(86);
                         cellCameraDrawable.setCurrentFrame(85, false);
@@ -9379,6 +9400,34 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setTextAndIcon(LocaleController.getString("TelegramPremium", R.string.TelegramPremium), new AnimatedEmojiDrawable.WrapSizeDrawable(PremiumGradient.getInstance().premiumStarMenuDrawable, AndroidUtilities.dp(24), AndroidUtilities.dp(24)), false);
                         textCell.setImageLeft(23);
                     }
+                    if (ghostModeQuickToggleRow != -1 && languageRow != -1 && position >= ghostModeQuickToggleRow && position <= languageRow) {
+                        int rad = AndroidUtilities.dp(14);
+                        int topRad = position == ghostModeQuickToggleRow ? rad : 0;
+                        int bottomRad = position == languageRow ? rad : 0;
+                        textCell.setBackground(Theme.createRoundRectDrawable(topRad, bottomRad, Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider)));
+                        ViewGroup.LayoutParams lp = textCell.getLayoutParams();
+                        if (lp instanceof RecyclerView.LayoutParams) {
+                            RecyclerView.LayoutParams rlp = (RecyclerView.LayoutParams) lp;
+                            if (rlp.leftMargin != AndroidUtilities.dp(12) || rlp.rightMargin != AndroidUtilities.dp(12)) {
+                                rlp.leftMargin = rlp.rightMargin = AndroidUtilities.dp(12);
+                                textCell.setLayoutParams(rlp);
+                            }
+                        }
+                        textCell.setStaggerPosition(position - ghostModeQuickToggleRow);
+                    } else {
+                        textCell.setBackground(null);
+                        ViewGroup.LayoutParams lp = textCell.getLayoutParams();
+                        if (lp instanceof RecyclerView.LayoutParams) {
+                            RecyclerView.LayoutParams rlp = (RecyclerView.LayoutParams) lp;
+                            if (rlp.leftMargin != 0 || rlp.rightMargin != 0) {
+                                rlp.leftMargin = rlp.rightMargin = 0;
+                                textCell.setLayoutParams(rlp);
+                            }
+                        }
+                        textCell.setStaggerPosition(-1);
+                    }
+                    break;
+                case VIEW_TYPE_VIP_BANNER:
                     break;
                 case VIEW_TYPE_NOTIFICATIONS_CHECK:
                     NotificationsCheckCell checkCell = (NotificationsCheckCell) holder.itemView;
@@ -9582,7 +9631,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == questionRow || position == devicesRow || position == filtersRow || position == stickersRow ||
                         position == policyRow || position == sendLogsRow || position == sendLastLogsRow || position == exteraRow || position == ayuRow ||
                         position == clearLogsRow || position == switchBackendRow || position == setAvatarRow ||
-                        position == addToGroupButtonRow || position == premiumRow || position == liteModeRow;
+                        position == addToGroupButtonRow || position == premiumRow || position == liteModeRow ||
+                        position == vipBannerRow || position == ghostModeQuickToggleRow;
             }
             if (holder.itemView instanceof UserCell) {
                 UserCell userCell = (UserCell) holder.itemView;
@@ -9610,6 +9660,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (position == infoHeaderRow || position == membersHeaderRow || position == settingsSectionRow2 ||
                     position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow) {
                 return VIEW_TYPE_HEADER;
+            } else if (position == vipBannerRow) {
+                return VIEW_TYPE_VIP_BANNER;
             } else if (position == idDcRow || position == phoneRow || position == locationRow || position == numberRow) {
                 return VIEW_TYPE_TEXT_DETAIL;
             } else if (position == usernameRow || position == setUsernameRow) {
@@ -9620,6 +9672,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     position == subscribersRow || position == subscribersRequestsRow || position == administratorsRow || position == blockedUsersRow ||
                     position == addMemberRow || position == joinRow || position == unblockRow ||
                     position == sendMessageRow || position == notificationRow || position == exteraRow || position == ayuRow || position == privacyRow ||
+                    position == ghostModeQuickToggleRow ||
                     position == languageRow || position == dataRow || position == chatRow ||
                     position == questionRow || position == devicesRow || position == filtersRow || position == stickersRow ||
                     position == policyRow || position == sendLogsRow || position == sendLastLogsRow ||
@@ -10796,6 +10849,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             put(++pointer, passwordSuggestionSectionRow, sparseIntArray);
             put(++pointer, settingsSectionRow, sparseIntArray);
             put(++pointer, settingsSectionRow2, sparseIntArray);
+            put(++pointer, vipBannerRow, sparseIntArray);
+            put(++pointer, ghostModeQuickToggleRow, sparseIntArray);
             put(++pointer, exteraRow, sparseIntArray);
             put(++pointer, ayuRow, sparseIntArray);
             put(++pointer, notificationRow, sparseIntArray);

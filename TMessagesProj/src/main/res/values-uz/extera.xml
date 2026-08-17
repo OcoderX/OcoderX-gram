@@ -14,8 +14,15 @@
 <resources>
     <string name="Preferences">Ox-gram sozlamalari</string>
     <string name="OcoderXPreferences">OcoderX sozlamalari</string>
+    <string name="OcoderXFeatures">OcoderX imkoniyatlari</string>
+    <string name="GhostAndMessagesSettings">Arvoh va O\'chirilgan xabarlar</string>
     <string name="DeletedMessages">O\'chirilgan xabarlar</string>
     <string name="RestartApp">Ilovani qayta ishga tushirish</string>
+    <string name="Navigation">Navigatsiya</string>
+    <string name="OcoderXCommunity">OcoderX</string>
+    <string name="FilterPeopleDefault">Odamlar</string>
+    <string name="LoginViaQrCode">QR-kod orqali kirish</string>
+    <string name="LoginViaQrCodeSoon">QR-kod orqali kirish tez orada qo\'shiladi.</string>
 
     <!-- Main Menu -->
     <string name="Links">Havolalar</string>

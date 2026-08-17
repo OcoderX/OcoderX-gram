@@ -2219,6 +2219,30 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             addView(proxySettings, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM, 16, 15, 16, 16));
             proxySettings.setOnClickListener(view -> presentFragment(new ProxyListActivity()));
 
+            TextView qrLoginButton = new TextView(context);
+            qrLoginButton.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+            qrLoginButton.setGravity(Gravity.CENTER);
+            qrLoginButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            qrLoginButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            qrLoginButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.msg_qrcode, 0, 0, 0);
+            qrLoginButton.setCompoundDrawablePadding(AndroidUtilities.dp(8));
+            qrLoginButton.setText(LocaleController.getString("LoginViaQrCode", R.string.LoginViaQrCode));
+            qrLoginButton.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4));
+            qrLoginButton.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_listSelector)));
+            addView(qrLoginButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM, 16, 15, 16, 80));
+            qrLoginButton.setOnClickListener(view -> {
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                // NOTE(ocoderx): a real "scan to log in" flow needs this (unauthenticated) device to
+                // call auth.exportLoginToken and display/poll a QR, then handle auth.LoginTokenMigrateTo /
+                // auth.LoginTokenSuccess. That plumbing doesn't exist anywhere in this codebase yet -
+                // every existing QR-scan entry point (SessionsActivity, ActionIntroActivity's tg://scanqr
+                // handler) is the opposite direction: an ALREADY authenticated device scanning a QR to
+                // approve a new session. Wiring this button to auth.acceptLoginToken like those flows would
+                // be semantically wrong (and would fail: this connection isn't authorized yet). Shipping the
+                // entry point only; real support needs the export/poll flow added first.
+                AlertsCreator.showSimpleAlert(LoginActivity.this, LocaleController.getString("LoginViaQrCode", R.string.LoginViaQrCode), LocaleController.getString("LoginViaQrCodeSoon", R.string.LoginViaQrCodeSoon));
+            });
+
             int bottomMargin = 72;
             if (newAccount && activityMode == MODE_LOGIN) {
                 syncContactsBox = new CheckBoxCell(context, 2);

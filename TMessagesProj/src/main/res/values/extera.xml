@@ -15,8 +15,15 @@
     <string name="exteraAppName" translatable="false">Ox-gram</string>
     <string name="Preferences">Ox-gram Preferences</string>
     <string name="OcoderXPreferences">Ox-gram Preferences</string>
+    <string name="OcoderXFeatures">OcoderX Features</string>
+    <string name="GhostAndMessagesSettings">Ghost &amp; Deleted Messages</string>
     <string name="DeletedMessages">Deleted Messages</string>
     <string name="RestartApp">Restart App</string>
+    <string name="Navigation">Navigation</string>
+    <string name="OcoderXCommunity">OcoderX</string>
+    <string name="FilterPeopleDefault">People</string>
+    <string name="LoginViaQrCode">Login via QR Code</string>
+    <string name="LoginViaQrCodeSoon">QR code login is coming soon.</string>
 
     <!-- Main Menu -->
     <string name="Links">Links</string>

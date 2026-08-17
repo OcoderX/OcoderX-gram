@@ -2881,7 +2881,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         return;
                     }
 
-                    ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
+                    ArrayList<MessagesController.DialogFilter> dialogFilters = getDisplayedDialogFilters();
                     if (!tab.isDefault && (tab.id < 0 || tab.id >= dialogFilters.size())) {
                         return;
                     }
@@ -2935,11 +2935,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     if (tabId == filterTabsView.getDefaultTabId()) {
                         return getMessagesStorage().getMainUnreadCount();
                     }
-                    ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
+                    ArrayList<MessagesController.DialogFilter> dialogFilters = getDisplayedDialogFilters();
                     if (tabId < 0 || tabId >= dialogFilters.size()) {
                         return 0;
                     }
-                    return getMessagesController().getDialogFilters().get(tabId).unreadCount;
+                    return dialogFilters.get(tabId).unreadCount;
                 }
 
                 @Override
@@ -2960,7 +2960,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     if (tabView.getId() == filterTabsView.getDefaultTabId()) {
                         dialogFilter = null;
                     } else {
-                        dialogFilter = getMessagesController().getDialogFilters().get(tabView.getId());
+                        dialogFilter = getDisplayedDialogFilters().get(tabView.getId());
                     }
 
                     boolean defaultTab = dialogFilter == null;
@@ -2972,7 +2972,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     ArrayList<TLRPC.Dialog> dialogs = new ArrayList<>(defaultTab ? getMessagesController().getDialogs(folderId) : getMessagesController().getAllDialogs());
                     MessagesController.DialogFilter filter = null;
                     if (dialogFilter != null) {
-                        filter = getMessagesController().getDialogFilters().get(tabView.getId());
+                        filter = getDisplayedDialogFilters().get(tabView.getId());
                         if (filter != null) {
                             for (int i = 0; i < dialogs.size(); i++) {
                                 if (!filter.includesDialog(getAccountInstance(), dialogs.get(i).id)) {
@@ -3023,7 +3023,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                             filterTabsView.setIsEditing(true);
                             showDoneItem(true);
                         })
-                        .add(R.drawable.msg_edit, defaultTab ? LocaleController.getString("FilterEditAll", R.string.FilterEditAll) : LocaleController.getString("FilterEdit", R.string.FilterEdit), () -> presentFragment(defaultTab ? new FiltersSetupActivity() : new FilterCreateActivity(dialogFilter)))
+                        .addIf(defaultTab || !dialogFilter.synthetic, R.drawable.msg_edit, defaultTab ? LocaleController.getString("FilterEditAll", R.string.FilterEditAll) : LocaleController.getString("FilterEdit", R.string.FilterEdit), () -> presentFragment(defaultTab ? new FiltersSetupActivity() : new FilterCreateActivity(dialogFilter)))
                         .addIf(dialogFilter != null && !dialogs.isEmpty(), muteAll ? R.drawable.msg_mute : R.drawable.msg_unmute, muteAll ? LocaleController.getString("FilterMuteAll", R.string.FilterMuteAll) : LocaleController.getString("FilterUnmuteAll", R.string.FilterUnmuteAll), () -> {
                             int count = 0;
                             for (int i = 0; i < dialogs.size(); ++i) {
@@ -3045,7 +3045,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                 FilterCreateActivity.FilterInvitesBottomSheet.show(DialogsActivity.this, finalFilter, null);
                             }
                         })
-                        .addIf(!defaultTab, R.drawable.msg_delete, LocaleController.getString("FilterDeleteItem", R.string.FilterDeleteItem), true, () -> {
+                        .addIf(!defaultTab && !dialogFilter.synthetic, R.drawable.msg_delete, LocaleController.getString("FilterDeleteItem", R.string.FilterDeleteItem), true, () -> {
                             showDeleteAlert(dialogFilter);
                         })
                         .setGravity(Gravity.LEFT)
@@ -5380,10 +5380,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             viewPages[a].listView.stopScroll();
         }
         int a = animated ? 1 : 0;
-        if (viewPages[a].selectedType < 0 || viewPages[a].selectedType >= getMessagesController().getDialogFilters().size()) {
+        ArrayList<MessagesController.DialogFilter> displayedFilters = getDisplayedDialogFilters();
+        if (viewPages[a].selectedType < 0 || viewPages[a].selectedType >= displayedFilters.size()) {
             return;
         }
-        MessagesController.DialogFilter filter = getMessagesController().getDialogFilters().get(viewPages[a].selectedType);
+        MessagesController.DialogFilter filter = displayedFilters.get(viewPages[a].selectedType);
         if (filter.isDefault()) {
             viewPages[a].dialogsType = initialDialogsType;
             viewPages[a].listView.updatePullState();
@@ -5421,6 +5422,41 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
+    private MessagesController.DialogFilter[] defaultTypeFilters;
+
+    private ArrayList<MessagesController.DialogFilter> getDisplayedDialogFilters() {
+        ArrayList<MessagesController.DialogFilter> filters = getMessagesController().getDialogFilters();
+        if (filters.size() > 1 || filters.isEmpty() || initialDialogsType != DIALOGS_TYPE_DEFAULT || onlySelect) {
+            return filters;
+        }
+        if (defaultTypeFilters == null) {
+            int[] typeFlags = {
+                MessagesController.DIALOG_FILTER_FLAG_CONTACTS | MessagesController.DIALOG_FILTER_FLAG_NON_CONTACTS,
+                MessagesController.DIALOG_FILTER_FLAG_GROUPS,
+                MessagesController.DIALOG_FILTER_FLAG_CHANNELS,
+                MessagesController.DIALOG_FILTER_FLAG_BOTS
+            };
+            defaultTypeFilters = new MessagesController.DialogFilter[typeFlags.length];
+            for (int i = 0; i < typeFlags.length; i++) {
+                MessagesController.DialogFilter filter = new MessagesController.DialogFilter();
+                filter.id = -1 - i;
+                filter.flags = typeFlags[i] | MessagesController.DIALOG_FILTER_FLAG_EXCLUDE_ARCHIVED;
+                filter.synthetic = true;
+                defaultTypeFilters[i] = filter;
+            }
+        }
+        defaultTypeFilters[0].name = LocaleController.getString("FilterPeopleDefault", R.string.FilterPeopleDefault);
+        defaultTypeFilters[1].name = LocaleController.getString("FilterGroups", R.string.FilterGroups);
+        defaultTypeFilters[2].name = LocaleController.getString("FilterChannels", R.string.FilterChannels);
+        defaultTypeFilters[3].name = LocaleController.getString("FilterBots", R.string.FilterBots);
+        ArrayList<MessagesController.DialogFilter> result = new ArrayList<>(defaultTypeFilters.length + 1);
+        result.add(filters.get(0));
+        for (MessagesController.DialogFilter filter : defaultTypeFilters) {
+            result.add(filter);
+        }
+        return result;
+    }
+
     private void updateFilterTabs(boolean force, boolean animated) {
         if (filterTabsView == null || inPreviewMode || searchIsShowed) {
             return;
@@ -5429,7 +5465,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             filterOptions.dismiss();
             filterOptions = null;
         }
-        ArrayList<MessagesController.DialogFilter> filters = getMessagesController().getDialogFilters();
+        ArrayList<MessagesController.DialogFilter> filters = getDisplayedDialogFilters();
         if (filters.size() > 1) {
             if (force || filterTabsView.getVisibility() != View.VISIBLE) {
                 boolean animatedUpdateItems = animated;
@@ -8197,7 +8233,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else {
             blockItem.setVisibility(View.VISIBLE);
         }
-        boolean cantRemoveFromFolder = filterTabsView == null || filterTabsView.getVisibility() != View.VISIBLE || filterTabsView.currentTabIsDefault();
+        boolean cantRemoveFromFolder = filterTabsView == null || filterTabsView.getVisibility() != View.VISIBLE || filterTabsView.currentTabIsDefault()
+                || viewPages[0].selectedType < 0 || viewPages[0].selectedType >= getMessagesController().getDialogFilters().size();
         if (!cantRemoveFromFolder) {
             try {
                 final int dialogsCount = getDialogsArray(currentAccount, viewPages[0].dialogsAdapter.getDialogsType(), folderId, dialogsListFrozen).size();

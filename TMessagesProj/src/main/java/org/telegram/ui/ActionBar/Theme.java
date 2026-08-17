@@ -9082,6 +9082,15 @@ public class Theme {
     }
 
     public static int getColor(int key, ResourcesProvider provider) {
+        if (key == key_chat_outSentCheck || key == key_chats_sentCheck) {
+            return 0xFFFF3B30;
+        } else if (key == key_chat_outSentCheckRead || key == key_chats_sentReadCheck) {
+            return 0xFF00E676;
+        } else if (key == key_chat_outSentCheckSelected) {
+            return 0xFFFF5252;
+        } else if (key == key_chat_outSentCheckReadSelected) {
+            return 0xFF69F0AE;
+        }
         if (provider != null) {
             return provider.getColor(key);
         }
@@ -9096,6 +9105,15 @@ public class Theme {
     }
 
     public static int getColor(int key, boolean[] isDefault, boolean ignoreAnimation) {
+        if (key == key_chat_outSentCheck || key == key_chats_sentCheck) {
+            return 0xFFFF3B30;
+        } else if (key == key_chat_outSentCheckRead || key == key_chats_sentReadCheck) {
+            return 0xFF00E676;
+        } else if (key == key_chat_outSentCheckSelected) {
+            return 0xFFFF5252;
+        } else if (key == key_chat_outSentCheckReadSelected) {
+            return 0xFF69F0AE;
+        }
         if (!ignoreAnimation && animatingColors != null) {
             int index = animatingColors.indexOfKey(key);
             if (index >= 0) {

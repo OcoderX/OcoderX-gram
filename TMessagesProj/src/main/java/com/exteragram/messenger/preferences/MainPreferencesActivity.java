@@ -34,7 +34,6 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
-import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
@@ -64,7 +63,6 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
     private int groupRow;
     private int adminRow;
     private int spamBotRow;
-    private int sourceCodeRow;
     private int infoDividerRow;
 
     @Override
@@ -207,7 +205,6 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
         groupRow = newRow();
         adminRow = newRow();
         spamBotRow = newRow();
-        sourceCodeRow = newRow();
         infoDividerRow = newRow();
     }
 
@@ -224,8 +221,6 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
             MessagesController.getInstance(currentAccount).openByUserName("OcoderX", this, 1);
         } else if (position == spamBotRow) {
             MessagesController.getInstance(currentAccount).openByUserName("OcoderXbot", this, 1);
-        } else if (position == sourceCodeRow) {
-            Browser.openUrl(getParentActivity(), "https://github.com/OcoderX/OcoderX-gram");
         } else if (position == appearanceRow) {
             presentFragment(new AppearancePreferencesActivity());
         } else if (position == chatsRow) {
@@ -286,9 +281,7 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
                     } else if (position == adminRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("ContactAdmin", R.string.ContactAdmin), "@OcoderX", R.drawable.msg_admins, true);
                     } else if (position == spamBotRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("SpamBot", R.string.SpamBot), "@OcoderXbot", R.drawable.msg_bot, true);
-                    } else if (position == sourceCodeRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("SourceCode", R.string.SourceCode), "GitHub", R.drawable.msg_help, false);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("SpamBot", R.string.SpamBot), "@OcoderXbot", R.drawable.msg_bot, false);
                     }
                     break;
                 case 3:
