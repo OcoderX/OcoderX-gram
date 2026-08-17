@@ -55,7 +55,7 @@ dependencies {
     implementation "androidx.camera:camera-video:${camerax_version}"
     implementation 'androidx.interpolator:interpolator:1.0.0'
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     // AyuGram deps
 
@@ -75,9 +75,9 @@ def isPmBuild = "false"
 def abis = [9: 'universal', 1: 'armeabi-v7a', 5: 'arm64-v8a', 2: 'x86', 6: 'x86_64']
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion '33.0.1'
-    ndkVersion "21.4.7075529"
+    compileSdkVersion 35
+    buildToolsVersion '35.0.0'
+    ndkVersion "27.2.12479018"
     namespace 'org.telegram.messenger'
 
     defaultConfig.applicationId = APP_PACKAGE
@@ -90,7 +90,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 35
         versionName APP_VERSION_NAME
 
         // Obtain your own keys at: https://core.telegram.org/api/obtaining_api_id
