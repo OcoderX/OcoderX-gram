@@ -77,6 +77,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     private BackupImageView avatarImageView;
     private SimpleTextView nameTextView;
     private TextView phoneTextView;
+    private TextView dcTextView; // --- OcoderX: DC badge
     private ImageView shadowView;
     private ImageView arrowView;
     private RLottieImageView darkThemeView;
@@ -147,6 +148,18 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         phoneTextView.setSingleLine(true);
         phoneTextView.setGravity(Gravity.LEFT);
         addView(phoneTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 16, 0, 52, 9));
+
+        // --- OcoderX: DC badge label
+        dcTextView = new TextView(context);
+        dcTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
+        dcTextView.setLines(1);
+        dcTextView.setMaxLines(1);
+        dcTextView.setSingleLine(true);
+        dcTextView.setGravity(Gravity.RIGHT);
+        dcTextView.setPadding(AndroidUtilities.dp(6), AndroidUtilities.dp(2), AndroidUtilities.dp(6), AndroidUtilities.dp(2));
+        dcTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        addView(dcTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT,
+                Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 8, 10));
 
         arrowView = new ImageView(context);
         arrowView.setScaleType(ImageView.ScaleType.CENTER);
@@ -687,6 +700,24 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         AvatarDrawable avatarDrawable = new AvatarDrawable(user);
         avatarDrawable.setColor(Theme.getColor(Theme.key_avatar_backgroundInProfileBlue));
         avatarImageView.setForUserOrChat(user, avatarDrawable);
+        // --- OcoderX: show DC server info
+        try {
+            int dc = UserConfig.getInstance(account).getCurrentUser().photo != null
+                    ? UserConfig.getInstance(account).getCurrentUser().photo.dc_id : 0;
+            if (dc > 0) {
+                String[] dcNames = {"DC1 · Miami", "DC2 · Amsterdam", "DC3 · Miami", "DC4 · Amsterdam", "DC5 · Singapore"};
+                String dcLabel = dc <= dcNames.length ? dcNames[dc - 1] : "DC" + dc;
+                dcTextView.setText(dcLabel);
+                int dcColor = Theme.getColor(Theme.key_chats_menuName);
+                dcTextView.setTextColor((dcColor & 0x00FFFFFF) | 0xBB000000);
+                dcTextView.setBackgroundDrawable(Theme.createRoundRectDrawable(AndroidUtilities.dp(8), (dcColor & 0x00FFFFFF) | 0x22000000));
+                dcTextView.setVisibility(VISIBLE);
+            } else {
+                dcTextView.setVisibility(GONE);
+            }
+        } catch (Exception e) {
+            dcTextView.setVisibility(GONE);
+        }
         applyBackground(true);
         updateRightDrawable = true;
     }

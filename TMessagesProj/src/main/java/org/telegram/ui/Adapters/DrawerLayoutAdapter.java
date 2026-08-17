@@ -31,6 +31,7 @@ import org.telegram.ui.Cells.DividerCell;
 import org.telegram.ui.Cells.DrawerActionCell;
 import org.telegram.ui.Cells.DrawerAddCell;
 import org.telegram.ui.Cells.DrawerProfileCell;
+import org.telegram.ui.Cells.DrawerSectionCell;
 import org.telegram.ui.Cells.DrawerUserCell;
 import org.telegram.ui.Cells.EmptyCell;
 import org.telegram.ui.Components.RecyclerListView;
@@ -116,7 +117,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     @Override
     public boolean isEnabled(RecyclerView.ViewHolder holder) {
         int itemType = holder.getItemViewType();
-        return itemType == 3 || itemType == 4 || itemType == 5 || itemType == 6;
+        return itemType == 3 || itemType == 4 || itemType == 5;
     }
 
     @Override
@@ -145,6 +146,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             case 5:
                 view = new DrawerAddCell(mContext);
                 break;
+            case 6: // --- OcoderX: section header
+                view = new DrawerSectionCell(mContext);
+                break;
             case 1:
             default:
                 view = new EmptyCell(mContext, AndroidUtilities.dp(8));
@@ -168,8 +172,20 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                 if (accountsShown) {
                     position -= getAccountRowsCount();
                 }
-                items.get(position).bind(drawerActionCell);
+                Item item = items.get(position);
+                item.bind(drawerActionCell);
+                drawerActionCell.setAdapterPosition(position); // --- OcoderX: stagger anim
                 drawerActionCell.setPadding(0, 0, 0, 0);
+                break;
+            }
+            case 6: { // --- OcoderX: section header
+                DrawerSectionCell sectionCell = (DrawerSectionCell) holder.itemView;
+                position -= 2;
+                if (accountsShown) {
+                    position -= getAccountRowsCount();
+                }
+                Item item = items.get(position);
+                sectionCell.setText(item.text);
                 break;
             }
             case 4: {
@@ -209,6 +225,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (i < 0 || i >= items.size() || items.get(i) == null) {
             return 2;
         }
+        if (items.get(i).isSection) return 6; // --- OcoderX: section header
         return 3;
     }
 
@@ -317,6 +334,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                     : LocaleController.getString("EnableGhostMode", R.string.EnableGhostMode);
             items.add(new Item(AyuConstants.DRAWER_TOGGLE_GHOST, msg, R.drawable.ayu_ghost));
         }
+        // OcoderX section
+        items.add(Item.section(LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences)));
         items.add(new Item(AyuConstants.DRAWER_OCODER_PREFS, LocaleController.getString("OcoderXPreferences", R.string.OcoderXPreferences), R.drawable.msg_customize));
         items.add(new Item(AyuConstants.DRAWER_DELETED_MESSAGES, LocaleController.getString("DeletedMessages", R.string.DeletedMessages), R.drawable.msg_delete));
         if (AyuConfig.showKillButtonInDrawer) {
@@ -338,6 +357,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             items.add(new Item(14, LocaleController.getString("ArchivedChats", R.string.ArchivedChats), archiveIcon));
             items.add(null);
         }
+        // Navigation section
+        items.add(Item.section("Navigatsiya"));
         if (ExteraConfig.newGroup) items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon));
         if (ExteraConfig.newSecretChat) items.add(new Item(3, LocaleController.getString("NewSecretChat", R.string.NewSecretChat), newSecretIcon));
         if (ExteraConfig.newChannel) items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon));
@@ -351,6 +372,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             items.add(new Item(16, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), scanQrIcon));
         }
         items.add(null);
+        // OcoderX channel section
+        items.add(Item.section("OcoderX"));
         items.add(new Item(AyuConstants.DRAWER_CHANNEL, LocaleController.getString("Channel", R.string.Channel) + " (@OcoderXs)", R.drawable.msg_channel));
         items.add(new Item(AyuConstants.DRAWER_ADMIN, LocaleController.getString("ContactAdmin", R.string.ContactAdmin) + " (@OcoderX)", R.drawable.msg_admins));
 //      items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
@@ -387,11 +410,20 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         public int icon;
         public String text;
         public int id;
+        public boolean isSection; // --- OcoderX: section header flag
 
         public Item(int id, String text, int icon) {
             this.icon = icon;
             this.id = id;
             this.text = text;
+            this.isSection = false;
+        }
+
+        // --- OcoderX: section header factory
+        public static Item section(String title) {
+            Item item = new Item(-1, title, 0);
+            item.isSection = true;
+            return item;
         }
 
         public void bind(DrawerActionCell actionCell) {

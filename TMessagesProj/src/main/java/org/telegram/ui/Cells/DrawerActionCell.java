@@ -61,6 +61,12 @@ public class DrawerActionCell extends FrameLayout {
         setWillNotDraw(false);
     }
 
+    // --- OcoderX: stagger animation support
+    private int adapterPosition = -1;
+    public void setAdapterPosition(int pos) {
+        this.adapterPosition = pos;
+    }
+
     private boolean wasRTL;
 
     public void toggleRTL(boolean force) {
@@ -138,6 +144,19 @@ public class DrawerActionCell extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         textView.setTextColor(Theme.getColor(Theme.key_chats_menuItemText));
+        // --- OcoderX: stagger slide-in animation
+        if (adapterPosition >= 0) {
+            setTranslationX(-AndroidUtilities.dp(40));
+            setAlpha(0f);
+            long delay = Math.min(adapterPosition * 25L, 200L);
+            animate()
+                .translationX(0f)
+                .alpha(1f)
+                .setStartDelay(delay)
+                .setDuration(220)
+                .setInterpolator(org.telegram.ui.Components.CubicBezierInterpolator.EASE_OUT)
+                .start();
+        }
     }
 
     public void setTextAndIcon(int id, String text, int resId) {
