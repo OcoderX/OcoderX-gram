@@ -152,7 +152,7 @@
   <string name="ExportAsJson">JSON sifatida eksport qilish (.json)</string>
   <string name="ExportingChatHistory">Chat tarixi eksport qilinmoqda…</string>
   <string name="SettingsWatermark">OcoderX-gram</string>
-  <string name="SettingsDescription">ToS qoidalarini chetlab o\'tuvchi funksiyalarga ega exteraGram asosidagi oddiy mijoz.</string>
+  <string name="SettingsDescription">Maksimal maxfiylik, turbo tezlik va kengaytirilgan imkoniyatlar.</string>
   <string name="SecretMessageTecno">Tecno telefonlari eng zo\'ri.</string>
   <string name="SecretMessageXiaomiSuccess">Sizda yaxshi telefon bor.</string>
   <string name="SecretMessageXiaomiFailure">Maxsus proshivka o\'rnating.</string>

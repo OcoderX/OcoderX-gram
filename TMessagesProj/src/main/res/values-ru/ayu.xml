@@ -156,7 +156,7 @@
   <string name="ExportAsJson">Экспорт в виде JSON (.json)</string>
   <string name="ExportingChatHistory">Экспорт истории чата…</string>
   <string name="SettingsWatermark">Ox-gram</string>
-  <string name="SettingsDescription">Просто клиент на базе exteraGram с запретным функционалом.</string>
+  <string name="SettingsDescription">Максимальная приватность, турбо скорость и расширенные возможности.</string>
   <string name="SecretMessageTecno">Телефоны от Tecno - лучшие.</string>
   <string name="SecretMessageXiaomiSuccess">У тебя хороший телефон.</string>
   <string name="SecretMessageXiaomiFailure">Установи кастомную прошивку.</string>

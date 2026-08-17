@@ -18,6 +18,8 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -268,20 +270,28 @@ public class MainPreferencesActivity extends BasePreferencesActivity {
                     TextCell textCell = (TextCell) holder.itemView;
                     if (position == generalRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("General", R.string.General), LocaleController.getString("GeneralPrefSubtitle", R.string.GeneralPrefSubtitle), R.drawable.msg_settings_old, true);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFF7C4DFF, PorterDuff.Mode.MULTIPLY));
                     } else if (position == appearanceRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("Appearance", R.string.Appearance), LocaleController.getString("AppearancePrefSubtitle", R.string.AppearancePrefSubtitle), R.drawable.msg_theme, true);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFF00B0FF, PorterDuff.Mode.MULTIPLY));
                     } else if (position == chatsRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), LocaleController.getString("ChatsPrefSubtitle", R.string.ChatsPrefSubtitle), R.drawable.msg_discussion, true);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFF00E676, PorterDuff.Mode.MULTIPLY));
                     } else if (position == otherRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("LocalOther", R.string.LocalOther), LocaleController.getString("OtherPrefSubtitle", R.string.OtherPrefSubtitle), R.drawable.msg_fave, false);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFFFF9100, PorterDuff.Mode.MULTIPLY));
                     } else if (position == channelRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("Channel", R.string.Channel), "@OcoderXs", R.drawable.msg_channel, true);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFF29B6F6, PorterDuff.Mode.MULTIPLY));
                     } else if (position == groupRow) {
-                        textCell.setTextAndValueAndIcon(LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort), "@TATUdagi_chat", R.drawable.msg_groups, true);
+                        textCell.setTextAndValueAndIcon(LocaleController.getString("Groups", R.string.Groups), "@TATUdagi_chat", R.drawable.msg_groups, true);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFF7E57C2, PorterDuff.Mode.MULTIPLY));
                     } else if (position == adminRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("ContactAdmin", R.string.ContactAdmin), "@OcoderX", R.drawable.msg_admins, true);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFFFF5252, PorterDuff.Mode.MULTIPLY));
                     } else if (position == spamBotRow) {
                         textCell.setTextAndValueAndIcon(LocaleController.getString("SpamBot", R.string.SpamBot), "@OcoderXbot", R.drawable.msg_bot, false);
+                        textCell.imageView.setColorFilter(new PorterDuffColorFilter(0xFF26A69A, PorterDuff.Mode.MULTIPLY));
                     }
                     break;
                 case 3:
