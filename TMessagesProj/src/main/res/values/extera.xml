@@ -352,4 +352,13 @@
     <string name="PrefMaintenance">⚙️ Maintenance &amp; Account</string>
     <string name="ResetSettingsSub">Reset all app settings to defaults</string>
     <string name="DeleteAccountSub">Permanently delete Telegram account</string>
+
+    <string name="MembersFilter">Filter</string>
+    <string name="MembersFilterAll">All Members</string>
+    <string name="MembersFilterAdmins">Admins</string>
+    <string name="MembersFilterBots">Bots</string>
+    <string name="MembersFilterContacts">Contacts</string>
+    <string name="MembersFilterBlocked">Blocked by Me</string>
+    <string name="MembersFilterPremium">Premium Users</string>
+    <string name="MembersFilterActive">Filter: %1$s</string>
 </resources>

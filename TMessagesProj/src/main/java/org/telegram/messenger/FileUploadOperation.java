@@ -40,11 +40,18 @@ public class FileUploadOperation {
     private int operationGuid;
     private static final int minUploadChunkSize = 128;
     private static final int minUploadChunkBoostSize = 512;
-    private static final int minUploadChunkTurboSize = 1024;
+    // Must never exceed 512 KB: MessagesController.uploadMaxFileParts assumes 512 KB parts
+    // (Telegram's documented 4000-part cap), so a larger part size here would push uploads
+    // past the protocol-accepted ceiling and cause intermittent upload failures.
+    private static final int minUploadChunkTurboSize = 512;
     private static final int minUploadChunkSlowNetworkSize = 32;
     private static final int initialRequestsCount = 16;
     private static final int initialRequestsSlowNetworkCount = 1;
-    private static final int maxUploadingKBytes = 1024 * 16;
+    // Was 1024*16 (16 MB in flight) which is excessive concurrency/memory pressure on
+    // low-end devices; 4096 KB still lets the turbo tier's forced 16-request floor below
+    // run at full 512 KB chunks (8 MB in flight, 4x the pre-boost baseline) while keeping
+    // the non-turbo path's concurrency far more conservative than the old 16 MB ceiling.
+    private static final int maxUploadingKBytes = 1024 * 4;
     private static final int maxUploadingSlowNetworkKBytes = 32;
 
     private int maxRequestsCount;

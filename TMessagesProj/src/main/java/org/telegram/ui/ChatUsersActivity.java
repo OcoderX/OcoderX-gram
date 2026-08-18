@@ -14,7 +14,13 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -109,6 +115,11 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
     private ArrayList<TLObject> participants = new ArrayList<>();
     private ArrayList<TLObject> bots = new ArrayList<>();
     private ArrayList<TLObject> contacts = new ArrayList<>();
+    private ArrayList<TLObject> allParticipants = new ArrayList<>();
+    private ArrayList<TLObject> allBots = new ArrayList<>();
+    private ArrayList<TLObject> allContacts = new ArrayList<>();
+    private ActionBarMenuItem filterItem;
+    private int memberFilterMode = FILTER_ALL;
     private boolean botsEndReached;
     private boolean contactsEndReached;
     private LongSparseArray<TLObject> participantsMap = new LongSparseArray<>();
@@ -197,11 +208,19 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
 
     private final static int search_button = 0;
     private final static int done_button = 1;
+    private final static int filter_button = 2;
 
     public final static int TYPE_BANNED = 0;
     public final static int TYPE_ADMIN = 1;
     public final static int TYPE_USERS = 2;
     public final static int TYPE_KICKED = 3;
+
+    public final static int FILTER_ALL = 0;
+    public final static int FILTER_ADMINS = 1;
+    public final static int FILTER_BOTS = 2;
+    public final static int FILTER_CONTACTS = 3;
+    public final static int FILTER_BLOCKED = 4;
+    public final static int FILTER_PREMIUM = 5;
 
     public final static int SELECT_TYPE_MEMBERS = 0; // "Subscribers" / "Members"
     public final static int SELECT_TYPE_ADMIN = 1; // "Add Admin"
@@ -270,6 +289,145 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
         initialBannedRights = ChatObject.getBannedRightsString(defaultBannedRights);
         isChannel = ChatObject.isChannel(currentChat) && !currentChat.megagroup;
         isForum = ChatObject.isForum(currentChat);
+    }
+
+    private long getParticipantPeerId(TLObject participant) {
+        if (participant instanceof TLRPC.ChannelParticipant) {
+            return MessageObject.getPeerId(((TLRPC.ChannelParticipant) participant).peer);
+        } else if (participant instanceof TLRPC.ChatParticipant) {
+            return ((TLRPC.ChatParticipant) participant).user_id;
+        }
+        return 0;
+    }
+
+    private boolean isAdminParticipant(TLObject participant) {
+        return participant instanceof TLRPC.TL_channelParticipantAdmin || participant instanceof TLRPC.TL_channelParticipantCreator ||
+                participant instanceof TLRPC.TL_chatParticipantAdmin || participant instanceof TLRPC.TL_chatParticipantCreator;
+    }
+
+    private boolean matchesMemberFilter(TLObject participant) {
+        if (memberFilterMode == FILTER_ALL) {
+            return true;
+        }
+        long peerId = getParticipantPeerId(participant);
+        if (peerId == 0) {
+            return false;
+        }
+        if (memberFilterMode == FILTER_ADMINS) {
+            return isAdminParticipant(participant);
+        }
+        TLRPC.User user = peerId > 0 ? getMessagesController().getUser(peerId) : null;
+        switch (memberFilterMode) {
+            case FILTER_BOTS:
+                return user != null && user.bot;
+            case FILTER_CONTACTS:
+                return peerId > 0 && getContactsController().isContact(peerId);
+            case FILTER_BLOCKED:
+                return peerId > 0 && getMessagesController().blockePeers.indexOfKey(peerId) >= 0;
+            case FILTER_PREMIUM:
+                return user != null && user.premium;
+        }
+        return true;
+    }
+
+    private void captureAllMembersSnapshot() {
+        allParticipants = new ArrayList<>(participants);
+        allContacts = new ArrayList<>(contacts);
+        allBots = new ArrayList<>(bots);
+    }
+
+    private void applyMembersFilter() {
+        if (memberFilterMode == FILTER_ALL) {
+            participants = new ArrayList<>(allParticipants);
+            contacts = new ArrayList<>(allContacts);
+            bots = new ArrayList<>(allBots);
+            return;
+        }
+        ArrayList<TLObject> filtered = new ArrayList<>();
+        for (int a = 0, N = allContacts.size(); a < N; a++) {
+            TLObject p = allContacts.get(a);
+            if (matchesMemberFilter(p)) {
+                filtered.add(p);
+            }
+        }
+        for (int a = 0, N = allBots.size(); a < N; a++) {
+            TLObject p = allBots.get(a);
+            if (matchesMemberFilter(p)) {
+                filtered.add(p);
+            }
+        }
+        for (int a = 0, N = allParticipants.size(); a < N; a++) {
+            TLObject p = allParticipants.get(a);
+            if (matchesMemberFilter(p)) {
+                filtered.add(p);
+            }
+        }
+        participants = filtered;
+        contacts = new ArrayList<>();
+        bots = new ArrayList<>();
+    }
+
+    private String getMemberFilterTitle(int mode) {
+        switch (mode) {
+            case FILTER_ADMINS:
+                return LocaleController.getString("MembersFilterAdmins", R.string.MembersFilterAdmins);
+            case FILTER_BOTS:
+                return LocaleController.getString("MembersFilterBots", R.string.MembersFilterBots);
+            case FILTER_CONTACTS:
+                return LocaleController.getString("MembersFilterContacts", R.string.MembersFilterContacts);
+            case FILTER_BLOCKED:
+                return LocaleController.getString("MembersFilterBlocked", R.string.MembersFilterBlocked);
+            case FILTER_PREMIUM:
+                return LocaleController.getString("MembersFilterPremium", R.string.MembersFilterPremium);
+            default:
+                return LocaleController.getString("MembersFilterAll", R.string.MembersFilterAll);
+        }
+    }
+
+    private void updateFilterItemUI() {
+        if (filterItem == null) {
+            return;
+        }
+        boolean active = memberFilterMode != FILTER_ALL;
+        filterItem.setIconColor(Theme.getColor(active ? Theme.key_windowBackgroundWhiteBlueText4 : Theme.key_actionBarDefaultIcon));
+        if (active) {
+            actionBar.setSubtitle(LocaleController.formatString("MembersFilterActive", R.string.MembersFilterActive, getMemberFilterTitle(memberFilterMode)));
+        } else {
+            actionBar.setSubtitle(null);
+        }
+    }
+
+    private void setMemberFilterMode(int mode) {
+        if (memberFilterMode == mode) {
+            return;
+        }
+        memberFilterMode = mode;
+        if (mode == FILTER_BLOCKED) {
+            getMessagesController().getBlockedPeers(false);
+        }
+        DiffCallback diffCallback = saveState();
+        applyMembersFilter();
+        updateRows();
+        updateListAnimated(diffCallback);
+        updateFilterItemUI();
+    }
+
+    private void showMemberFilterOptions() {
+        if (filterItem == null || getParentActivity() == null) {
+            return;
+        }
+        int[] modes = {FILTER_ALL, FILTER_ADMINS, FILTER_BOTS, FILTER_CONTACTS, FILTER_BLOCKED, FILTER_PREMIUM};
+        int[] icons = {R.drawable.msg_list, R.drawable.msg_admins, R.drawable.msg_bots, R.drawable.msg_contacts, R.drawable.msg_block2, R.drawable.msg_premium_status};
+        ItemOptions options = ItemOptions.makeOptions(this, filterItem);
+        for (int a = 0; a < modes.length; a++) {
+            int mode = modes[a];
+            String title = getMemberFilterTitle(mode);
+            if (mode == memberFilterMode) {
+                title = "✓  " + title;
+            }
+            options.add(icons[a], title, () -> setMemberFilterMode(mode));
+        }
+        options.show();
     }
 
     private void updateRows() {
@@ -501,6 +659,10 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
     public boolean onFragmentCreate() {
         super.onFragmentCreate();
         getNotificationCenter().addObserver(this, NotificationCenter.chatInfoDidLoad);
+        if (type == TYPE_USERS && selectType == SELECT_TYPE_MEMBERS) {
+            getNotificationCenter().addObserver(this, NotificationCenter.blockedUsersDidLoad);
+            getMessagesController().getBlockedPeers(true);
+        }
         loadChatParticipants(0, 200);
         return true;
     }
@@ -509,6 +671,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         getNotificationCenter().removeObserver(this, NotificationCenter.chatInfoDidLoad);
+        getNotificationCenter().removeObserver(this, NotificationCenter.blockedUsersDidLoad);
     }
 
     @Override
@@ -549,6 +712,8 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                     }
                 } else if (id == done_button) {
                     processDone();
+                } else if (id == filter_button) {
+                    showMemberFilterOptions();
                 }
             }
         });
@@ -607,6 +772,12 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
             }
             if (!(ChatObject.isChannel(currentChat) || currentChat.creator)) {
                 searchItem.setVisibility(View.GONE);
+            }
+
+            if (type == TYPE_USERS && selectType == SELECT_TYPE_MEMBERS) {
+                filterItem = menu.addItem(filter_button, new FilterIconDrawable());
+                filterItem.setContentDescription(LocaleController.getString("MembersFilter", R.string.MembersFilter));
+                updateFilterItemUI();
             }
 
             if (type == TYPE_KICKED) {
@@ -1626,6 +1797,12 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
             if (p != null) {
                 map.remove(peerId);
                 arrayList.remove(p);
+                contacts.remove(p);
+                bots.remove(p);
+                participants.remove(p);
+                allContacts.remove(p);
+                allBots.remove(p);
+                allParticipants.remove(p);
                 updated = true;
                 if (type == TYPE_BANNED && info != null) {
                     info.kicked_count--;
@@ -1858,6 +2035,13 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                     selectedSlowmode = initialSlowmode = getCurrentSlowmode();
                 }
                 AndroidUtilities.runOnUIThread(() -> loadChatParticipants(0, 200));
+            }
+        } else if (id == NotificationCenter.blockedUsersDidLoad) {
+            if (memberFilterMode == FILTER_BLOCKED) {
+                DiffCallback diffCallback = saveState();
+                applyMembersFilter();
+                updateRows();
+                updateListAnimated(diffCallback);
             }
         }
     }
@@ -2201,6 +2385,8 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                         }
                     }
                 }
+                captureAllMembersSnapshot();
+                applyMembersFilter();
             }
             if (listViewAdapter != null) {
                 listViewAdapter.notifyDataSetChanged();
@@ -2306,6 +2492,10 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                     } catch (Exception e) {
                         FileLog.e(e);
                     }
+                }
+                if (type == TYPE_USERS) {
+                    captureAllMembersSnapshot();
+                    applyMembersFilter();
                 }
                 if (type != TYPE_USERS || delayResults <= 0) {
                     showItemsAnimated(listViewAdapter != null ? listViewAdapter.getItemCount() : 0);
@@ -3742,5 +3932,64 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
         themeDescriptions.add(new ThemeDescription(null, 0, null, null, null, cellDelegate, Theme.key_avatar_backgroundPink));
 
         return themeDescriptions;
+    }
+
+    private static class FilterIconDrawable extends Drawable {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path path = new Path();
+
+        FilterIconDrawable() {
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeCap(Paint.Cap.ROUND);
+            paint.setStrokeJoin(Paint.Join.ROUND);
+            paint.setStrokeWidth(AndroidUtilities.dp(1.7f));
+            paint.setColor(0xffffffff);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            Rect bounds = getBounds();
+            float cx = bounds.centerX();
+            float top = bounds.top + AndroidUtilities.dp(7);
+            float bottom = bounds.bottom - AndroidUtilities.dp(6);
+            float topHalfWidth = AndroidUtilities.dp(6.5f);
+            float stemHalfWidth = AndroidUtilities.dp(1.5f);
+            float neckY = top + (bottom - top) * 0.55f;
+
+            path.reset();
+            path.moveTo(cx - topHalfWidth, top);
+            path.lineTo(cx + topHalfWidth, top);
+            path.lineTo(cx + stemHalfWidth, neckY);
+            path.lineTo(cx + stemHalfWidth, bottom);
+            path.lineTo(cx - stemHalfWidth, bottom);
+            path.lineTo(cx - stemHalfWidth, neckY);
+            path.close();
+            canvas.drawPath(path, paint);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+            paint.setAlpha(alpha);
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+            paint.setColorFilter(colorFilter);
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return AndroidUtilities.dp(24);
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return AndroidUtilities.dp(24);
+        }
     }
 }

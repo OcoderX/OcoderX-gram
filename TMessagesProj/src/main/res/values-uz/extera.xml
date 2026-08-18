@@ -347,4 +347,13 @@
     <string name="PrefMaintenance">⚙️ Texnik xizmat va hisob</string>
     <string name="ResetSettingsSub">Barcha ilova sozlamalarini standart holatga qaytarish</string>
     <string name="DeleteAccountSub">Telegram hisobini butunlay o\'chirish</string>
+
+    <string name="MembersFilter">Filtr</string>
+    <string name="MembersFilterAll">Barchasi</string>
+    <string name="MembersFilterAdmins">Adminlar</string>
+    <string name="MembersFilterBots">Botlar</string>
+    <string name="MembersFilterContacts">Kontaktlar</string>
+    <string name="MembersFilterBlocked">Men bloklaganlarim</string>
+    <string name="MembersFilterPremium">Premium foydalanuvchilar</string>
+    <string name="MembersFilterActive">Filtr: %1$s</string>
 </resources>

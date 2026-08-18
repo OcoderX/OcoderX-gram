@@ -1,5 +1,6 @@
 package org.telegram.ui.Components;
 
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -30,6 +31,14 @@ public class MsgClockDrawable extends Drawable {
         startTime = System.currentTimeMillis();
     }
 
+    private void updateGlow() {
+        if (color != 0) {
+            paint.setMaskFilter(new BlurMaskFilter(AndroidUtilities.dp(3f), BlurMaskFilter.Blur.NORMAL));
+        } else {
+            paint.setMaskFilter(null);
+        }
+    }
+
     @Override
     public void draw(Canvas canvas) {
         Rect bounds = getBounds();
@@ -55,6 +64,7 @@ public class MsgClockDrawable extends Drawable {
         if (color != this.color) {
             colorAlpha = Color.alpha(color);
             paint.setColor(ColorUtils.setAlphaComponent(color, (int) (alpha * (colorAlpha / 255f))));
+            updateGlow();
         }
         this.color = color;
     }

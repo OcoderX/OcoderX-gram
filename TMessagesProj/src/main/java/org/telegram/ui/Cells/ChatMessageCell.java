@@ -13227,7 +13227,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
 
         int restore = Integer.MIN_VALUE;
-        if (alphaInternal != 1.0f) {
+        // OcoderX: fade deleted-but-saved messages so they look noticeably dimmer
+        float effectiveAlpha = ayuDeleted ? alphaInternal * 0.55f : alphaInternal;
+        if (effectiveAlpha != 1.0f) {
             int top = 0;
             int left = 0;
             int bottom = getMeasuredHeight();
@@ -13254,7 +13256,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 bottom = (int) (parentHeight - getY());
             }
             rect.set(left, top, right, bottom);
-            restore = canvas.saveLayerAlpha(rect, (int) (255 * alphaInternal), Canvas.ALL_SAVE_FLAG);
+            restore = canvas.saveLayerAlpha(rect, (int) (255 * effectiveAlpha), Canvas.ALL_SAVE_FLAG);
         }
         boolean clipContent = false;
         if (transitionParams.animateBackgroundBoundsInner && currentBackgroundDrawable != null && !isRoundVideo) {
@@ -13624,7 +13626,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
 
         if ((drawBackground || transitionParams.animateDrawBackground) && currentBackgroundDrawable != null && (currentPosition == null || isDrawSelectionBackground() && (currentMessageObject.isMusic() || currentMessageObject.isDocument())) && !(enterTransitionInProgress && !currentMessageObject.isVoice())) {
-            float alphaInternal = this.alphaInternal;
+            float alphaInternal = ayuDeleted ? this.alphaInternal * 0.55f : this.alphaInternal;
             if (fromParent) {
                 alphaInternal *= getAlpha();
             }

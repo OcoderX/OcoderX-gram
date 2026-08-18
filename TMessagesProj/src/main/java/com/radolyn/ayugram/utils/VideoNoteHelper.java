@@ -89,28 +89,25 @@ public class VideoNoteHelper {
         info.originalHeight = height;
         info.resultWidth = resultSide;
         info.resultHeight = resultSide;
-        info.rotationValue = rotation;
+        info.rotationValue = 0;
         info.muted = false;
 
         MediaController.CropState cropState = new MediaController.CropState();
         if (width > height) {
             cropState.cropPw = (float) side / width;
             cropState.cropPh = 1.0f;
-            cropState.cropPx = (float) (width - side) / (2.0f * width);
-            cropState.cropPy = 0.0f;
         } else if (height > width) {
             cropState.cropPw = 1.0f;
             cropState.cropPh = (float) side / height;
-            cropState.cropPx = 0.0f;
-            cropState.cropPy = (float) (height - side) / (2.0f * height);
         } else {
             cropState.cropPw = 1.0f;
             cropState.cropPh = 1.0f;
-            cropState.cropPx = 0.0f;
-            cropState.cropPy = 0.0f;
         }
+        cropState.cropPx = 0.0f;
+        cropState.cropPy = 0.0f;
         cropState.transformWidth = resultSide;
         cropState.transformHeight = resultSide;
+        cropState.transformRotation = rotation;
         cropState.cropScale = 1.0f;
         cropState.initied = true;
         info.cropState = cropState;

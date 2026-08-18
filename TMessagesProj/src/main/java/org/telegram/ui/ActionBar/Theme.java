@@ -9090,6 +9090,8 @@ public class Theme {
             return 0xFFFF5252;
         } else if (key == key_chat_outSentCheckReadSelected) {
             return 0xFF69F0AE;
+        } else if (key == key_chats_sentClock) {
+            return 0xFFFFD600;
         }
         if (provider != null) {
             return provider.getColor(key);
@@ -9113,6 +9115,8 @@ public class Theme {
             return 0xFFFF5252;
         } else if (key == key_chat_outSentCheckReadSelected) {
             return 0xFF69F0AE;
+        } else if (key == key_chats_sentClock) {
+            return 0xFFFFD600;
         }
         if (!ignoreAnimation && animatingColors != null) {
             int index = animatingColors.indexOfKey(key);

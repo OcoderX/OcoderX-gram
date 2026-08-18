@@ -2103,18 +2103,13 @@ public class FileLoadOperation {
             boolean isLast = totalBytesCount <= 0 || a == count - 1 || totalBytesCount > 0 && downloadOffset + currentDownloadChunkSize >= totalBytesCount;
             final TLObject request;
             int connectionType;
-            if (ExteraConfig.downloadSpeedBoost >= 3) {
-                int mod = requestsCount % 3;
-                if (mod == 0) {
-                    connectionType = ConnectionsManager.ConnectionTypeDownload;
-                } else if (mod == 1) {
-                    connectionType = ConnectionsManager.ConnectionTypeDownload2;
-                } else {
-                    connectionType = ConnectionsManager.ConnectionTypeGeneric;
-                }
-            } else {
-                connectionType = requestsCount % 2 == 0 ? ConnectionsManager.ConnectionTypeDownload : ConnectionsManager.ConnectionTypeDownload2;
-            }
+            // Downloads must stay off ConnectionTypeGeneric: that pool also carries ordinary
+            // API traffic (messages, typing, read receipts, updates, file-reference refresh),
+            // and mixing bulk file requests into it starves that traffic and can self-interfere
+            // with the file-reference refresh calls downloads themselves depend on. Only
+            // ConnectionTypeDownload/ConnectionTypeDownload2 exist as dedicated download pools,
+            // so every speed-boost tier just alternates between those two.
+            connectionType = requestsCount % 2 == 0 ? ConnectionsManager.ConnectionTypeDownload : ConnectionsManager.ConnectionTypeDownload2;
             int flags = (isForceRequest ? ConnectionsManager.RequestFlagForceDownload : 0);
             if (isCdn) {
                 TLRPC.TL_upload_getCdnFile req = new TLRPC.TL_upload_getCdnFile();
