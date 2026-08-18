@@ -153,6 +153,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
     private boolean messagesIsLoading;
     private boolean initialLoading = true;
     private DiffUtilsCallback diffUtilsCallback;
+    private ChartViewData[] lastChartsViewData;
 
     private final Runnable showProgressbar = new Runnable() {
         @Override
@@ -295,6 +296,19 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                     dataLoaded(chartsViewData);
                 });
             }
+
+            if (!(response instanceof TLRPC.TL_stats_broadcastStats) && !(response instanceof TLRPC.TL_stats_megagroupStats)) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    initialLoading = false;
+                    String message = error != null && error.text != null ? error.text : LocaleController.getString("UnknownError", R.string.UnknownError);
+                    if (BulletinFactory.canShowBulletin(this)) {
+                        BulletinFactory.of(this).createErrorBulletin(message).show();
+                    } else if (getParentActivity() != null) {
+                        Toast.makeText(getParentActivity(), message, Toast.LENGTH_LONG).show();
+                    }
+                    finishFragment();
+                });
+            }
         }, null, null, 0, chat.stats_dc, ConnectionsManager.ConnectionTypeGeneric, true);
 
         getConnectionsManager().bindRequestToGuid(reqId, classGuid);
@@ -308,6 +322,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
             adapter.notifyDataSetChanged();
         }
         initialLoading = false;
+        lastChartsViewData = chartsViewData;
         if (progressLayout != null && progressLayout.getVisibility() == View.VISIBLE) {
             AndroidUtilities.cancelRunOnUIThread(showProgressbar);
             progressLayout.animate().alpha(0).setDuration(230).setListener(new AnimatorListenerAdapter() {
@@ -319,11 +334,20 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
             recyclerListView.setVisibility(View.VISIBLE);
             recyclerListView.setAlpha(0);
             recyclerListView.animate().alpha(1).setDuration(230).start();
+        }
 
-            for (ChartViewData data : chartsViewData) {
-                if (data != null && data.chartData == null && data.token != null) {
-                    data.load(currentAccount, classGuid, chat.stats_dc, recyclerListView, adapter, diffUtilsCallback);
-                }
+        // Must run regardless of progressLayout's visibility, or token-based charts
+        // (top hours, interactions, sources, languages, etc.) never load.
+        loadPendingAsyncGraphs(chartsViewData);
+    }
+
+    private void loadPendingAsyncGraphs(ChartViewData[] chartsViewData) {
+        if (recyclerListView == null || adapter == null || chartsViewData == null) {
+            return;
+        }
+        for (ChartViewData data : chartsViewData) {
+            if (data != null && data.chartData == null && data.token != null) {
+                data.load(currentAccount, classGuid, chat.stats_dc, recyclerListView, adapter, diffUtilsCallback);
             }
         }
     }
@@ -576,6 +600,10 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
 
         diffUtilsCallback = new DiffUtilsCallback(adapter, layoutManager);
+        if (!initialLoading) {
+            // Data arrived before this view existed; retrigger any charts still pending a token load.
+            loadPendingAsyncGraphs(lastChartsViewData);
+        }
         return fragmentView;
     }
 
