@@ -6602,4 +6602,15 @@
     <string name="BotWebAppInstantViewOpen">Open App</string>
     <string name="RestorePremiumHintTitle">Get Premium back with up to **%1$d%%** off</string>
     <string name="RestorePremiumHintMessage">Your Telegram Premium has recently expired. Tap here to extend it.</string>
+
+    <string name="MyProfile">My Profile</string>
+    <string name="MyProfileSubtitle">See how your account looks to others</string>
+    <string name="MyProfileTelegramId">Telegram ID</string>
+    <string name="MyProfileRegDate">Registration Date</string>
+    <string name="MyProfileRegDateApprox">~%1$s</string>
+    <string name="MyProfileRegDateInfo">Telegram does not provide the real account creation date. This is a rough estimate based on your account ID and public community data, and may be off by weeks or months.</string>
+    <string name="MyProfileChannelsSection">Your Channels &amp; Groups</string>
+    <string name="MyProfileNoChannels">You are not the owner or admin of any channels or groups yet.</string>
+    <string name="MyProfileMusicSection">Saved Music</string>
+    <string name="MyProfileNoMusic">No music files found in your Saved Messages.</string>
 </resources>

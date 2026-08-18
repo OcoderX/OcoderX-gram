@@ -471,6 +471,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int settingsSectionRow2;
     private int vipBannerRow;
     private int ghostModeQuickToggleRow;
+    private int myProfileRow;
     private int exteraRow;
     private int notificationRow;
     private int languageRow;
@@ -3316,6 +3317,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                 AyuConfig.toggleGhostMode();
                 ((TextCell) view).setChecked(AyuConfig.isGhostModeActive());
+            } else if (position == myProfileRow) {
+                presentFragment(new MyProfileActivity());
             } else if (position == exteraRow) {
                 presentFragment(new MainPreferencesActivity());
             } else if (position == notificationRow) {
@@ -7043,6 +7046,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         settingsSectionRow2 = -1;
         vipBannerRow = -1;
         ghostModeQuickToggleRow = -1;
+        myProfileRow = -1;
         exteraRow = -1;
         notificationRow = -1;
         languageRow = -1;
@@ -7150,6 +7154,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 settingsSectionRow2 = rowCount++;
                 vipBannerRow = rowCount++;
                 ghostModeQuickToggleRow = rowCount++;
+                myProfileRow = rowCount++;
                 exteraRow = rowCount++;
                 chatRow = rowCount++;
                 privacyRow = rowCount++;
@@ -9348,6 +9353,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             textCell.setImageLeft(23);
                     } else if (position == ghostModeQuickToggleRow) {
                         textCell.setTextAndCheckAndGradientIcon(LocaleController.getString("GhostModeToggle", R.string.GhostModeToggle), AyuConfig.isGhostModeActive(), R.drawable.msg2_secret, 0xFF8E24AA, 0xFF3949AB, true);
+                    } else if (position == myProfileRow) {
+                        textCell.setTextAndIcon(LocaleController.getString("MyProfile", R.string.MyProfile), R.drawable.msg_openprofile, true);
                     } else if (position == exteraRow) {
                         textCell.setTextAndGradientIcon(LocaleController.getString("Preferences", R.string.Preferences), R.drawable.etg_settings, 0xFF7C4DFF, 0xFFFF4FD8, true);
                     } else if (position == notificationRow) {
@@ -9622,7 +9629,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == languageRow || position == setUsernameRow || position == idDcRow || position == bioRow ||
                         position == versionRow || position == dataRow || position == chatRow ||
                         position == questionRow || position == devicesRow || position == filtersRow || position == stickersRow ||
-                        position == policyRow || position == sendLogsRow || position == sendLastLogsRow || position == exteraRow ||
+                        position == policyRow || position == sendLogsRow || position == sendLastLogsRow || position == myProfileRow || position == exteraRow ||
                         position == clearLogsRow || position == switchBackendRow || position == setAvatarRow ||
                         position == addToGroupButtonRow || position == premiumRow || position == liteModeRow ||
                         position == vipBannerRow || position == ghostModeQuickToggleRow;
@@ -9664,7 +9671,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == settingsTimerRow || position == settingsKeyRow || position == reportRow || position == reportReactionRow ||
                     position == subscribersRow || position == subscribersRequestsRow || position == administratorsRow || position == blockedUsersRow ||
                     position == addMemberRow || position == joinRow || position == unblockRow ||
-                    position == sendMessageRow || position == notificationRow || position == exteraRow || position == privacyRow ||
+                    position == sendMessageRow || position == notificationRow || position == myProfileRow || position == exteraRow || position == privacyRow ||
                     position == ghostModeQuickToggleRow ||
                     position == languageRow || position == dataRow || position == chatRow ||
                     position == questionRow || position == devicesRow || position == filtersRow || position == stickersRow ||
@@ -10844,6 +10851,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             put(++pointer, settingsSectionRow2, sparseIntArray);
             put(++pointer, vipBannerRow, sparseIntArray);
             put(++pointer, ghostModeQuickToggleRow, sparseIntArray);
+            put(++pointer, myProfileRow, sparseIntArray);
             put(++pointer, exteraRow, sparseIntArray);
             put(++pointer, notificationRow, sparseIntArray);
             put(++pointer, languageRow, sparseIntArray);
